@@ -30,6 +30,10 @@ define(function (require, exports, module) {
         Commands            = staruml.getModule("command/Commands"),
         MenuManager         = staruml.getModule("menu/MenuManager");
     
+    var CodeGenUtils        = require("CodeGenUtils"),
+        CsharpPreferences   = require("CsharpPreferences"),
+        CsharpCodeGenerator = require("CsharpCodeGenerator") ;
+    
     var CMD_CSHARP              = "csharp",
         CMD_CSHARP_GENERATE     = "csharp.generate",
         CMD_CSHARP_REVERSE      = "csharp.reverse",
@@ -44,7 +48,7 @@ define(function (require, exports, module) {
     }
 
     function _handleConfigure() {
-        console.log("handle configure");
+        CommandManager.execute(Commands.FILE_PREFERENCES, CsharpPreferences.getId());
     }
 
     // Register Commands
