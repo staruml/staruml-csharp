@@ -25,22 +25,96 @@
 /*global define, $, _, window, staruml, type, appshell, document */
 
 define(function (require, exports, module) {
-    "use strict";
-    var CommandManager      = staruml.getModule("command/CommandManager"),
+    "use strict"; 
+    
+    var AppInit             = staruml.getModule("utils/AppInit"),
+        Repository          = staruml.getModule("engine/Repository"),
+        Engine              = staruml.getModule("engine/Engine"),
         Commands            = staruml.getModule("command/Commands"),
-        MenuManager         = staruml.getModule("menu/MenuManager");
+        CommandManager      = staruml.getModule("command/CommandManager"),
+        MenuManager         = staruml.getModule("menu/MenuManager"),
+        Dialogs             = staruml.getModule("dialogs/Dialogs"),
+        ElementPickerDialog = staruml.getModule("dialogs/ElementPickerDialog"),
+        FileSystem          = staruml.getModule("filesystem/FileSystem"),
+        FileSystemError     = staruml.getModule("filesystem/FileSystemError"),
+        ExtensionUtils      = staruml.getModule("utils/ExtensionUtils"),
+        UML                 = staruml.getModule("uml/UML");
     
     var CodeGenUtils        = require("CodeGenUtils"),
         CsharpPreferences   = require("CsharpPreferences"),
         CsharpCodeGenerator = require("CsharpCodeGenerator") ;
     
+    /**
+     * Commands IDs
+     */
     var CMD_CSHARP              = "csharp",
         CMD_CSHARP_GENERATE     = "csharp.generate",
         CMD_CSHARP_REVERSE      = "csharp.reverse",
         CMD_CSHARP_CONFIGURE    = "csharp.configure";
-     
-    function _handleGenerate() {
+        
+    /**
+     * Command Handler for C# Generate
+     *
+     * @param {Element} base
+     * @param {string} path
+     * @param {Object} options
+     * @return {$.Promise}
+     */
+    function _handleGenerate(base, path, options) {
         console.log("handle generate");
+        var result = new $.Deferred();
+
+        // If options is not passed, get from preference
+        options = options || CsharpPreferences.getGenOptions();
+
+        // If base is not assigned, popup ElementPicker
+        if (!base) {
+            ElementPickerDialog.showDialog("Select a base model to generate codes", null, type.UMLPackage)
+                .done(function (buttonId, selected) {
+                    if (buttonId === Dialogs.DIALOG_BTN_OK && selected) {
+                        base = selected;
+
+                        // If path is not assigned, popup Open Dialog to select a folder
+                        if (!path) {
+                            FileSystem.showOpenDialog(false, true, "Select a folder where generated codes to be located", null, null, function (err, files) {
+                                if (!err) {
+                                    if (files.length > 0) {
+                                        path = files[0];
+//                                        CsharpCodeGenerator.generate(base, path, options).then(result.resolve, result.reject);
+                                    } else {
+                                        result.reject(FileSystem.USER_CANCELED);
+                                    }
+                                } else {
+                                    result.reject(err);
+                                }
+                            });
+                        } else {
+//                            CsharpCodeGenerator.generate(base, path, options).then(result.resolve, result.reject);
+                        }
+                    } else {
+                        result.reject();
+                    }
+                });
+        } else {
+            // If path is not assigned, popup Open Dialog to select a folder
+            if (!path) {
+                FileSystem.showOpenDialog(false, true, "Select a folder where generated codes to be located", null, null, function (err, files) {
+                    if (!err) {
+                        if (files.length > 0) {
+                            path = files[0];
+//                            CsharpCodeGenerator.generate(base, path, options).then(result.resolve, result.reject);
+                        } else {
+                            result.reject(FileSystem.USER_CANCELED);
+                        }
+                    } else {
+                        result.reject(err);
+                    }
+                });
+            } else {
+//                CsharpCodeGenerator.generate(base, path, options).then(result.resolve, result.reject);
+            }
+        }
+        return result.promise();
     }
 
     function _handleReverse() {
