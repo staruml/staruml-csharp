@@ -80,7 +80,7 @@ define(function (require, exports, module) {
                                 if (!err) {
                                     if (files.length > 0) {
                                         path = files[0];
-//                                        CsharpCodeGenerator.generate(base, path, options).then(result.resolve, result.reject);
+                                        CsharpCodeGenerator.generate(base, path, options).then(result.resolve, result.reject);
                                     } else {
                                         result.reject(FileSystem.USER_CANCELED);
                                     }
@@ -89,7 +89,7 @@ define(function (require, exports, module) {
                                 }
                             });
                         } else {
-//                            CsharpCodeGenerator.generate(base, path, options).then(result.resolve, result.reject);
+                            CsharpCodeGenerator.generate(base, path, options).then(result.resolve, result.reject);
                         }
                     } else {
                         result.reject();
@@ -102,7 +102,7 @@ define(function (require, exports, module) {
                     if (!err) {
                         if (files.length > 0) {
                             path = files[0];
-//                            CsharpCodeGenerator.generate(base, path, options).then(result.resolve, result.reject);
+                            CsharpCodeGenerator.generate(base, path, options).then(result.resolve, result.reject);
                         } else {
                             result.reject(FileSystem.USER_CANCELED);
                         }
@@ -111,7 +111,7 @@ define(function (require, exports, module) {
                     }
                 });
             } else {
-//                CsharpCodeGenerator.generate(base, path, options).then(result.resolve, result.reject);
+                CsharpCodeGenerator.generate(base, path, options).then(result.resolve, result.reject);
             }
         }
         return result.promise();
