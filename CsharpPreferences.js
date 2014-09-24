@@ -55,7 +55,7 @@ define(function (require, exports, module) {
 
     function getGenOptions() {
         return {
-            csharpDoc     : PreferenceManager.get("csharp.gen.javaDoc"),
+            csharpDoc     : PreferenceManager.get("csharp.gen.csharpDoc"),
             useTab        : PreferenceManager.get("csharp.gen.useTab"),
             indentSpaces  : PreferenceManager.get("csharp.gen.indentSpaces")
         };

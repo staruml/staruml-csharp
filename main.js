@@ -61,7 +61,6 @@ define(function (require, exports, module) {
      * @return {$.Promise}
      */
     function _handleGenerate(base, path, options) {
-        console.log("handle generate");
         var result = new $.Deferred();
 
         // If options is not passed, get from preference
