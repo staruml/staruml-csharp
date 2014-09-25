@@ -122,9 +122,9 @@ define(function (require, exports, module) {
                 codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options)); 
                 codeWriter.writeLine();
                 codeWriter.writeLine("using System;");
-//                codeWriter.writeLine("using System.Collections.Generic;");
-//                codeWriter.writeLine("using System.Linq;");
-//                codeWriter.writeLine("using System.Text;");
+                codeWriter.writeLine("using System.Collections.Generic;");
+                codeWriter.writeLine("using System.Linq;");
+                codeWriter.writeLine("using System.Text;");
                 codeWriter.writeLine();
                 this.writeNamespace(codeWriter, elem, options, isAnnotationType);
                 file = FileSystem.getFileForPath(fullPath);
@@ -221,9 +221,252 @@ define(function (require, exports, module) {
         codeWriter.writeLine();
         codeWriter.indent();
         
+        // Constructor
+        this.writeConstructor(codeWriter, elem, options);
+        codeWriter.writeLine();
+        
+        // Member Variables
+        // (from attributes)
+        for (i = 0, len = elem.attributes.length; i < len; i++) {
+            this.writeMemberVariable(codeWriter, elem.attributes[i], options);
+            codeWriter.writeLine();
+        }
+        // (from associations)
+        var associations = Repository.getRelationshipsOf(elem, function (rel) {
+            return (rel instanceof type.UMLAssociation);
+        }); 
+        
+        console.log('association length: ' + associations.length); 
+        
+        for (i = 0, len = associations.length; i < len; i++) {
+            var asso = associations[i];
+            if (asso.end1.reference === elem && asso.end2.navigable === true) {
+                this.writeMemberVariable(codeWriter, asso.end2, options);
+                codeWriter.writeLine();
+                console.log('assoc end1');
+            } else if (asso.end2.reference === elem && asso.end1.navigable === true) {
+                this.writeMemberVariable(codeWriter, asso.end1, options);
+                codeWriter.writeLine();
+                console.log('assoc end2');
+            }
+        } 
+        
+        // Methods
+        for (i = 0, len = elem.operations.length; i < len; i++) {
+            this.writeMethod(codeWriter, elem.operations[i], options, false, false);
+            codeWriter.writeLine();
+        }
+        
+        // Inner Definitions
+        for (i = 0, len = elem.ownedElements.length; i < len; i++) {
+            var def = elem.ownedElements[i];
+            if (def instanceof type.UMLClass) {
+                if (def.stereotype === "annotationType") {
+//                    this.writeAnnotationType(codeWriter, def, options);
+                } else {
+                    console.log("class in class");
+                    this.writeClass(codeWriter, def, options);
+                }
+                codeWriter.writeLine();
+            } else if (def instanceof type.UMLInterface) {
+//                this.writeInterface(codeWriter, def, options);
+                codeWriter.writeLine();
+            } else if (def instanceof type.UMLEnumeration) {
+//                this.writeEnum(codeWriter, def, options);
+                codeWriter.writeLine();
+            }
+        }
+
+        
         codeWriter.outdent();
         codeWriter.writeLine("}");
         
+    };
+    
+    
+    /**
+     * Write Method
+     * @param {StringWriter} codeWriter
+     * @param {type.Model} elem
+     * @param {Object} options     
+     * @param {boolean} skipBody
+     * @param {boolean} skipParams
+     */
+    CsharpCodeGenerator.prototype.writeMethod = function (codeWriter, elem, options, skipBody, skipParams) {
+        if (elem.name.length > 0) {
+            var terms = [];
+            var params = elem.getNonReturnParameters();
+            var returnParam = elem.getReturnParameter();
+            
+            // doc
+            var doc = elem.documentation.trim();
+            _.each(params, function (param) {
+                doc += "\n@param " + param.name + " " + param.documentation;
+            });
+            if (returnParam) {
+                doc += "\n@return " + returnParam.documentation;
+            }
+            this.writeDoc(codeWriter, doc, options);
+            
+            // modifiers
+            var _modifiers = this.getModifiers(elem);
+            if (_modifiers.length > 0) {
+                terms.push(_modifiers.join(" "));
+            }
+            
+            // type
+            if (returnParam) {
+                terms.push(this.getType(returnParam));
+            } else {
+                terms.push("void");
+            }
+            
+            // name + parameters
+            var paramTerms = [];
+            if (!skipParams) {
+                var i, len;
+                for (i = 0, len = params.length; i < len; i++) {
+                    var p = params[i];
+                    var s = this.getType(p) + " " + p.name;
+                    if (p.isReadOnly === true) {
+                        s = "sealed " + s;
+                    }
+                    paramTerms.push(s);
+                }
+            }
+            terms.push(elem.name + "(" + paramTerms.join(", ") + ")");
+            
+            // body
+            if (skipBody === true || _.contains(_modifiers, "abstract")) {
+                codeWriter.writeLine(terms.join(" ") + ";");
+            } else {
+                codeWriter.writeLine(terms.join(" ") + " {");
+                codeWriter.indent();
+                codeWriter.writeLine("// TODO implement here");
+                
+                // return statement
+                if (returnParam) {
+                    var returnType = this.getType(returnParam);
+                    if (returnType === "bool") {
+                        codeWriter.writeLine("return False;");
+                    } else if (returnType === "byte" 
+                               || returnType === "int" 
+                               || returnType === "sbyte" 
+                               || returnType === "short"
+                               || returnType === "uint"
+                               || returnType === "ulong"
+                               || returnType === "ushort" ) {
+                        codeWriter.writeLine("return 0;");
+                    } else if (returnType === "float") {
+                        codeWriter.writeLine("return 0.0F;");
+                    } else if (returnType === "double") {
+                        codeWriter.writeLine("return 0.0D;");
+                    } else if (returnType === "long") {
+                        codeWriter.writeLine("return 0.0L;");
+                    } else if (returnType === "decimal") {
+                        codeWriter.writeLine("return 0.0M;");
+                    } else if (returnType === "char") {
+                        codeWriter.writeLine("return '\0';");
+                    } else if (returnType === "string") {
+                        codeWriter.writeLine('return "";');
+                    } else {
+                        codeWriter.writeLine("return null;");
+                    }
+                }
+                               
+                codeWriter.outdent();
+                codeWriter.writeLine("}");
+            }
+        }
+    };
+    
+    /**
+     * Return type expression
+     * @param {type.Model} elem
+     * @return {string}
+     */
+    CsharpCodeGenerator.prototype.getType = function (elem) {
+        var _type = "void";
+        // type name
+        if (elem instanceof type.UMLAssociationEnd) {
+            if (elem.reference instanceof type.UMLModelElement && elem.reference.name.length > 0) {
+                _type = elem.reference.name;
+            }
+        } else {
+            if (elem.type instanceof type.UMLModelElement && elem.type.name.length > 0) {
+                _type = elem.type.name;
+            } else if (_.isString(elem.type) && elem.type.length > 0) {
+                _type = elem.type;
+            }
+        }
+         
+        
+        // multiplicity
+        if (elem.multiplicity) {
+            if (_.contains(["0..*", "1..*", "*"], elem.multiplicity.trim())) {
+                if (elem.isOrdered === true) {
+                    _type = "List<" + _type + ">";
+                } else {
+                    _type = "HashSet<" + _type + ">";
+                }
+            } else if (elem.multiplicity.match(/^\d+$/)) { // number
+                _type += "[]";
+            }
+        }
+        return _type;
+    };
+    
+    
+    /**
+     * Write Member Variable
+     * @param {StringWriter} codeWriter
+     * @param {type.Model} elem
+     * @param {Object} options     
+     */
+    CsharpCodeGenerator.prototype.writeMemberVariable = function (codeWriter, elem, options) {
+         
+        if (elem.name.length > 0) {
+            var terms = [];
+            // doc
+            this.writeDoc(codeWriter, elem.documentation, options);
+            // modifiers
+            var _modifiers = this.getModifiers(elem);
+            if (_modifiers.length > 0) {
+                terms.push(_modifiers.join(" "));
+            }
+            // type
+            terms.push(this.getType(elem));
+            // name
+            terms.push(elem.name);
+            // initial value
+            if (elem.defaultValue && elem.defaultValue.length > 0) {
+                terms.push("= " + elem.defaultValue);
+            }
+            codeWriter.writeLine(terms.join(" ") + ";");
+        }
+    };
+
+    
+    /**
+     * Write Constructor
+     * @param {StringWriter} codeWriter
+     * @param {type.Model} elem
+     * @param {Object} options     
+     */
+    CsharpCodeGenerator.prototype.writeConstructor = function (codeWriter, elem, options) {
+        if (elem.name.length > 0) {
+            var terms = [];
+            // Doc
+            this.writeDoc(codeWriter, elem.documentation, options);
+            // Visibility
+            var visibility = this.getVisibility(elem);
+            if (visibility) {
+                terms.push(visibility);
+            }
+            terms.push(elem.name + "()");
+            codeWriter.writeLine(terms.join(" ") + " {");
+            codeWriter.writeLine("}");
+        }
     };
     
     /**
