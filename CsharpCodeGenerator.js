@@ -113,6 +113,17 @@ define(function (require, exports, module) {
             if (isAnnotationType) {
                 console.log('annotationType generate');
                 
+                fullPath = path + "/" + elem.name + ".cs";
+                codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options)); 
+                codeWriter.writeLine();
+                codeWriter.writeLine("using System;");
+                codeWriter.writeLine("using System.Collections.Generic;");
+                codeWriter.writeLine("using System.Linq;");
+                codeWriter.writeLine("using System.Text;");
+                codeWriter.writeLine();
+                this.writeNamespace(codeWriter, elem, options, isAnnotationType);
+                file = FileSystem.getFileForPath(fullPath);
+                FileUtils.writeText(file, codeWriter.getData(), true).then(result.resolve, result.reject);
             } 
             // Class
             else { 
@@ -155,8 +166,8 @@ define(function (require, exports, module) {
         if (path) {
             codeWriter.writeLine("namespace " + path + "{"); 
             codeWriter.indent();
-            if(isAnnotationType){
-                
+            if(isAnnotationType){ 
+                this.writeAnnotationType(codeWriter, elem, options);
             } else { 
                 this.writeClass(codeWriter, elem, options);
             }
@@ -164,14 +175,127 @@ define(function (require, exports, module) {
             codeWriter.writeLine("}");
         }
         else{
-            if(isAnnotationType){
-                
+            if(isAnnotationType){ 
+                this.writeAnnotationType(codeWriter, elem, options);
             } else { 
                 this.writeClass(codeWriter, elem, options);
             }
         }
     };
+    
+    /**
+     * Write AnnotationType
+     * @param {StringWriter} codeWriter
+     * @param {type.Model} elem
+     * @param {Object} options     
+     */
+    CsharpCodeGenerator.prototype.writeAnnotationType = function (codeWriter, elem, options) {
+var i, len, terms = [];
+        // Doc
+        var doc = elem.documentation.trim();
+        if (Repository.getProject().author && Repository.getProject().author.length > 0) {
+            doc += "\n@author " + Repository.getProject().author;
+        }
+        this.writeDoc(codeWriter, doc, options);
+           
+         // Modifiers
+        var _modifiers = this.getModifiers(elem);
+        if (_.some(elem.operations, function (op) { return op.isAbstract === true; })) {
+            _modifiers.push("abstract");
+        }
+        if (_modifiers.length > 0) {
+            terms.push(_modifiers.join(" "));
+        }
+        
+        // Class
+        terms.push("class");
+        elem.name = elem.name+"Attribute";
+        terms.push(elem.name);
+        
+        // AnnotationType => Attribute in C#
+        terms.push(":System.Attribute");
+        
+        
+//        // Extends
+//        var _extends = this.getSuperClasses(elem);
+//        if (_extends.length > 0) {
+//            terms.push(": " + _extends[0].name);
+//        }
+//        
+//        // Implements
+//        var _implements = this.getSuperInterfaces(elem);
+//        if (_implements.length > 0) {
+//            if (_extends.length > 0) {
+//                terms.push(", " + _.map(_implements, function (e) { return e.name; }).join(", "));
+//            } else { 
+//                terms.push(": " + _.map(_implements, function (e) { return e.name; }).join(", "));
+//            }
+//        }
+        
+        codeWriter.writeLine(terms.join(" ") + " {");
+        codeWriter.writeLine();
+        codeWriter.indent();
+        
+        // Constructor
+        this.writeConstructor(codeWriter, elem, options);
+        codeWriter.writeLine();
+        
+        // Member Variables
+        // (from attributes)
+        for (i = 0, len = elem.attributes.length; i < len; i++) {
+            this.writeMemberVariable(codeWriter, elem.attributes[i], options);
+            codeWriter.writeLine();
+        }
+        // (from associations)
+        var associations = Repository.getRelationshipsOf(elem, function (rel) {
+            return (rel instanceof type.UMLAssociation);
+        }); 
+        
+        console.log('association length: ' + associations.length); 
+        
+        for (i = 0, len = associations.length; i < len; i++) {
+            var asso = associations[i];
+            if (asso.end1.reference === elem && asso.end2.navigable === true) {
+                this.writeMemberVariable(codeWriter, asso.end2, options);
+                codeWriter.writeLine();
+                console.log('assoc end1');
+            } else if (asso.end2.reference === elem && asso.end1.navigable === true) {
+                this.writeMemberVariable(codeWriter, asso.end1, options);
+                codeWriter.writeLine();
+                console.log('assoc end2');
+            }
+        } 
+        
+        // Methods
+        for (i = 0, len = elem.operations.length; i < len; i++) {
+            this.writeMethod(codeWriter, elem.operations[i], options, false, false);
+            codeWriter.writeLine();
+        }
+        
+        // Inner Definitions
+        for (i = 0, len = elem.ownedElements.length; i < len; i++) {
+            var def = elem.ownedElements[i];
+            if (def instanceof type.UMLClass) {
+                if (def.stereotype === "annotationType") {
+                    this.writeAnnotationType(codeWriter, def, options);
+                } else {
+                    console.log("class in class");
+                    this.writeClass(codeWriter, def, options);
+                }
+                codeWriter.writeLine();
+            } else if (def instanceof type.UMLInterface) {
+//                this.writeInterface(codeWriter, def, options);
+                codeWriter.writeLine();
+            } else if (def instanceof type.UMLEnumeration) {
+//                this.writeEnum(codeWriter, def, options);
+                codeWriter.writeLine();
+            }
+        }
 
+        
+        codeWriter.outdent();
+        codeWriter.writeLine("}");
+    };
     
     /**
      * Write Class
@@ -262,7 +386,7 @@ define(function (require, exports, module) {
             var def = elem.ownedElements[i];
             if (def instanceof type.UMLClass) {
                 if (def.stereotype === "annotationType") {
-//                    this.writeAnnotationType(codeWriter, def, options);
+                    this.writeAnnotationType(codeWriter, def, options);
                 } else {
                     console.log("class in class");
                     this.writeClass(codeWriter, def, options);
