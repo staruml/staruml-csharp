@@ -142,7 +142,23 @@ define(function (require, exports, module) {
                 FileUtils.writeText(file, codeWriter.getData(), true).then(result.resolve, result.reject);
             }
         }
-        
+        // Interface
+        else if (elem instanceof type.UMLInterface) {
+            fullPath = path + "/" + elem.name + ".cs";
+            console.log('Interface generate' + fullPath);
+            
+            codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options)); 
+            codeWriter.writeLine();
+            codeWriter.writeLine("using System;");
+            codeWriter.writeLine("using System.Collections.Generic;");
+            codeWriter.writeLine("using System.Linq;");
+            codeWriter.writeLine("using System.Text;");
+            codeWriter.writeLine();
+            this.writeInterface(codeWriter, elem, options);
+            file = FileSystem.getFileForPath(fullPath);
+            FileUtils.writeText(file, codeWriter.getData(), true).then(result.resolve, result.reject);
+            
+        } 
             
         // Others (Nothing generated.)
         else {
@@ -154,6 +170,102 @@ define(function (require, exports, module) {
     
     
     
+    /**
+     * Write Interface
+     * @param {StringWriter} codeWriter
+     * @param {type.Model} elem
+     * @param {Object} options     
+     */
+    CsharpCodeGenerator.prototype.writeInterface = function (codeWriter, elem, options) {
+        
+        var path = null;
+        if (elem._parent) {
+            path = _.map(elem._parent.getPath(this.baseModel), function (e) { return e.name; }).join(".");
+        }
+        if (path) {
+            codeWriter.writeLine("namespace " + path + "{"); 
+            codeWriter.indent();
+        }
+        
+        var i, len, terms = [];
+        
+        // Doc
+        this.writeDoc(codeWriter, elem.documentation, options);
+        
+        // Modifiers
+        var visibility = this.getVisibility(elem);
+        if (visibility) {
+            terms.push(visibility);
+        }
+        
+        // Interface
+        terms.push("interface");
+        terms.push(elem.name);
+        
+        // Extends
+        var _extends = this.getSuperClasses(elem);
+        if (_extends.length > 0) {
+            terms.push(": " + _.map(_extends, function (e) { return e.name; }).join(", "));
+        }
+        codeWriter.writeLine(terms.join(" ") + " {");
+        codeWriter.writeLine();
+        codeWriter.indent();
+
+        // Member Variables
+        // (from attributes)
+        for (i = 0, len = elem.attributes.length; i < len; i++) {
+            this.writeMemberVariable(codeWriter, elem.attributes[i], options);
+            codeWriter.writeLine();
+        }
+        // (from associations)
+        var associations = Repository.getRelationshipsOf(elem, function (rel) {
+            return (rel instanceof type.UMLAssociation);
+        });
+        for (i = 0, len = associations.length; i < len; i++) {
+            var asso = associations[i];
+            if (asso.end1.reference === elem && asso.end2.navigable === true) {
+                this.writeMemberVariable(codeWriter, asso.end2, options);
+                codeWriter.writeLine();
+            } else if (asso.end2.reference === elem && asso.end1.navigable === true) {
+                this.writeMemberVariable(codeWriter, asso.end1, options);
+                codeWriter.writeLine();
+            }
+        }
+
+        // Methods
+        for (i = 0, len = elem.operations.length; i < len; i++) {
+            this.writeMethod(codeWriter, elem.operations[i], options, true, false);
+            codeWriter.writeLine();
+        }
+
+        // Inner Definitions
+        for (i = 0, len = elem.ownedElements.length; i < len; i++) {
+            var def = elem.ownedElements[i];
+            if (def instanceof type.UMLClass) {
+                if (def.stereotype === "annotationType") {
+                    this.writeAnnotationType(codeWriter, def, options);
+                } else {
+                    this.writeClass(codeWriter, def, options);
+                }
+                codeWriter.writeLine();
+            } else if (def instanceof type.UMLInterface) {
+                this.writeInterface(codeWriter, def, options);
+                codeWriter.writeLine();
+            } else if (def instanceof type.UMLEnumeration) {
+//                this.writeEnum(codeWriter, def, options);
+                codeWriter.writeLine();
+            }
+        }
+
+        codeWriter.outdent();
+        codeWriter.writeLine("}");
+        
+        if(path){
+            codeWriter.outdent();
+            codeWriter.writeLine("}");
+        }
+    };
+
     
     /**
      * Write AnnotationType
@@ -266,7 +378,7 @@ define(function (require, exports, module) {
                 }
                 codeWriter.writeLine();
             } else if (def instanceof type.UMLInterface) {
-//                this.writeInterface(codeWriter, def, options);
+                this.writeInterface(codeWriter, def, options);
                 codeWriter.writeLine();
             } else if (def instanceof type.UMLEnumeration) {
 //                this.writeEnum(codeWriter, def, options);
@@ -391,7 +503,7 @@ define(function (require, exports, module) {
                 }
                 codeWriter.writeLine();
             } else if (def instanceof type.UMLInterface) {
-//                this.writeInterface(codeWriter, def, options);
+                this.writeInterface(codeWriter, def, options);
                 codeWriter.writeLine();
             } else if (def instanceof type.UMLEnumeration) {
 //                this.writeEnum(codeWriter, def, options);
