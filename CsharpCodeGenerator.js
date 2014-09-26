@@ -121,7 +121,7 @@ define(function (require, exports, module) {
                 codeWriter.writeLine("using System.Linq;");
                 codeWriter.writeLine("using System.Text;");
                 codeWriter.writeLine();
-                this.writeNamespace(codeWriter, elem, options, isAnnotationType);
+                this.writeAnnotationType(codeWriter, elem, options, isAnnotationType);
                 file = FileSystem.getFileForPath(fullPath);
                 FileUtils.writeText(file, codeWriter.getData(), true).then(result.resolve, result.reject);
             } 
@@ -137,11 +137,12 @@ define(function (require, exports, module) {
                 codeWriter.writeLine("using System.Linq;");
                 codeWriter.writeLine("using System.Text;");
                 codeWriter.writeLine();
-                this.writeNamespace(codeWriter, elem, options, isAnnotationType);
+                this.writeClass(codeWriter, elem, options, isAnnotationType);
                 file = FileSystem.getFileForPath(fullPath);
                 FileUtils.writeText(file, codeWriter.getData(), true).then(result.resolve, result.reject);
             }
         }
+        
             
         // Others (Nothing generated.)
         else {
@@ -152,36 +153,7 @@ define(function (require, exports, module) {
     };
     
     
-    /**
-     * Write namespace 
-     * @param {StringWriter} codeWriter
-     * @param {type.Model} elem
-     * @param {Object} options     
-     */
-    CsharpCodeGenerator.prototype.writeNamespace = function (codeWriter, elem, options, isAnnotationType) {
-        var path = null;
-        if (elem._parent) {
-            path = _.map(elem._parent.getPath(this.baseModel), function (e) { return e.name; }).join(".");
-        }
-        if (path) {
-            codeWriter.writeLine("namespace " + path + "{"); 
-            codeWriter.indent();
-            if(isAnnotationType){ 
-                this.writeAnnotationType(codeWriter, elem, options);
-            } else { 
-                this.writeClass(codeWriter, elem, options);
-            }
-            codeWriter.outdent();
-            codeWriter.writeLine("}");
-        }
-        else{
-            if(isAnnotationType){ 
-                this.writeAnnotationType(codeWriter, elem, options);
-            } else { 
-                this.writeClass(codeWriter, elem, options);
-            }
-        }
-    };
+    
     
     /**
      * Write AnnotationType
@@ -190,7 +162,17 @@ define(function (require, exports, module) {
      * @param {Object} options     
      */
     CsharpCodeGenerator.prototype.writeAnnotationType = function (codeWriter, elem, options) {
-var i, len, terms = [];
+        
+        var path = null;
+        if (elem._parent) {
+            path = _.map(elem._parent.getPath(this.baseModel), function (e) { return e.name; }).join(".");
+        }
+        if (path) {
+            codeWriter.writeLine("namespace " + path + "{"); 
+            codeWriter.indent();
+        }
+        
+        var i, len, terms = [];
         // Doc
         var doc = elem.documentation.trim();
         if (Repository.getProject().author && Repository.getProject().author.length > 0) {
@@ -295,6 +277,11 @@ var i, len, terms = [];
         
         codeWriter.outdent();
         codeWriter.writeLine("}");
+        
+        if(path){
+            codeWriter.outdent();
+            codeWriter.writeLine("}");
+        }
     };
     
     /**
@@ -304,7 +291,18 @@ var i, len, terms = [];
      * @param {Object} options     
      */
     CsharpCodeGenerator.prototype.writeClass = function (codeWriter, elem, options) {
+        
+        var path = null;
+        if (elem._parent) {
+            path = _.map(elem._parent.getPath(this.baseModel), function (e) { return e.name; }).join(".");
+        }
+        if (path) {
+            codeWriter.writeLine("namespace " + path + "{"); 
+            codeWriter.indent();
+        }
+        
         var i, len, terms = [];
+         
         // Doc
         var doc = elem.documentation.trim();
         if (Repository.getProject().author && Repository.getProject().author.length > 0) {
@@ -404,6 +402,11 @@ var i, len, terms = [];
         
         codeWriter.outdent();
         codeWriter.writeLine("}");
+        
+        if(path){
+            codeWriter.outdent();
+            codeWriter.writeLine("}");
+        }
         
     };
     
