@@ -116,8 +116,36 @@ define(function (require, exports, module) {
         return result.promise();
     }
 
+    
+    /**
+     * Command Handler for C# Reverse
+     *
+     * @param {string} basePath
+     * @param {Object} options
+     * @return {$.Promise}
+     */
     function _handleReverse() {
-        console.log("handle reverse");
+        var result = new $.Deferred();
+
+        // If options is not passed, get from preference
+        options = CsharpPreferences.getRevOptions();
+
+        // If basePath is not assigned, popup Open Dialog to select a folder
+        if (!basePath) {
+            FileSystem.showOpenDialog(false, true, "Select Folder", null, null, function (err, files) {
+                if (!err) {
+                    if (files.length > 0) {
+                        basePath = files[0];
+//                        CsharpReverseEngineer.analyze(basePath, options).then(result.resolve, result.reject);
+                    } else {
+                        result.reject(FileSystem.USER_CANCELED);
+                    }
+                } else {
+                    result.reject(err);
+                }
+            });
+        }
+        return result.promise();
     }
 
     function _handleConfigure() {
