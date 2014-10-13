@@ -2,7 +2,7 @@
     "name": "staruml.csharp",
     "title": "C#",
     "description": "C# code generation and reverse engineering.",
-    "homepage": "https://github.com/staruml/JavaCodeEng",
+    "homepage": "https://github.com/staruml/CSharp",
     "keywords": ["csharp"],
     "version": "0.1.0",
     "author": {

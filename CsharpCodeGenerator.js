@@ -84,6 +84,7 @@ define(function (require, exports, module) {
             directory,
             codeWriter,
             file;
+        var isAnnotationType = elem.stereotype === "annotationType";
         
         // Package
         if (elem instanceof type.UMLPackage) {
@@ -103,27 +104,24 @@ define(function (require, exports, module) {
                     result.reject(err);
                 }
             });
-        } 
-        
-        else if (elem instanceof type.UMLClass) {
+        } else if (elem instanceof type.UMLClass) {
            
-            var isAnnotationType = elem.stereotype === "annotationType";
+           
             
             // AnnotationType
             if (isAnnotationType) {
                 console.log('annotationType generate');
                 
-                console.log(elem.name.substring(elem.name.length-9, elem.name.length)); 
+                console.log(elem.name.substring(elem.name.length - 9, elem.name.length));
         
-                if(elem.name.length<9 ){  
+                if (elem.name.length < 9) {
                     elem.name = elem.name + "Attribute";
-                }
-                else if ( elem.name.substring(elem.name.length-9, elem.name.length) != "Attribute" ){   
+                } else if (elem.name.substring(elem.name.length - 9, elem.name.length) !== "Attribute") {
                     elem.name = elem.name + "Attribute";
                 }
                 
                 fullPath = path + "/" + elem.name + ".cs";
-                codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options)); 
+                codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options));
                 codeWriter.writeLine();
                 codeWriter.writeLine("using System;");
                 codeWriter.writeLine("using System.Collections.Generic;");
@@ -134,13 +132,12 @@ define(function (require, exports, module) {
                 this.writeNamespace("writeAnnotationType", codeWriter, elem, options, isAnnotationType);
                 file = FileSystem.getFileForPath(fullPath);
                 FileUtils.writeText(file, codeWriter.getData(), true).then(result.resolve, result.reject);
-            } 
-            // Class
-            else { 
-                fullPath = path + "/" + elem.name + ".cs"; 
+            } else {
+                // Class
+                fullPath = path + "/" + elem.name + ".cs";
                 console.log('Class generate' + fullPath);
                 
-                codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options)); 
+                codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options));
                 codeWriter.writeLine();
                 codeWriter.writeLine("using System;");
                 codeWriter.writeLine("using System.Collections.Generic;");
@@ -152,13 +149,12 @@ define(function (require, exports, module) {
                 file = FileSystem.getFileForPath(fullPath);
                 FileUtils.writeText(file, codeWriter.getData(), true).then(result.resolve, result.reject);
             }
-        }
-        // Interface
-        else if (elem instanceof type.UMLInterface) {
+        } else if (elem instanceof type.UMLInterface) {
+            // Interface
             fullPath = path + "/" + elem.name + ".cs";
             console.log('Interface generate' + fullPath);
             
-            codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options)); 
+            codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options));
             codeWriter.writeLine();
             codeWriter.writeLine("using System;");
             codeWriter.writeLine("using System.Collections.Generic;");
@@ -170,20 +166,18 @@ define(function (require, exports, module) {
             file = FileSystem.getFileForPath(fullPath);
             FileUtils.writeText(file, codeWriter.getData(), true).then(result.resolve, result.reject);
             
-        } 
+        } else if (elem instanceof type.UMLEnumeration) {
         // Enum
-        else if (elem instanceof type.UMLEnumeration) {
             fullPath = path + "/" + elem.name + ".cs";
-            codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options)); 
+            codeWriter = new CodeGenUtils.CodeWriter(this.getIndentString(options));
             codeWriter.writeLine();
 //            this.writeEnum(codeWriter, elem, options);
             this.writeNamespace("writeEnum", codeWriter, elem, options, isAnnotationType);
             file = FileSystem.getFileForPath(fullPath);
             FileUtils.writeText(file, codeWriter.getData(), true).then(result.resolve, result.reject);
              
-        }     
+        } else {
         // Others (Nothing generated.)
-        else {
             console.log('nothing generate');
             result.resolve();
         }
@@ -203,27 +197,24 @@ define(function (require, exports, module) {
             path = _.map(elem._parent.getPath(this.baseModel), function (e) { return e.name; }).join(".");
         }
         if (path) {
-            codeWriter.writeLine("namespace " + path + "{"); 
+            codeWriter.writeLine("namespace " + path + "{");
             codeWriter.indent();
         }
-        if(writeFunction == "writeAnnotationType"){
+        if (writeFunction === "writeAnnotationType") {
             this.writeAnnotationType(codeWriter, elem, options);
-        }
-        else if (writeFunction == "writeClass"){
+        } else if (writeFunction === "writeClass") {
             this.writeClass(codeWriter, elem, options);
-        }
-        else if (writeFunction == "writeInterface"){
+        } else if (writeFunction === "writeInterface") {
             this.writeInterface(codeWriter, elem, options);
-        }
-        else if (writeFunction == "writeEnum"){ 
+        } else if (writeFunction === "writeEnum") {
             this.writeEnum(codeWriter, elem, options);
         }
         
-        if(path){
+        if (path) {
             codeWriter.outdent();
             codeWriter.writeLine("}");
         }
-    }
+    };
     
     /**
      * Write Enum
@@ -377,8 +368,8 @@ define(function (require, exports, module) {
         }
         
         // Class
-        terms.push("class"); 
-        terms.push(elem.name); 
+        terms.push("class");
+        terms.push(elem.name);
         
         // AnnotationType => Attribute in C#
         terms.push(":System.Attribute");
@@ -417,9 +408,9 @@ define(function (require, exports, module) {
         // (from associations)
         var associations = Repository.getRelationshipsOf(elem, function (rel) {
             return (rel instanceof type.UMLAssociation);
-        }); 
+        });
         
-        console.log('association length: ' + associations.length); 
+        console.log('association length: ' + associations.length);
         
         for (i = 0, len = associations.length; i < len; i++) {
             var asso = associations[i];
@@ -432,7 +423,7 @@ define(function (require, exports, module) {
                 codeWriter.writeLine();
                 console.log('assoc end2');
             }
-        } 
+        }
         
         // Methods
         for (i = 0, len = elem.operations.length; i < len; i++) {
@@ -509,7 +500,7 @@ define(function (require, exports, module) {
         if (_implements.length > 0) {
             if (_extends.length > 0) {
                 terms.push(", " + _.map(_implements, function (e) { return e.name; }).join(", "));
-            } else { 
+            } else {
                 terms.push(": " + _.map(_implements, function (e) { return e.name; }).join(", "));
             }
         }
@@ -531,9 +522,9 @@ define(function (require, exports, module) {
         // (from associations)
         var associations = Repository.getRelationshipsOf(elem, function (rel) {
             return (rel instanceof type.UMLAssociation);
-        }); 
+        });
         
-        console.log('association length: ' + associations.length); 
+        console.log('association length: ' + associations.length);
         
         for (i = 0, len = associations.length; i < len; i++) {
             var asso = associations[i];
@@ -546,7 +537,7 @@ define(function (require, exports, module) {
                 codeWriter.writeLine();
                 console.log('assoc end2');
             }
-        } 
+        }
         
         // Methods
         for (i = 0, len = elem.operations.length; i < len; i++) {
@@ -647,13 +638,13 @@ define(function (require, exports, module) {
                     var returnType = this.getType(returnParam);
                     if (returnType === "bool") {
                         codeWriter.writeLine("return False;");
-                    } else if (returnType === "byte" 
-                               || returnType === "int" 
-                               || returnType === "sbyte" 
+                    } else if (returnType === "byte"
+                               || returnType === "int"
+                               || returnType === "sbyte"
                                || returnType === "short"
                                || returnType === "uint"
                                || returnType === "ulong"
-                               || returnType === "ushort" ) {
+                               || returnType === "ushort") {
                         codeWriter.writeLine("return 0;");
                     } else if (returnType === "float") {
                         codeWriter.writeLine("return 0.0F;");
@@ -664,7 +655,7 @@ define(function (require, exports, module) {
                     } else if (returnType === "decimal") {
                         codeWriter.writeLine("return 0.0M;");
                     } else if (returnType === "char") {
-                        codeWriter.writeLine("return '\0';");
+                        codeWriter.writeLine("return '\\0';");
                     } else if (returnType === "string") {
                         codeWriter.writeLine('return "";');
                     } else {
@@ -824,10 +815,10 @@ define(function (require, exports, module) {
         if (elem.isFinalSpecification === true || elem.isLeaf === true) {
             modifiers.push("sealed");
         }
-        if (elem.concurrency === UML.CCK_CONCURRENT) {
+        //if (elem.concurrency === UML.CCK_CONCURRENT) {
             //http://msdn.microsoft.com/ko-kr/library/c5kehkcz.aspx
             //modifiers.push("synchronized");
-        }
+        //}
         // transient
         // volatile
         // strictfp

@@ -20,12 +20,12 @@
  * DEALINGS IN THE SOFTWARE.
  *
  */
-
+ 
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, regexp: true */
 /*global define, $, _, window, staruml, type, appshell, document */
 
 define(function (require, exports, module) {
-    "use strict"; 
+    "use strict";
     
     var AppInit             = staruml.getModule("utils/AppInit"),
         Repository          = staruml.getModule("engine/Repository"),
@@ -42,7 +42,8 @@ define(function (require, exports, module) {
     
     var CodeGenUtils        = require("CodeGenUtils"),
         CsharpPreferences   = require("CsharpPreferences"),
-        CsharpCodeGenerator = require("CsharpCodeGenerator") ;
+        CsharpCodeGenerator = require("CsharpCodeGenerator"),
+        CsharpReverseEngineer = require("CsharpReverseEngineer");
     
     /**
      * Commands IDs
@@ -124,7 +125,7 @@ define(function (require, exports, module) {
      * @param {Object} options
      * @return {$.Promise}
      */
-    function _handleReverse() {
+    function _handleReverse(basePath, options) {
         var result = new $.Deferred();
 
         // If options is not passed, get from preference
@@ -136,7 +137,7 @@ define(function (require, exports, module) {
                 if (!err) {
                     if (files.length > 0) {
                         basePath = files[0];
-//                        CsharpReverseEngineer.analyze(basePath, options).then(result.resolve, result.reject);
+                        CsharpReverseEngineer.analyze(basePath, options).then(result.resolve, result.reject);
                     } else {
                         result.reject(FileSystem.USER_CANCELED);
                     }

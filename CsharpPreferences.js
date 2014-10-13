@@ -80,7 +80,7 @@ define(function (require, exports, module) {
             description: "Create a package structure diagram for all packages",
             type: "Check",
             default: true
-        } 
+        }
     };
     
     function getId() {
