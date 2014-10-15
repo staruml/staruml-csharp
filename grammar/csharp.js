@@ -77,8 +77,8 @@ var parser = {trace: function trace() {
         Jison.print.apply(null, arguments);
     },
 yy: {},
-symbols_: {"error":2,"compilationUnit":3,"e":4,"EOF":5,"UNICODE_CLASS_Nd":6,"$accept":0,"$end":1},
-terminals_: {2:"error",5:"EOF",6:"UNICODE_CLASS_Nd"},
+symbols_: {"error":2,"compilationUnit":3,"e":4,"EOF":5,"WHITESPACE":6,"$accept":0,"$end":1},
+terminals_: {2:"error",5:"EOF",6:"WHITESPACE"},
 productions_: [0,[3,2],[4,1],[4,0]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
@@ -581,40 +581,16 @@ options: {"flex":true},
 performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START) {
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
-case 0:/* skip whitespace */
+case 0:return 6;
 break;
-case 1:return 'UNICODE_CLASS_Zs';
+case 1:return 5;
 break;
-case 2:return 'UNICODE_CLASS_Lu';
-break;
-case 3:return 'UNICODE_CLASS_Ll';
-break;
-case 4:return 'UNICODE_CLASS_Lt';
-break;
-case 5:return 'UNICODE_CLASS_Lm';
-break;
-case 6:return 'UNICODE_CLASS_Lo';
-break;
-case 7:return 'UNICODE_CLASS_Nl';
-break;
-case 8:return 'UNICODE_CLASS_Mn';
-break;
-case 9:return 'UNICODE_CLASS_Mc';
-break;
-case 10:return 'UNICODE_CLASS_Cf';
-break;
-case 11:return 'UNICODE_CLASS_Pc';
-break;
-case 12:return 6;
-break;
-case 13:return 5;
-break;
-case 14:console.log(yy_.yytext);
+case 2:console.log(yy_.yytext);
 break;
 }
 },
-rules: [/^(?:\s+)/,/^(?:([\u0020]|[\u00A0]|[\u1680]|[\u180E]|[\u2000]|[\u2001]|[\u2002]|[\u2003]|[\u2004]|[\u2005]|[\u2006]|[\u2008]|[\u2009]|[\u200A]|[\u202F]|[\u3000]|[\u205F]))/,/^(?:([\u0041-\u005A]|[\u00C0-\u00DE]))/,/^(?:([\u0061-\u007A]))/,/^(?:([\u01C5]|[\u01C8]|[\u01CB]|[\u01F2]))/,/^(?:([\u02B0-\u02EE]))/,/^(?:([\u01BB]|[\u01C0]|[\u01C1]|[\u01C2]|[\u01C3]|[\u0294]))/,/^(?:([\u16EE]|[\u16EF]|[\u16F0]|[\u2160]|[\u2161]|[\u2162]|[\u2163]|[\u2164]|[\u2165]|[\u2166]|[\u2167]|[\u2168]|[\u2169]|[\u216A]|[\u216B]|[\u216C]|[\u216D]|[\u216E]|[\u216F]))/,/^(?:([\u0300]|[\u0301]|[\u0302]|[\u0303]|[\u0304]|[\u0305]|[\u0306]|[\u0307]|[\u0308]|[\u0309]|[\u030A]|[\u030B]|[\u030C]|[\u030D]|[\u030E]|[\u030F]|[\u0310]))/,/^(?:([\u0903]|[\u093E]|[\u093F]|[\u0940]|[\u0949]|[\u094A]|[\u094B]|[\u094C]))/,/^(?:([\u00AD]|[\u0600]|[\u0601]|[\u0602]|[\u0603]|[\u06DD]))/,/^(?:([\u005F]|[\u203F]|[\u2040]|[\u2054]|[\uFE33]|[\uFE34]|[\uFE4D]|[\uFE4E]|[\uFE4F]|[\uFF3F]))/,/^(?:([\u0030]|[\u0031]|[\u0032]|[\u0033]|[\u0034]|[\u0035]|[\u0036]|[\u0037]|[\u0038]|[\u0039]))/,/^(?:$)/,/^(?:.)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14],"inclusive":true}}
+rules: [/^(?:(((([\u0020]|[\u00A0]|[\u1680]|[\u180E]|[\u2000]|[\u2001]|[\u2002]|[\u2003]|[\u2004]|[\u2005]|[\u2006]|[\u2008]|[\u2009]|[\u200A]|[\u202F]|[\u3000]|[\u205F])|[\u0009]|[\u000B]|[\u000C]|[\s])+)))/,/^(?:$)/,/^(?:.)/],
+conditions: {"INITIAL":{"rules":[0,1,2],"inclusive":true}}
 });
 return lexer;
 })();

@@ -3,6 +3,8 @@
 
 
 
+
+
 /* Unicode character classes */  
 
 UNICODE_CLASS_Zs        [\u0020]|[\u00A0]|[\u1680]|[\u180E]|[\u2000]|[\u2001]|[\u2002]|[\u2003]|[\u2004]|[\u2005]|[\u2006]|[\u2008]|[\u2009]|[\u200A]|[\u202F]|[\u3000]|[\u205F] 
@@ -18,23 +20,16 @@ UNICODE_CLASS_Cf        [\u00AD]|[\u0600]|[\u0601]|[\u0602]|[\u0603]|[\u06DD]
 UNICODE_CLASS_Pc        [\u005F]|[\u203F]|[\u2040]|[\u2054]|[\uFE33]|[\uFE34]|[\uFE4D]|[\uFE4E]|[\uFE4F]|[\uFF3F]
 UNICODE_CLASS_Nd        [\u0030]|[\u0031]|[\u0032]|[\u0033]|[\u0034]|[\u0035]|[\u0036]|[\u0037]|[\u0038]|[\u0039]
 
+
+/* White space */  
+WHITESPACE              {Whitespace_characters}
+Whitespace_characters   {Whitespace_character}+
+Whitespace_character    {UNICODE_CLASS_Zs}|[\u0009]|[\u000B]|[\u000C]|[\s]
+
 %%
+ 
 
-\s+                             /* skip whitespace */
-
-{UNICODE_CLASS_Zs}              return 'UNICODE_CLASS_Zs';
-{UNICODE_CLASS_Lu}              return 'UNICODE_CLASS_Lu';
-{UNICODE_CLASS_Ll}              return 'UNICODE_CLASS_Ll';
-{UNICODE_CLASS_Lt}              return 'UNICODE_CLASS_Lt';
-{UNICODE_CLASS_Lm}              return 'UNICODE_CLASS_Lm';
-{UNICODE_CLASS_Lo}              return 'UNICODE_CLASS_Lo';
-{UNICODE_CLASS_Nl}              return 'UNICODE_CLASS_Nl';
-{UNICODE_CLASS_Mn}              return 'UNICODE_CLASS_Mn';
-{UNICODE_CLASS_Mc}              return 'UNICODE_CLASS_Mc';
-{UNICODE_CLASS_Cf}              return 'UNICODE_CLASS_Cf';
-{UNICODE_CLASS_Pc}              return 'UNICODE_CLASS_Pc';
-{UNICODE_CLASS_Nd}              return 'UNICODE_CLASS_Nd';
-
+{WHITESPACE}                    return 'WHITESPACE';
 
 <<EOF>>                         return 'EOF';
  

@@ -5,7 +5,7 @@ error(2)
 compilationUnit(3)
 e(4)
 EOF(5)
-UNICODE_CLASS_Nd(6)
+WHITESPACE(6)
 
 Item sets
 ------
@@ -13,9 +13,9 @@ Item sets
 item set 0 
 $accept -> .compilationUnit $end #lookaheads= $end
 compilationUnit -> .e EOF
-e -> .UNICODE_CLASS_Nd
+e -> .WHITESPACE
 e -> . 
-transitions ->  {"compilationUnit":1,"e":2,"UNICODE_CLASS_Nd":3}
+transitions ->  {"compilationUnit":1,"e":2,"WHITESPACE":3}
 
 item set 1 
 $accept -> compilationUnit .$end #lookaheads= $end 
@@ -26,7 +26,7 @@ compilationUnit -> e .EOF
 transitions ->  {"EOF":4}
 
 item set 3 
-e -> UNICODE_CLASS_Nd . 
+e -> WHITESPACE . 
 transitions ->  {}
 
 item set 4 
