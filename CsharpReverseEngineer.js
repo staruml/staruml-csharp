@@ -22,7 +22,7 @@
  */
 
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, regexp: true, continue:true */
-/*global define, $, _, window, staruml, type, document, java7 */
+/*global define, $, _, window, staruml, type, document, csharp */
 define(function (require, exports, module) {
     "use strict";
 
@@ -35,7 +35,7 @@ define(function (require, exports, module) {
         FileUtils       = staruml.getModule("file/FileUtils"),
         Async           = staruml.getModule("utils/Async");
 
-    require("grammar/csharp"); 
+    require("grammar/csharp");
     
       
     /**
@@ -137,13 +137,14 @@ define(function (require, exports, module) {
             file.read({}, function (err, data, stat) {
                 if (!err) {
                     try {
-                        var ast = csharp.parse(data);
+                        var ast = parser.parse(data);
 //                        self._currentCompilationUnit = ast;
 //                        self._currentCompilationUnit.file = file;
 //                        self.translateCompilationUnit(options, self._root, ast);
+                        console.log("test " + ast["unicode"]);
                         result.resolve();
                     } catch (ex) {
-                        console.error("[C#] Failed to parse - " + file._name);
+                        console.error("[C#] Failed to parse - " + file._name + "  : " + ex);
                         result.reject(ex);
                     }
                 } else {
@@ -169,7 +170,7 @@ define(function (require, exports, module) {
             if (entry._isFile === true) {
                 var ext = FileUtils.getFileExtension(entry._path);
                 if (ext && ext.toLowerCase() === "cs") {
-                    csharpAnalyzer.addFile(entry); 
+                    csharpAnalyzer.addFile(entry);
                 }
             }
             return true;
