@@ -48,6 +48,36 @@ WHITESPACE                      {Whitespace_characters}
 Whitespace_characters           {Whitespace_character}+
 Whitespace_character            {UNICODE_CLASS_Zs}|[\u0009]|[\u000B]|[\u000C]|[\s]
         
+        
+/* Identifiers  */
+IDENTIFIER                      {Available_identifier}|'@'{Identifier_or_keyword}
+
+/* <An Identifier_or_keyword That Is Not A Keyword> */
+Available_identifier            {Identifier_or_keyword}
+
+Identifier_or_keyword           {Identifier_start_character}{Identifier_part_characters}?
+Identifier_start_character      {Letter_character}|'_'
+
+Identifier_part_characters      {Identifier_part_character}+
+
+Identifier_part_character       {Letter_character}|{Decimal_digit_character}|{Connecting_character}|{Combining_character}|{Formatting_character}
+  
+/* <A Unicode Character Of Classes Lu, Ll, Lt, Lm, Lo, Or Nl> */ 
+Letter_character                {UNICODE_CLASS_Lu}|{UNICODE_CLASS_Ll}|{UNICODE_CLASS_Lt}|{UNICODE_CLASS_Lm}|{UNICODE_CLASS_Lo}|{UNICODE_CLASS_Nl}
+
+/* <A Unicode Character Of Classes Mn Or Mc> */
+Combining_character             {UNICODE_CLASS_Mn}|{UNICODE_CLASS_Mc}
+
+/* <A Unicode Character Of The Class Nd> */
+Decimal_digit_character         {UNICODE_CLASS_Nd}
+
+/* <A Unicode Character Of The Class Pc> */
+Connecting_character            {UNICODE_CLASS_Pc}
+
+/* <A Unicode Character Of The Class Cf> */ 
+Formatting_character            {UNICODE_CLASS_Cf}
+
+        
 %%      
         
 {WHITESPACE}                    {console.log('WHITESPACE');}
@@ -139,6 +169,7 @@ Whitespace_character            {UNICODE_CLASS_Zs}|[\u0009]|[\u000B]|[\u000C]|[\
 "volatile"                      return 'VOLATILE';
 "while"                         return 'WHILE';
 
+{IDENTIFIER}                    return 'IDENTIFIER';
 
 {TEST_TOKEN}                    return 'TEST_TOKEN';
         

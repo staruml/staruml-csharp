@@ -1,7 +1,7 @@
 
-%token TEST_TOKEN 
-
 %token ABSTRACT AS BASE BOOL BREAK BYTE CASE CATCH CHAR CHECKED CLASS CONST CONTINUE DECIMAL DEFAULT DELEGATE DO DOUBLE ELSE ENUM EVENT EXPLICIT EXTERN FALSE FINALLY FIXED FLOAT FOR FOREACH GOTO IF IMPLICIT IN INT INTERFACE INTERNAL IS LOCK LONG NAMESPACE NEW NULL OBJECT OPERATOR OUT OVERRIDE PARAMS PRIVATE PROTECTED PUBLIC READONLY REF RETURN SBYTE SEALED SHORT SIZEOF STACKALLOC STATIC STRING STRUCT SWITCH THIS THROW TRUE TRY TYPEOF UINT ULONG UNCHECKED UNSAFE USHORT USING VIRTUAL VOID VOLATILE WHILE 
+
+%token IDENTIFIER
 
 %token EOF 
 
@@ -29,14 +29,16 @@ es
     
 
 e  
-    :   TEST_TOKEN     
-        {
-            $$="3";
-            console.log('TEST_TOKEN');
+    :   IF             
+        { 
+            console.log('IF');
+        }
+    |   IDENTIFIER             
+        { 
+            console.log('IDENTIFIER');
         }
     |   %empty             
-        {
-            $$="2";
+        { 
             console.log('EMPTY');
         }
     ;

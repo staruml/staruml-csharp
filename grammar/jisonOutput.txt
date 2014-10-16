@@ -6,7 +6,8 @@ compilationUnit(3)
 es(4)
 EOF(5)
 e(6)
-TEST_TOKEN(7)
+IF(7)
+IDENTIFIER(8)
 
 Item sets
 ------
@@ -16,9 +17,10 @@ $accept -> .compilationUnit $end #lookaheads= $end
 compilationUnit -> .es EOF
 es -> .e
 es -> .es e
-e -> .TEST_TOKEN
+e -> .IF
+e -> .IDENTIFIER
 e -> . 
-transitions ->  {"compilationUnit":1,"es":2,"e":3,"TEST_TOKEN":4}
+transitions ->  {"compilationUnit":1,"es":2,"e":3,"IF":4,"IDENTIFIER":5}
 
 item set 1 
 $accept -> compilationUnit .$end #lookaheads= $end 
@@ -27,38 +29,49 @@ transitions ->  {}
 item set 2 
 compilationUnit -> es .EOF
 es -> es .e
-e -> .TEST_TOKEN
+e -> .IF
+e -> .IDENTIFIER
 e -> . 
-transitions ->  {"EOF":5,"e":6,"TEST_TOKEN":4}
+transitions ->  {"EOF":6,"e":7,"IF":4,"IDENTIFIER":5}
 
 item set 3 
 es -> e . 
 transitions ->  {}
 
 item set 4 
-e -> TEST_TOKEN . 
+e -> IF . 
 transitions ->  {}
 
 item set 5 
-compilationUnit -> es EOF . 
+e -> IDENTIFIER . 
 transitions ->  {}
 
 item set 6 
+compilationUnit -> es EOF . 
+transitions ->  {}
+
+item set 7 
 es -> es e . 
 transitions ->  {}
-7 states.
+8 states.
 Building lookahead grammar.
 Computing lookaheads.
 Building parse table.
-Conflict at state: 0, token: TEST_TOKEN
+Conflict at state: 0, token: IDENTIFIER
+  reduce by rule: e -> 
+  shift token (then go to state 5)
+Conflict at state: 0, token: IF
   reduce by rule: e -> 
   shift token (then go to state 4)
-Conflict at state: 2, token: TEST_TOKEN
+Conflict at state: 2, token: IDENTIFIER
+  reduce by rule: e -> 
+  shift token (then go to state 5)
+Conflict at state: 2, token: IF
   reduce by rule: e -> 
   shift token (then go to state 4)
 Conflict at state: 2, token: EOF
   reduce by rule: e -> 
-  shift token (then go to state 5)
+  shift token (then go to state 6)
 
-3 Conflict(s) found in grammar.
+5 Conflict(s) found in grammar.
 Done.
