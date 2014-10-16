@@ -77,23 +77,26 @@ Connecting_character            {UNICODE_CLASS_Pc}
 Formatting_character            {UNICODE_CLASS_Cf}
 
 
+/* Real Literals */
+REAL_LITERAL                    {Decimal_digits}{DOT}{Decimal_digits}{Exponent_part}?{Real_type_suffix}?|{DOT}{Decimal_digits}{Exponent_part}?{Real_type_suffix}?|{Decimal_digits}{Exponent_part}{Real_type_suffix}?|{Decimal_digits}{Real_type_suffix}
+Exponent_part                   'e'{Sign}?{Decimal_digits}|'E'{Sign}?{Decimal_digits}
+Sign                            '+'|'-'
+Real_type_suffix                'F'|'f'|'D'|'d'|'M'|'m'
+DOT                             '.'  
+
+
+
 /* Integer Literals */
-
 INTEGER_LITERAL                 {Hexadecimal_integer_literal}|{Decimal_integer_literal}
-
 Decimal_integer_literal         {Decimal_digits}{Integer_type_suffix}?
-  
 Decimal_digits                  {DECIMAL_DIGIT}+
-  
 DECIMAL_DIGIT                   [0-9]
-  
 Integer_type_suffix             'UL'|'Ul'|'uL'|'ul'|'LU'|'Lu'|'lU'|'lu'|'U'|'u'|'L'|'l'
-
 Hexadecimal_integer_literal     ('0x'{Hex_digits}{Integer_type_suffix}?) | ('0X'{Hex_digits}{Integer_type_suffix}?)
-  
 Hex_digits                      {HEX_DIGIT}+
-  
 HEX_DIGIT                       [0-9a-fA-F] 
+
+
 
         
 %%      
@@ -189,7 +192,59 @@ HEX_DIGIT                       [0-9a-fA-F]
 
 {Unicode_escape_sequence}       return 'Unicode_escape_sequence';
 
+{REAL_LITERAL}                  return 'REAL_LITERAL';
 {INTEGER_LITERAL}               return 'INTEGER_LITERAL'; 
+
+
+/* Operators And Punctuators*/
+"{"                             return 'OPEN_BRACE';
+"}"                             return 'CLOSE_BRACE';
+"["                             return 'OPEN_BRACKET';
+"]"                             return 'CLOSE_BRACKET';
+"("                             return 'OPEN_PARENS';
+")"                             return 'CLOSE_PARENS';
+{DOT}                           return 'DOT';
+","                             return 'COMMA';
+":"                             return 'COLON';
+";"                             return 'SEMICOLON';
+"+"                             return 'PLUS';
+"-"                             return 'MINUS';
+"*"                             return 'STAR';
+"/"                             return 'DIV';
+"%"                             return 'PERCENT';
+"&"                             return 'AMP';
+"|"                             return 'BITWISE_OR';
+"^"                             return 'CARET';
+"!"                             return 'BANG';
+"~"                             return 'TILDE';
+"="                             return 'ASSIGNMENT';
+"<"                             return 'LT';
+">"                             return 'GT';
+"?"                             return 'INTERR';
+"::"                            return 'DOUBLE_COLON';
+"??"                            return 'OP_COALESCING';
+"++"                            return 'OP_INC';
+"--"                            return 'OP_DEC';
+"&&"                            return 'OP_AND';
+"||"                            return 'OP_OR';
+"->"                            return 'OP_PTR';
+"=="                            return 'OP_EQ';
+"!="                            return 'OP_NE';
+"<="                            return 'OP_LE';
+">="                            return 'OP_GE';
+"+="                            return 'OP_ADD_ASSIGNMENT';
+"-="                            return 'OP_SUB_ASSIGNMENT';
+"*="                            return 'OP_MULT_ASSIGNMENT';
+"/="                            return 'OP_DIV_ASSIGNMENT';
+"%="                            return 'OP_MOD_ASSIGNMENT';
+"&="                            return 'OP_AND_ASSIGNMENT';
+"|="                            return 'OP_OR_ASSIGNMENT';
+"^="                            return 'OP_XOR_ASSIGNMENT';
+"<<"                            return 'OP_LEFT_SHIFT';
+"<<="                           return 'OP_LEFT_SHIFT_ASSIGNMENT';
+">>"                            return 'RIGHT_SHIFT';
+">>="                           return 'RIGHT_SHIFT_ASSIGNMENT';
+
 
 {IDENTIFIER}                    return 'IDENTIFIER';
  
