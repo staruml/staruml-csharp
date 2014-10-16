@@ -7,8 +7,9 @@ es(4)
 EOF(5)
 e(6)
 IF(7)
-INTEGER_LITERAL(8)
-IDENTIFIER(9)
+Unicode_escape_sequence(8)
+INTEGER_LITERAL(9)
+IDENTIFIER(10)
 
 Item sets
 ------
@@ -19,10 +20,11 @@ compilationUnit -> .es EOF
 es -> .e
 es -> .es e
 e -> .IF
+e -> .Unicode_escape_sequence
 e -> .INTEGER_LITERAL
 e -> .IDENTIFIER
 e -> . 
-transitions ->  {"compilationUnit":1,"es":2,"e":3,"IF":4,"INTEGER_LITERAL":5,"IDENTIFIER":6}
+transitions ->  {"compilationUnit":1,"es":2,"e":3,"IF":4,"Unicode_escape_sequence":5,"INTEGER_LITERAL":6,"IDENTIFIER":7}
 
 item set 1 
 $accept -> compilationUnit .$end #lookaheads= $end 
@@ -32,10 +34,11 @@ item set 2
 compilationUnit -> es .EOF
 es -> es .e
 e -> .IF
+e -> .Unicode_escape_sequence
 e -> .INTEGER_LITERAL
 e -> .IDENTIFIER
 e -> . 
-transitions ->  {"EOF":7,"e":8,"IF":4,"INTEGER_LITERAL":5,"IDENTIFIER":6}
+transitions ->  {"EOF":8,"e":9,"IF":4,"Unicode_escape_sequence":5,"INTEGER_LITERAL":6,"IDENTIFIER":7}
 
 item set 3 
 es -> e . 
@@ -46,28 +49,35 @@ e -> IF .
 transitions ->  {}
 
 item set 5 
-e -> INTEGER_LITERAL . 
+e -> Unicode_escape_sequence . 
 transitions ->  {}
 
 item set 6 
-e -> IDENTIFIER . 
+e -> INTEGER_LITERAL . 
 transitions ->  {}
 
 item set 7 
-compilationUnit -> es EOF . 
+e -> IDENTIFIER . 
 transitions ->  {}
 
 item set 8 
+compilationUnit -> es EOF . 
+transitions ->  {}
+
+item set 9 
 es -> es e . 
 transitions ->  {}
-9 states.
+10 states.
 Building lookahead grammar.
 Computing lookaheads.
 Building parse table.
 Conflict at state: 0, token: IDENTIFIER
   reduce by rule: e -> 
-  shift token (then go to state 6)
+  shift token (then go to state 7)
 Conflict at state: 0, token: INTEGER_LITERAL
+  reduce by rule: e -> 
+  shift token (then go to state 6)
+Conflict at state: 0, token: Unicode_escape_sequence
   reduce by rule: e -> 
   shift token (then go to state 5)
 Conflict at state: 0, token: IF
@@ -75,8 +85,11 @@ Conflict at state: 0, token: IF
   shift token (then go to state 4)
 Conflict at state: 2, token: IDENTIFIER
   reduce by rule: e -> 
-  shift token (then go to state 6)
+  shift token (then go to state 7)
 Conflict at state: 2, token: INTEGER_LITERAL
+  reduce by rule: e -> 
+  shift token (then go to state 6)
+Conflict at state: 2, token: Unicode_escape_sequence
   reduce by rule: e -> 
   shift token (then go to state 5)
 Conflict at state: 2, token: IF
@@ -84,7 +97,7 @@ Conflict at state: 2, token: IF
   shift token (then go to state 4)
 Conflict at state: 2, token: EOF
   reduce by rule: e -> 
-  shift token (then go to state 7)
+  shift token (then go to state 8)
 
-7 Conflict(s) found in grammar.
+9 Conflict(s) found in grammar.
 Done.

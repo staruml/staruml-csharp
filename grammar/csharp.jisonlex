@@ -45,7 +45,11 @@ UNICODE_CLASS_Nd                [\u0030]|[\u0031]|[\u0032]|[\u0033]|[\u0034]|[\u
 WHITESPACE                      {Whitespace_characters}      
 Whitespace_characters           {Whitespace_character}+
 Whitespace_character            {UNICODE_CLASS_Zs}|[\u0009]|[\u000B]|[\u000C]|[\s]
-        
+
+/* Unicode Character Escape Sequences */
+Unicode_escape_sequence         '\\u' {HEX_DIGIT}{4}|'\\U' {HEX_DIGIT}{8} 
+
+
         
 /* Identifiers  */
 IDENTIFIER                      {Available_identifier}|'@'{Identifier_or_keyword}
@@ -183,6 +187,7 @@ HEX_DIGIT                       [0-9a-fA-F]
 "volatile"                      return 'VOLATILE';
 "while"                         return 'WHILE';
 
+{Unicode_escape_sequence}       return 'Unicode_escape_sequence';
 
 {INTEGER_LITERAL}               return 'INTEGER_LITERAL'; 
 
