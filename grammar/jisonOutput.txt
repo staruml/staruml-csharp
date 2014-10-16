@@ -3,37 +3,62 @@ $accept(0)
 $end(1)
 error(2)
 compilationUnit(3)
-e(4)
+es(4)
 EOF(5)
-WHITESPACE(6)
+e(6)
+TEST_TOKEN(7)
 
 Item sets
 ------
 
 item set 0 
 $accept -> .compilationUnit $end #lookaheads= $end
-compilationUnit -> .e EOF
-e -> .WHITESPACE
+compilationUnit -> .es EOF
+es -> .e
+es -> .es e
+e -> .TEST_TOKEN
 e -> . 
-transitions ->  {"compilationUnit":1,"e":2,"WHITESPACE":3}
+transitions ->  {"compilationUnit":1,"es":2,"e":3,"TEST_TOKEN":4}
 
 item set 1 
 $accept -> compilationUnit .$end #lookaheads= $end 
 transitions ->  {}
 
 item set 2 
-compilationUnit -> e .EOF 
-transitions ->  {"EOF":4}
+compilationUnit -> es .EOF
+es -> es .e
+e -> .TEST_TOKEN
+e -> . 
+transitions ->  {"EOF":5,"e":6,"TEST_TOKEN":4}
 
 item set 3 
-e -> WHITESPACE . 
+es -> e . 
 transitions ->  {}
 
 item set 4 
-compilationUnit -> e EOF . 
+e -> TEST_TOKEN . 
 transitions ->  {}
-5 states.
+
+item set 5 
+compilationUnit -> es EOF . 
+transitions ->  {}
+
+item set 6 
+es -> es e . 
+transitions ->  {}
+7 states.
 Building lookahead grammar.
 Computing lookaheads.
 Building parse table.
+Conflict at state: 0, token: TEST_TOKEN
+  reduce by rule: e -> 
+  shift token (then go to state 4)
+Conflict at state: 2, token: TEST_TOKEN
+  reduce by rule: e -> 
+  shift token (then go to state 4)
+Conflict at state: 2, token: EOF
+  reduce by rule: e -> 
+  shift token (then go to state 5)
+
+3 Conflict(s) found in grammar.
 Done.

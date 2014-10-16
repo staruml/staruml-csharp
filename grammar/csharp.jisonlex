@@ -1,8 +1,29 @@
 %lex
 %options flex
 
+TEST_TOKEN                      'k'
 
+/* Comments */
 
+SINGLE_LINE_COMMENT             '//' {Input_characters}?  
+
+Input_characters                {Input_character}+
+
+/* <Any Unicode Character Except A NEW_LINE_CHARACTER> */
+Input_character                 [^(\u000D|\u000A|\u0085|\u2028|\u2029|'\n')]
+  
+NEW_LINE_CHARACTER              [\u000D]|[\u000A]|[\u0085]|[\u2028]|[\u2029]|'\n'
+
+DELIMITED_COMMENT               '/*'{Delimited_comment_text}?{Asterisks}'/'  
+  
+Delimited_comment_text          {Delimited_comment_section}+
+  
+Delimited_comment_section       '/'|({Asterisks}?{Not_slash_or_asterisk})
+  
+Asterisks                       '*'+
+  
+/* <Any Unicode Character Except / Or *> */
+Not_slash_or_asterisk           [^('/'|'*')]
 
 
 /* Unicode character classes */  
@@ -22,16 +43,22 @@ UNICODE_CLASS_Nd        [\u0030]|[\u0031]|[\u0032]|[\u0033]|[\u0034]|[\u0035]|[\
 
 
 /* White space */  
-WHITESPACE              {Whitespace_characters}
+WHITESPACE              {Whitespace_characters}      
 Whitespace_characters   {Whitespace_character}+
 Whitespace_character    {UNICODE_CLASS_Zs}|[\u0009]|[\u000B]|[\u000C]|[\s]
 
 %%
  
+{WHITESPACE}            {console.log('WHITESPACE');}
+{NEW_LINE_CHARACTER}    {console.log('NEW_LINE_CHARACTER');}
 
-{WHITESPACE}                    return 'WHITESPACE';
+{SINGLE_LINE_COMMENT}   {console.log('SINGLE_LINE_COMMENT');}
+{DELIMITED_COMMENT}     {console.log('DELIMITED_COMMENT');}
 
-<<EOF>>                         return 'EOF';
+{TEST_TOKEN}            return 'TEST_TOKEN';
+
+
+<<EOF>>                 return 'EOF';
  
     
   

@@ -1,5 +1,6 @@
 
-%token WHITESPACE
+%token TEST_TOKEN 
+ 
 
 %token EOF 
 
@@ -7,7 +8,7 @@
 
 %%
 compilationUnit
-    : e EOF
+    : es EOF
         {   
             return {
                 "node": "CompilationUnit1",
@@ -17,16 +18,24 @@ compilationUnit
     
     ;
  
+ 
+es
+    :   e
+        {console.log('e');}
+    |   es e
+        {console.log('es e');}
+    ;
+    
 
-e 
-    :   WHITESPACE    
+e  
+    :   TEST_TOKEN     
         {
             $$="3";
-            console.log('1123');
-        } 
+            console.log('TEST_TOKEN');
+        }
     |   %empty             
         {
             $$="2";
-            console.log('123');
+            console.log('EMPTY');
         }
     ;

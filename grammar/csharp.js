@@ -72,14 +72,14 @@
   }
 */
 var parser = (function(){
-var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o};
+var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,4],$V1=[5,7];
 var parser = {trace: function trace() {
         Jison.print.apply(null, arguments);
     },
 yy: {},
-symbols_: {"error":2,"compilationUnit":3,"e":4,"EOF":5,"WHITESPACE":6,"$accept":0,"$end":1},
-terminals_: {2:"error",5:"EOF",6:"WHITESPACE"},
-productions_: [0,[3,2],[4,1],[4,0]],
+symbols_: {"error":2,"compilationUnit":3,"es":4,"EOF":5,"e":6,"TEST_TOKEN":7,"$accept":0,"$end":1},
+terminals_: {2:"error",5:"EOF",7:"TEST_TOKEN"},
+productions_: [0,[3,2],[4,1],[4,2],[6,1],[6,0]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
 
@@ -94,21 +94,27 @@ case 1:
         
 break;
 case 2:
-
-            this.$="3";
-            console.log('1123');
-        
+console.log('e');
 break;
 case 3:
+console.log('es e');
+break;
+case 4:
+
+            this.$="3";
+            console.log('TEST_TOKEN');
+        
+break;
+case 5:
 
             this.$="2";
-            console.log('123');
+            console.log('EMPTY');
         
 break;
 }
 },
-table: [{3:1,4:2,5:[2,3],6:[1,3]},{1:[3]},{5:[1,4]},{5:[2,2]},{1:[2,1]}],
-defaultActions: {3:[2,2],4:[2,1]},
+table: [{3:1,4:2,5:[2,5],6:3,7:$V0},{1:[3]},{5:[1,5],6:6,7:$V0},o($V1,[2,2]),o($V1,[2,4]),{1:[2,1]},o($V1,[2,3])],
+defaultActions: {5:[2,1]},
 parseError: function parseError(str, hash) {
     if (hash.recoverable) {
         this.trace(str);
@@ -581,16 +587,24 @@ options: {"flex":true},
 performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START) {
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
-case 0:return 6;
+case 0:console.log('WHITESPACE');
 break;
-case 1:return 5;
+case 1:console.log('NEW_LINE_CHARACTER');
 break;
-case 2:console.log(yy_.yytext);
+case 2:console.log('SINGLE_LINE_COMMENT');
+break;
+case 3:console.log('DELIMITED_COMMENT');
+break;
+case 4:return 7;
+break;
+case 5:return 5;
+break;
+case 6:console.log(yy_.yytext);
 break;
 }
 },
-rules: [/^(?:(((([\u0020]|[\u00A0]|[\u1680]|[\u180E]|[\u2000]|[\u2001]|[\u2002]|[\u2003]|[\u2004]|[\u2005]|[\u2006]|[\u2008]|[\u2009]|[\u200A]|[\u202F]|[\u3000]|[\u205F])|[\u0009]|[\u000B]|[\u000C]|[\s])+)))/,/^(?:$)/,/^(?:.)/],
-conditions: {"INITIAL":{"rules":[0,1,2],"inclusive":true}}
+rules: [/^(?:(((([\u0020]|[\u00A0]|[\u1680]|[\u180E]|[\u2000]|[\u2001]|[\u2002]|[\u2003]|[\u2004]|[\u2005]|[\u2006]|[\u2008]|[\u2009]|[\u200A]|[\u202F]|[\u3000]|[\u205F])|[\u0009]|[\u000B]|[\u000C]|[\s])+)))/,/^(?:([\u000D]|[\u000A]|[\u0085]|[\u2028]|[\u2029]|\\n))/,/^(?:(\/\/(([^(\u000D|\u000A|\u0085|\u2028|\u2029|'\n')])+)?))/,/^(?:(\/\*((\/|((\*+)?([^('/'|'*')])))+)?(\*+)\/))/,/^(?:(k))/,/^(?:$)/,/^(?:.)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6],"inclusive":true}}
 });
 return lexer;
 })();
