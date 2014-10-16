@@ -1,7 +1,11 @@
 
 %token ABSTRACT AS BASE BOOL BREAK BYTE CASE CATCH CHAR CHECKED CLASS CONST CONTINUE DECIMAL DEFAULT DELEGATE DO DOUBLE ELSE ENUM EVENT EXPLICIT EXTERN FALSE FINALLY FIXED FLOAT FOR FOREACH GOTO IF IMPLICIT IN INT INTERFACE INTERNAL IS LOCK LONG NAMESPACE NEW NULL OBJECT OPERATOR OUT OVERRIDE PARAMS PRIVATE PROTECTED PUBLIC READONLY REF RETURN SBYTE SEALED SHORT SIZEOF STACKALLOC STATIC STRING STRUCT SWITCH THIS THROW TRUE TRY TYPEOF UINT ULONG UNCHECKED UNSAFE USHORT USING VIRTUAL VOID VOLATILE WHILE 
 
+
+%token INTEGER_LITERAL   
+
 %token IDENTIFIER
+ 
 
 %token EOF 
 
@@ -21,10 +25,8 @@ compilationUnit
  
  
 es
-    :   e
-        {console.log('e');}
-    |   es e
-        {console.log('es e');}
+    :   e 
+    |   es e 
     ;
     
 
@@ -33,10 +35,16 @@ e
         { 
             console.log('IF');
         }
+   
+    |   INTEGER_LITERAL             
+        { 
+            console.log('INTEGER_LITERAL: '+$1);
+        }
+     
     |   IDENTIFIER             
         { 
-            console.log('IDENTIFIER');
-        }
+            console.log('IDENTIFIER: '+$1);
+        }    
     |   %empty             
         { 
             console.log('EMPTY');

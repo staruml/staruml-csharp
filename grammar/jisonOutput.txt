@@ -7,7 +7,8 @@ es(4)
 EOF(5)
 e(6)
 IF(7)
-IDENTIFIER(8)
+INTEGER_LITERAL(8)
+IDENTIFIER(9)
 
 Item sets
 ------
@@ -18,9 +19,10 @@ compilationUnit -> .es EOF
 es -> .e
 es -> .es e
 e -> .IF
+e -> .INTEGER_LITERAL
 e -> .IDENTIFIER
 e -> . 
-transitions ->  {"compilationUnit":1,"es":2,"e":3,"IF":4,"IDENTIFIER":5}
+transitions ->  {"compilationUnit":1,"es":2,"e":3,"IF":4,"INTEGER_LITERAL":5,"IDENTIFIER":6}
 
 item set 1 
 $accept -> compilationUnit .$end #lookaheads= $end 
@@ -30,9 +32,10 @@ item set 2
 compilationUnit -> es .EOF
 es -> es .e
 e -> .IF
+e -> .INTEGER_LITERAL
 e -> .IDENTIFIER
 e -> . 
-transitions ->  {"EOF":6,"e":7,"IF":4,"IDENTIFIER":5}
+transitions ->  {"EOF":7,"e":8,"IF":4,"INTEGER_LITERAL":5,"IDENTIFIER":6}
 
 item set 3 
 es -> e . 
@@ -43,21 +46,28 @@ e -> IF .
 transitions ->  {}
 
 item set 5 
-e -> IDENTIFIER . 
+e -> INTEGER_LITERAL . 
 transitions ->  {}
 
 item set 6 
-compilationUnit -> es EOF . 
+e -> IDENTIFIER . 
 transitions ->  {}
 
 item set 7 
+compilationUnit -> es EOF . 
+transitions ->  {}
+
+item set 8 
 es -> es e . 
 transitions ->  {}
-8 states.
+9 states.
 Building lookahead grammar.
 Computing lookaheads.
 Building parse table.
 Conflict at state: 0, token: IDENTIFIER
+  reduce by rule: e -> 
+  shift token (then go to state 6)
+Conflict at state: 0, token: INTEGER_LITERAL
   reduce by rule: e -> 
   shift token (then go to state 5)
 Conflict at state: 0, token: IF
@@ -65,13 +75,16 @@ Conflict at state: 0, token: IF
   shift token (then go to state 4)
 Conflict at state: 2, token: IDENTIFIER
   reduce by rule: e -> 
+  shift token (then go to state 6)
+Conflict at state: 2, token: INTEGER_LITERAL
+  reduce by rule: e -> 
   shift token (then go to state 5)
 Conflict at state: 2, token: IF
   reduce by rule: e -> 
   shift token (then go to state 4)
 Conflict at state: 2, token: EOF
   reduce by rule: e -> 
-  shift token (then go to state 6)
+  shift token (then go to state 7)
 
-5 Conflict(s) found in grammar.
+7 Conflict(s) found in grammar.
 Done.

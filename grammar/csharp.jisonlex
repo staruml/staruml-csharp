@@ -1,8 +1,6 @@
 %lex
 %options flex
-
-TEST_TOKEN                      'k'
-
+ 
 
 /* Documentation Comments */
 SINGLE_LINE_DOC_COMMENT         '///'{Input_characters}?   
@@ -54,12 +52,9 @@ IDENTIFIER                      {Available_identifier}|'@'{Identifier_or_keyword
 
 /* <An Identifier_or_keyword That Is Not A Keyword> */
 Available_identifier            {Identifier_or_keyword}
-
 Identifier_or_keyword           {Identifier_start_character}{Identifier_part_characters}?
 Identifier_start_character      {Letter_character}|'_'
-
 Identifier_part_characters      {Identifier_part_character}+
-
 Identifier_part_character       {Letter_character}|{Decimal_digit_character}|{Connecting_character}|{Combining_character}|{Formatting_character}
   
 /* <A Unicode Character Of Classes Lu, Ll, Lt, Lm, Lo, Or Nl> */ 
@@ -77,18 +72,37 @@ Connecting_character            {UNICODE_CLASS_Pc}
 /* <A Unicode Character Of The Class Cf> */ 
 Formatting_character            {UNICODE_CLASS_Cf}
 
+
+/* Integer Literals */
+
+INTEGER_LITERAL                 {Hexadecimal_integer_literal}|{Decimal_integer_literal}
+
+Decimal_integer_literal         {Decimal_digits}{Integer_type_suffix}?
+  
+Decimal_digits                  {DECIMAL_DIGIT}+
+  
+DECIMAL_DIGIT                   [0-9]
+  
+Integer_type_suffix             'UL'|'Ul'|'uL'|'ul'|'LU'|'Lu'|'lU'|'lu'|'U'|'u'|'L'|'l'
+
+Hexadecimal_integer_literal     ('0x'{Hex_digits}{Integer_type_suffix}?) | ('0X'{Hex_digits}{Integer_type_suffix}?)
+  
+Hex_digits                      {HEX_DIGIT}+
+  
+HEX_DIGIT                       [0-9a-fA-F] 
+
         
 %%      
         
-{WHITESPACE}                    {console.log('WHITESPACE');}
-{NEW_LINE_CHARACTER}            {console.log('NEW_LINE_CHARACTER');}
+{WHITESPACE}                    /* skip */
+{NEW_LINE_CHARACTER}            /* skip */
         
-{SINGLE_LINE_COMMENT}           {console.log('SINGLE_LINE_COMMENT');}
-{DELIMITED_COMMENT}             {console.log('DELIMITED_COMMENT');}
+{SINGLE_LINE_COMMENT}           /* skip */
+{DELIMITED_COMMENT}             /* skip */
 
-{SINGLE_LINE_DOC_COMMENT}       {console.log('SINGLE_LINE_DOC_COMMENT');}
-{DELIMITED_DOC_COMMENT}         {console.log('DELIMITED_DOC_COMMENT');}
-{NEW_LINE}                      {console.log('NEW_LINE');}
+{SINGLE_LINE_DOC_COMMENT}       /* skip */
+{DELIMITED_DOC_COMMENT}         /* skip */
+{NEW_LINE}                      /* skip */
 
 /* Keywords */
 "abstract"                      return 'ABSTRACT';
@@ -169,10 +183,11 @@ Formatting_character            {UNICODE_CLASS_Cf}
 "volatile"                      return 'VOLATILE';
 "while"                         return 'WHILE';
 
-{IDENTIFIER}                    return 'IDENTIFIER';
 
-{TEST_TOKEN}                    return 'TEST_TOKEN';
-        
+{INTEGER_LITERAL}               return 'INTEGER_LITERAL'; 
+
+{IDENTIFIER}                    return 'IDENTIFIER';
+ 
         
 <<EOF>>                         return 'EOF';
  
