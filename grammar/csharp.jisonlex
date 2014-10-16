@@ -26,6 +26,15 @@ Asterisks                       '*'+
 Not_slash_or_asterisk           [^('/'|'*')]
 
 
+/* Custome Lexer rules */
+QUOTE                           '\''
+DOUBLE_QUOTE                    '"'
+BACK_SLASH                      '\\'
+DOUBLE_BACK_SLASH               '\\\\'
+SHARP                           '#'
+DOT                             '.'  
+
+
 /* Unicode character classes */  
 UNICODE_CLASS_Zs                [\u0020]|[\u00A0]|[\u1680]|[\u180E]|[\u2000]|[\u2001]|[\u2002]|[\u2003]|[\u2004]|[\u2005]|[\u2006]|[\u2008]|[\u2009]|[\u200A]|[\u202F]|[\u3000]|[\u205F] 
 UNICODE_CLASS_Lu                [\u0041-\u005A]|[\u00C0-\u00DE]
@@ -46,9 +55,9 @@ WHITESPACE                      {Whitespace_characters}
 Whitespace_characters           {Whitespace_character}+
 Whitespace_character            {UNICODE_CLASS_Zs}|[\u0009]|[\u000B]|[\u000C]|[\s]
 
+
 /* Unicode Character Escape Sequences */
 Unicode_escape_sequence         '\\u' {HEX_DIGIT}{4}|'\\U' {HEX_DIGIT}{8} 
-
 
         
 /* Identifiers  */
@@ -82,8 +91,6 @@ REAL_LITERAL                    {Decimal_digits}{DOT}{Decimal_digits}{Exponent_p
 Exponent_part                   'e'{Sign}?{Decimal_digits}|'E'{Sign}?{Decimal_digits}
 Sign                            '+'|'-'
 Real_type_suffix                'F'|'f'|'D'|'d'|'M'|'m'
-DOT                             '.'  
-
 
 
 /* Integer Literals */
@@ -97,7 +104,13 @@ Hex_digits                      {HEX_DIGIT}+
 HEX_DIGIT                       [0-9a-fA-F] 
 
 
-
+/* Character Literals */
+CHARACTER_LITERAL               {QUOTE}{Character}{QUOTE}
+Character                       {Single_character}|{Simple_escape_sequence}|{Hexadecimal_escape_sequence}|{Unicode_escape_sequence}
+Single_character                [^('\''|'\\'|\u000D|\u000A|\u0085|\u2028|\u2029)]
+Simple_escape_sequence          '\\\''|'\\"'|{DOUBLE_BACK_SLASH}|'\\0'|'\\a'|'\\b'|'\\f'|'\\n'|'\\r'|'\\t'|'\\v'  
+Hexadecimal_escape_sequence     '\\x'{HEX_DIGIT}{4}|'\\x'{HEX_DIGIT}{3}|'\\x'{HEX_DIGIT}{2}|'\\x'{HEX_DIGIT}
+  
         
 %%      
         
@@ -194,7 +207,7 @@ HEX_DIGIT                       [0-9a-fA-F]
 
 {REAL_LITERAL}                  return 'REAL_LITERAL';
 {INTEGER_LITERAL}               return 'INTEGER_LITERAL'; 
-
+{CHARACTER_LITERAL}             return 'CHARACTER_LITERAL';
 
 /* Operators And Punctuators*/
 "{"                             return 'OPEN_BRACE';
@@ -203,7 +216,6 @@ HEX_DIGIT                       [0-9a-fA-F]
 "]"                             return 'CLOSE_BRACKET';
 "("                             return 'OPEN_PARENS';
 ")"                             return 'CLOSE_PARENS';
-{DOT}                           return 'DOT';
 ","                             return 'COMMA';
 ":"                             return 'COLON';
 ";"                             return 'SEMICOLON';
@@ -244,7 +256,7 @@ HEX_DIGIT                       [0-9a-fA-F]
 "<<="                           return 'OP_LEFT_SHIFT_ASSIGNMENT';
 ">>"                            return 'RIGHT_SHIFT';
 ">>="                           return 'RIGHT_SHIFT_ASSIGNMENT';
-
+{DOT}                           return 'DOT'
 
 {IDENTIFIER}                    return 'IDENTIFIER';
  

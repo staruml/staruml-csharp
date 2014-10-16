@@ -7,12 +7,13 @@ es(4)
 EOF(5)
 e(6)
 IF(7)
-Unicode_escape_sequence(8)
-REAL_LITERAL(9)
-INTEGER_LITERAL(10)
-OPEN_BRACE(11)
-DOT(12)
-IDENTIFIER(13)
+REAL_LITERAL(8)
+INTEGER_LITERAL(9)
+CHARACTER_LITERAL(10)
+Unicode_escape_sequence(11)
+OPEN_BRACE(12)
+DOT(13)
+IDENTIFIER(14)
 
 Item sets
 ------
@@ -23,14 +24,15 @@ compilationUnit -> .es EOF
 es -> .e
 es -> .es e
 e -> .IF
-e -> .Unicode_escape_sequence
 e -> .REAL_LITERAL
 e -> .INTEGER_LITERAL
+e -> .CHARACTER_LITERAL
+e -> .Unicode_escape_sequence
 e -> .OPEN_BRACE
 e -> .DOT
 e -> .IDENTIFIER
 e -> . 
-transitions ->  {"compilationUnit":1,"es":2,"e":3,"IF":4,"Unicode_escape_sequence":5,"REAL_LITERAL":6,"INTEGER_LITERAL":7,"OPEN_BRACE":8,"DOT":9,"IDENTIFIER":10}
+transitions ->  {"compilationUnit":1,"es":2,"e":3,"IF":4,"REAL_LITERAL":5,"INTEGER_LITERAL":6,"CHARACTER_LITERAL":7,"Unicode_escape_sequence":8,"OPEN_BRACE":9,"DOT":10,"IDENTIFIER":11}
 
 item set 1 
 $accept -> compilationUnit .$end #lookaheads= $end 
@@ -40,14 +42,15 @@ item set 2
 compilationUnit -> es .EOF
 es -> es .e
 e -> .IF
-e -> .Unicode_escape_sequence
 e -> .REAL_LITERAL
 e -> .INTEGER_LITERAL
+e -> .CHARACTER_LITERAL
+e -> .Unicode_escape_sequence
 e -> .OPEN_BRACE
 e -> .DOT
 e -> .IDENTIFIER
 e -> . 
-transitions ->  {"EOF":11,"e":12,"IF":4,"Unicode_escape_sequence":5,"REAL_LITERAL":6,"INTEGER_LITERAL":7,"OPEN_BRACE":8,"DOT":9,"IDENTIFIER":10}
+transitions ->  {"EOF":12,"e":13,"IF":4,"REAL_LITERAL":5,"INTEGER_LITERAL":6,"CHARACTER_LITERAL":7,"Unicode_escape_sequence":8,"OPEN_BRACE":9,"DOT":10,"IDENTIFIER":11}
 
 item set 3 
 es -> e . 
@@ -58,56 +61,63 @@ e -> IF .
 transitions ->  {}
 
 item set 5 
-e -> Unicode_escape_sequence . 
-transitions ->  {}
-
-item set 6 
 e -> REAL_LITERAL . 
 transitions ->  {}
 
-item set 7 
+item set 6 
 e -> INTEGER_LITERAL . 
 transitions ->  {}
 
+item set 7 
+e -> CHARACTER_LITERAL . 
+transitions ->  {}
+
 item set 8 
-e -> OPEN_BRACE . 
+e -> Unicode_escape_sequence . 
 transitions ->  {}
 
 item set 9 
-e -> DOT . 
+e -> OPEN_BRACE . 
 transitions ->  {}
 
 item set 10 
-e -> IDENTIFIER . 
+e -> DOT . 
 transitions ->  {}
 
 item set 11 
-compilationUnit -> es EOF . 
+e -> IDENTIFIER . 
 transitions ->  {}
 
 item set 12 
+compilationUnit -> es EOF . 
+transitions ->  {}
+
+item set 13 
 es -> es e . 
 transitions ->  {}
-13 states.
+14 states.
 Building lookahead grammar.
 Computing lookaheads.
 Building parse table.
 Conflict at state: 0, token: IDENTIFIER
   reduce by rule: e -> 
-  shift token (then go to state 10)
+  shift token (then go to state 11)
 Conflict at state: 0, token: DOT
   reduce by rule: e -> 
-  shift token (then go to state 9)
+  shift token (then go to state 10)
 Conflict at state: 0, token: OPEN_BRACE
   reduce by rule: e -> 
+  shift token (then go to state 9)
+Conflict at state: 0, token: Unicode_escape_sequence
+  reduce by rule: e -> 
   shift token (then go to state 8)
-Conflict at state: 0, token: INTEGER_LITERAL
+Conflict at state: 0, token: CHARACTER_LITERAL
   reduce by rule: e -> 
   shift token (then go to state 7)
-Conflict at state: 0, token: REAL_LITERAL
+Conflict at state: 0, token: INTEGER_LITERAL
   reduce by rule: e -> 
   shift token (then go to state 6)
-Conflict at state: 0, token: Unicode_escape_sequence
+Conflict at state: 0, token: REAL_LITERAL
   reduce by rule: e -> 
   shift token (then go to state 5)
 Conflict at state: 0, token: IF
@@ -115,20 +125,23 @@ Conflict at state: 0, token: IF
   shift token (then go to state 4)
 Conflict at state: 2, token: IDENTIFIER
   reduce by rule: e -> 
-  shift token (then go to state 10)
+  shift token (then go to state 11)
 Conflict at state: 2, token: DOT
   reduce by rule: e -> 
-  shift token (then go to state 9)
+  shift token (then go to state 10)
 Conflict at state: 2, token: OPEN_BRACE
   reduce by rule: e -> 
+  shift token (then go to state 9)
+Conflict at state: 2, token: Unicode_escape_sequence
+  reduce by rule: e -> 
   shift token (then go to state 8)
-Conflict at state: 2, token: INTEGER_LITERAL
+Conflict at state: 2, token: CHARACTER_LITERAL
   reduce by rule: e -> 
   shift token (then go to state 7)
-Conflict at state: 2, token: REAL_LITERAL
+Conflict at state: 2, token: INTEGER_LITERAL
   reduce by rule: e -> 
   shift token (then go to state 6)
-Conflict at state: 2, token: Unicode_escape_sequence
+Conflict at state: 2, token: REAL_LITERAL
   reduce by rule: e -> 
   shift token (then go to state 5)
 Conflict at state: 2, token: IF
@@ -136,7 +149,7 @@ Conflict at state: 2, token: IF
   shift token (then go to state 4)
 Conflict at state: 2, token: EOF
   reduce by rule: e -> 
-  shift token (then go to state 11)
+  shift token (then go to state 12)
 
-15 Conflict(s) found in grammar.
+17 Conflict(s) found in grammar.
 Done.
