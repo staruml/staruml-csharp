@@ -60,6 +60,86 @@ Whitespace_character            {UNICODE_CLASS_Zs}|[\u0009]|[\u000B]|[\u000C]|[\
 {DELIMITED_DOC_COMMENT}         {console.log('DELIMITED_DOC_COMMENT');}
 {NEW_LINE}                      {console.log('NEW_LINE');}
 
+/* Keywords */
+"abstract"                      return 'ABSTRACT';
+"as"                            return 'AS';
+"base"                          return 'BASE';
+"bool"                          return 'BOOL';
+"break"                         return 'BREAK';
+"byte"                          return 'BYTE';
+"case"                          return 'CASE';
+"catch"                         return 'CATCH';
+"char"                          return 'CHAR';
+"checked"                       return 'CHECKED';
+"class"                         return 'CLASS';
+"const"                         return 'CONST';
+"continue"                      return 'CONTINUE';
+"decimal"                       return 'DECIMAL';
+"default"                       return 'DEFAULT';
+"delegate"                      return 'DELEGATE';
+"do"                            return 'DO';
+"double"                        return 'DOUBLE';
+"else"                          return 'ELSE';
+"enum"                          return 'ENUM';
+"event"                         return 'EVENT';
+"explicit"                      return 'EXPLICIT';
+"extern"                        return 'EXTERN';
+"false"                         return 'FALSE';
+"finally"                       return 'FINALLY';
+"fixed"                         return 'FIXED';
+"float"                         return 'FLOAT';
+"for"                           return 'FOR';
+"foreach"                       return 'FOREACH';
+"goto"                          return 'GOTO';
+"if"                            return 'IF';
+"implicit"                      return 'IMPLICIT';
+"in"                            return 'IN';
+"int"                           return 'INT';
+"interface"                     return 'INTERFACE';
+"internal"                      return 'INTERNAL';
+"is"                            return 'IS';
+"lock"                          return 'LOCK';
+"long"                          return 'LONG';
+"namespace"                     return 'NAMESPACE';
+"new"                           return 'NEW';
+"null"                          return 'NULL';
+"object"                        return 'OBJECT';
+"operator"                      return 'OPERATOR';
+"out"                           return 'OUT';
+"override"                      return 'OVERRIDE';
+"params"                        return 'PARAMS';
+"private"                       return 'PRIVATE';
+"protected"                     return 'PROTECTED';
+"public"                        return 'PUBLIC';
+"readonly"                      return 'READONLY';
+"ref"                           return 'REF';
+"return"                        return 'RETURN';
+"sbyte"                         return 'SBYTE';
+"sealed"                        return 'SEALED';
+"short"                         return 'SHORT';
+"sizeof"                        return 'SIZEOF';
+"stackalloc"                    return 'STACKALLOC';
+"static"                        return 'STATIC';
+"string"                        return 'STRING';
+"struct"                        return 'STRUCT';
+"switch"                        return 'SWITCH';
+"this"                          return 'THIS';
+"throw"                         return 'THROW';
+"true"                          return 'TRUE';
+"try"                           return 'TRY';
+"typeof"                        return 'TYPEOF';
+"uint"                          return 'UINT';
+"ulong"                         return 'ULONG';
+"unchecked"                     return 'UNCHECKED';
+"unsafe"                        return 'UNSAFE';
+"ushort"                        return 'USHORT';
+"using"                         return 'USING';
+"virtual"                       return 'VIRTUAL';
+"void"                          return 'VOID';
+"volatile"                      return 'VOLATILE';
+"while"                         return 'WHILE';
+
+
 {TEST_TOKEN}                    return 'TEST_TOKEN';
         
         
