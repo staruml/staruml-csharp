@@ -595,16 +595,22 @@ case 2:console.log('SINGLE_LINE_COMMENT');
 break;
 case 3:console.log('DELIMITED_COMMENT');
 break;
-case 4:return 7;
+case 4:console.log('SINGLE_LINE_DOC_COMMENT');
 break;
-case 5:return 5;
+case 5:console.log('DELIMITED_DOC_COMMENT');
 break;
-case 6:console.log(yy_.yytext);
+case 6:console.log('NEW_LINE');
+break;
+case 7:return 7;
+break;
+case 8:return 5;
+break;
+case 9:console.log(yy_.yytext);
 break;
 }
 },
-rules: [/^(?:(((([\u0020]|[\u00A0]|[\u1680]|[\u180E]|[\u2000]|[\u2001]|[\u2002]|[\u2003]|[\u2004]|[\u2005]|[\u2006]|[\u2008]|[\u2009]|[\u200A]|[\u202F]|[\u3000]|[\u205F])|[\u0009]|[\u000B]|[\u000C]|[\s])+)))/,/^(?:([\u000D]|[\u000A]|[\u0085]|[\u2028]|[\u2029]|\\n))/,/^(?:(\/\/(([^(\u000D|\u000A|\u0085|\u2028|\u2029|'\n')])+)?))/,/^(?:(\/\*((\/|((\*+)?([^('/'|'*')])))+)?(\*+)\/))/,/^(?:(k))/,/^(?:$)/,/^(?:.)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6],"inclusive":true}}
+rules: [/^(?:(((([\u0020]|[\u00A0]|[\u1680]|[\u180E]|[\u2000]|[\u2001]|[\u2002]|[\u2003]|[\u2004]|[\u2005]|[\u2006]|[\u2008]|[\u2009]|[\u200A]|[\u202F]|[\u3000]|[\u205F])|[\u0009]|[\u000B]|[\u000C]|[\s])+)))/,/^(?:([\u000D]|[\u000A]|[\u0085]|[\u2028]|[\u2029]|\\n))/,/^(?:(\/\/(([^(\u000D|\u000A|\u0085|\u2028|\u2029|'\n')])+)?))/,/^(?:(\/\*((\/|((\*+)?([^('/'|'*')])))+)?(\*+)\/))/,/^(?:(\/\/\/(([^(\u000D|\u000A|\u0085|\u2028|\u2029|'\n')])+)?))/,/^(?:(\/\*\*((\/|((\*+)?([^('/'|'*')])))+)?(\*+)\/))/,/^(?:([\u000D]|[\u000A]|([\u000D][\u000A])|[\u0085]|[\u2029]))/,/^(?:(k))/,/^(?:$)/,/^(?:.)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9],"inclusive":true}}
 });
 return lexer;
 })();
