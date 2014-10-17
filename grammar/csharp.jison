@@ -3,6 +3,7 @@
 
 %token Unicode_escape_sequence
 
+%token BOOLEAN_LITERAL
 %token REAL_LITERAL
 %token INTEGER_LITERAL   
 %token STRING_LITERAL
@@ -39,28 +40,8 @@ e
     :   IF             
         { 
             console.log('IF');
-        }
-    
-    |   REAL_LITERAL             
-        { 
-            console.log('REAL_LITERAL: '+$1);
-        }    
-    |   INTEGER_LITERAL             
-        { 
-            console.log('INTEGER_LITERAL: '+$1);
-        }
-    |   STRING_LITERAL             
-        { 
-            console.log('STRING_LITERAL: '+$1);
-        }
-    |   CHARACTER_LITERAL             
-        { 
-            console.log('CHARACTER_LITERAL: '+$1);
-        }
-    |   Unicode_escape_sequence             
-        { 
-            console.log('Unicode_escape_sequence: '+$1);
-        }    
+        } 
+     
     |   OPEN_BRACE             
         { 
             console.log('OPEN_BRACE');
@@ -78,3 +59,32 @@ e
             console.log('EMPTY');
         }
     ;
+    
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

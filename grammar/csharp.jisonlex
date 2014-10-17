@@ -86,6 +86,10 @@ Connecting_character            {UNICODE_CLASS_Pc}
 Formatting_character            {UNICODE_CLASS_Cf}
 
 
+/* Boolearn Literals */
+BOOLEAN_LITERAL                 'true'|'false';
+
+
 /* Real Literals */
 REAL_LITERAL                    {Decimal_digits}{DOT}{Decimal_digits}{Exponent_part}?{Real_type_suffix}?|{DOT}{Decimal_digits}{Exponent_part}?{Real_type_suffix}?|{Decimal_digits}{Exponent_part}{Real_type_suffix}?|{Decimal_digits}{Real_type_suffix}
 Exponent_part                   'e'{Sign}?{Decimal_digits}|'E'{Sign}?{Decimal_digits}
@@ -221,6 +225,7 @@ Hexadecimal_escape_sequence     '\\x'{HEX_DIGIT}{4}|'\\x'{HEX_DIGIT}{3}|'\\x'{HE
 
 {Unicode_escape_sequence}       return 'Unicode_escape_sequence';
 
+{BOOLEAN_LITERAL}               return 'BOOLEAN_LITERAL';
 {REAL_LITERAL}                  return 'REAL_LITERAL';
 {INTEGER_LITERAL}               return 'INTEGER_LITERAL'; 
 {STRING_LITERAL}                return 'STRING_LITERAL';
