@@ -1,19 +1,27 @@
 
+%token IDENTIFIER 
+
 %token ABSTRACT AS BASE BOOL BREAK BYTE CASE CATCH CHAR CHECKED CLASS CONST CONTINUE DECIMAL DEFAULT DELEGATE DO DOUBLE ELSE ENUM EVENT EXPLICIT EXTERN FALSE FINALLY FIXED FLOAT FOR FOREACH GOTO IF IMPLICIT IN INT INTERFACE INTERNAL IS LOCK LONG NAMESPACE NEW NULL OBJECT OPERATOR OUT OVERRIDE PARAMS PRIVATE PROTECTED PUBLIC READONLY REF RETURN SBYTE SEALED SHORT SIZEOF STACKALLOC STATIC STRING STRUCT SWITCH THIS THROW TRUE TRY TYPEOF UINT ULONG UNCHECKED UNSAFE USHORT USING VIRTUAL VOID VOLATILE WHILE 
 
-%token Unicode_escape_sequence
 
-%token BOOLEAN_LITERAL
 %token REAL_LITERAL
 %token INTEGER_LITERAL   
 %token STRING_LITERAL
 %token CHARACTER_LITERAL
 
-%token OPEN_BRACE CLOSE_BRACE OPEN_BRACKET CLOSE_BRACKET OPEN_PARENS CLOSE_PARENS DOT COMMA COLON SEMICOLON PLUS MINUS STAR DIV PERCENT AMP BITWISE_OR CARET BANG TILDE ASSIGNMENT LT GT INTERR DOUBLE_COLON OP_COALESCING OP_INC OP_DEC OP_AND OP_OR OP_PTR OP_EQ OP_NE OP_LE OP_GE OP_ADD_ASSIGNMENT OP_SUB_ASSIGNMENT OP_MULT_ASSIGNMENT OP_DIV_ASSIGNMENT OP_MOD_ASSIGNMENT OP_AND_ASSIGNMENT OP_OR_ASSIGNMENT OP_XOR_ASSIGNMENT OP_LEFT_SHIFT OP_LEFT_SHIFT_ASSIGNMENT RIGHT_SHIFT RIGHT_SHIFT_ASSIGNMENT
+%token OPEN_BRACE CLOSE_BRACE OPEN_BRACKET CLOSE_BRACKET OPEN_PARENS CLOSE_PARENS DOT COMMA COLON SEMICOLON PLUS MINUS STAR DIV PERCENT AMP BITWISE_OR CARET BANG TILDE ASSIGN LT GT INTERR DOUBLE_COLON OP_COALESCING OP_INC OP_DEC OP_AND OP_OR OP_PTR OP_EQ OP_NE OP_LE OP_GE OP_ADD_ASSIGNMENT OP_SUB_ASSIGNMENT OP_MULT_ASSIGNMENT OP_DIV_ASSIGNMENT OP_MOD_ASSIGNMENT OP_AND_ASSIGNMENT OP_OR_ASSIGNMENT OP_XOR_ASSIGNMENT OP_LEFT_SHIFT OP_LEFT_SHIFT_ASSIGNMENT RIGHT_SHIFT RIGHT_SHIFT_ASSIGNMENT
 
-%token IDENTIFIER 
 
 %token EOF 
+ 
+%left OP_LEFT_SHIFT 
+
+%left PERCENT
+%left STAR DIV
+%left PLUS MINUS 
+ 
+%right ASSIGN OP_ADD_ASSIGNMENT OP_SUB_ASSIGNMENT OP_MULT_ASSIGNMENT OP_DIV_ASSIGNMENT OP_MOD_ASSIGNMENT OP_AND_ASSIGNMENT OP_OR_ASSIGNMENT OP_XOR_ASSIGNMENT OP_LEFT_SHIFT_ASSIGNMENT  RIGHT_SHIFT_ASSIGNMENT
+
 
 %start compilationUnit
 
@@ -31,33 +39,27 @@ compilationUnit
  
  
 es
-    :   e 
-    |   es e 
+    :   es e 
+    |    e 
     ;
     
 
 e  
-    :   IF             
+    :   block             
         { 
-            console.log('IF');
+            console.log('block '+$1);
         } 
-     
-    |   OPEN_BRACE             
-        { 
-            console.log('OPEN_BRACE');
-        }     
-    |   DOT             
-        { 
-            console.log('DOT');
-        } 
-    |   IDENTIFIER             
-        { 
-            console.log('IDENTIFIER: '+$1);
-        }    
     |   %empty             
         { 
             console.log('EMPTY');
         }
+    ;
+    
+
+/* Boolearn Literals */
+BOOLEAN_LITERAL
+    :   TRUE
+    |   FALSE
     ;
     
 
@@ -88,7 +90,7 @@ namespace-or-type-name
 
 /* C.2.2 Types */
 
-type
+type 
     :   value-type
     |   reference-type
     ;
@@ -166,8 +168,8 @@ rank-specifiers
     ;
     
 rank-specifier
-    :   OPEN_BRACKET  dim-separators  CLOSE_BRACKET
-    |   OPEN_BRACKET  CLOSE_BRACKET
+    :   OPEN_BRACKET  CLOSE_BRACKET
+    |   OPEN_BRACKET  dim-separators  CLOSE_BRACKET
     ;
     
 dim-separators
@@ -231,8 +233,8 @@ parenthesized-expression
     ;
 
 member-access
-    :   primary-expression   COMMA   IDENTIFIER
-    |   predefined-type   COMMA   IDENTIFIER
+    :   primary-expression   DOT   IDENTIFIER
+    |   predefined-type   DOT   IDENTIFIER
     ;
 
 predefined-type
@@ -254,8 +256,8 @@ predefined-type
     ; 
 
 invocation-expression
-    :   primary-expression   OPEN_PARENS   argument-list   CLOSE_PARENS
-    |   primary-expression   OPEN_PARENS   CLOSE_PARENS
+    :   primary-expression   OPEN_PARENS   CLOSE_PARENS
+    |   primary-expression   OPEN_PARENS   argument-list   CLOSE_PARENS
     ;
     
 element-access
@@ -285,15 +287,15 @@ post-decrement-expression
     ;
     
 object-creation-expression
-    :   NEW   type   OPEN_PARENS   argument-list   CLOSE_PARENS
-    |   NEW   type   OPEN_PARENS   CLOSE_PARENS
+    :   NEW   type   OPEN_PARENS   CLOSE_PARENS
+    |   NEW   type   OPEN_PARENS   argument-list   CLOSE_PARENS
     ;
 
 array-creation-expression
-    :   NEW   non-array-type   OPEN_BRACKET   expression-list   CLOSE_BRACKET   rank-specifiers   array-initializer
+    :   NEW   non-array-type   OPEN_BRACKET   expression-list   CLOSE_BRACKET   
     |   NEW   non-array-type   OPEN_BRACKET   expression-list   CLOSE_BRACKET   rank-specifiers   
     |   NEW   non-array-type   OPEN_BRACKET   expression-list   CLOSE_BRACKET   array-initializer
-    |   NEW   non-array-type   OPEN_BRACKET   expression-list   CLOSE_BRACKET   
+    |   NEW   non-array-type   OPEN_BRACKET   expression-list   CLOSE_BRACKET   rank-specifiers   array-initializer
     |   NEW   array-type   array-initializer
     ;
     
@@ -408,7 +410,7 @@ assignment
     ;
     
 assignment-operator
-    :   ASSIGNMENT
+    :   ASSIGN
     |   OP_ADD_ASSIGNMENT
     |   OP_SUB_ASSIGNMENT
     |   OP_MULT_ASSIGNMENT
@@ -436,8 +438,293 @@ boolean-expression
 
 
 
+/* C.2.5 Statements */
+statement
+    :   labeled-statement
+    |   declaration-statement
+    |   embedded-statement
+    ;
 
+embedded-statement
+    :   block
+    |   empty-statement
+    |   expression-statement
+    |   selection-statement
+    |   iteration-statement
+    |   jump-statement
+    |   try-statement
+    |   checked-statement
+    |   unchecked-statement
+    |   lock-statement
+    |   using-statement
+    ;
+    
+block
+    :   OPEN_BRACE   CLOSE_BRACE
+    |   OPEN_BRACE   statement-list   CLOSE_BRACE
+    ;
 
+statement-list
+    :   statement
+    |   statement-list   statement
+    ;
+
+empty-statement
+    :   SEMICOLON
+    ;
+
+labeled-statement
+    :   IDENTIFIER   COLON   statement
+    ;
+
+declaration-statement
+    :   local-variable-declaration   SEMICOLON
+    |   local-constant-declaration   SEMICOLON
+    ;
+    
+local-variable-declaration
+    :   type   local-variable-declarators
+    ;
+
+local-variable-declarators
+    :   local-variable-declarator
+    |   local-variable-declarators   COMMA   local-variable-declarator
+    ;
+    
+local-variable
+    :   %empty 
+    |   IDENTIFIER  
+    ;
+    
+local-variable-declarator
+    :   local-variable
+    |   local-variable   ASSIGN   local-variable-initializer
+    ;
+    
+local-variable-initializer
+    :   expression
+    |   array-initializer
+    ;
+
+local-constant-declaration
+    :   CONST   type   constant-declarators
+    ;
+    
+constant-declarators
+    :   constant-declarator
+    |   constant-declarators   COMMA   constant-declarator
+    ;
+    
+constant-declarator
+    :   IDENTIFIER   ASSIGN   constant-expression
+    ;
+    
+expression-statement
+    :   statement-expression   SEMICOLON
+    ;
+    
+statement-expression
+    :   invocation-expression
+    |   object-creation-expression
+    |   assignment
+    |   post-increment-expression
+    |   post-decrement-expression
+    |   pre-increment-expression
+    |   pre-decrement-expression
+    ;
+    
+selection-statement
+    :   if-statement
+    |   switch-statement
+    ;
+    
+if-statement
+    :   IF   OPEN_PARENS   boolean-expression   CLOSE_PARENS   embedded-statement
+    |   IF   OPEN_PARENS   boolean-expression   CLOSE_PARENS   embedded-statement   ELSE   embedded-statement
+    ;
+    
+boolean-expression
+    :   expression
+    ;
+
+switch-statement
+    :   SWITCH   OPEN_PARENS   expression   CLOSE_PARENS   switch-block
+    ;
+    
+switch-block
+    :   OPEN_BRACE   CLOSE_BRACE
+    |   OPEN_BRACE   switch-sections   CLOSE_BRACE
+    ;
+
+switch-sections
+    :   switch-section
+    |   switch-sections   switch-section
+    ;
+    
+switch-section
+    :   switch-labels   statement-list
+    ;
+    
+switch-labels
+    :   switch-label
+    |   switch-labels   switch-label
+    ;
+    
+switch-label
+    :   CASE   constant-expression   COLON
+    |   DEFAULT   COLON
+    ;
+
+iteration-statement
+    :   while-statement
+    |   do-statement
+    |   for-statement
+    |   foreach-statement
+    ;
+    
+while-statement
+    :   WHILE   OPEN_PARENS   boolean-expression   CLOSE_PARENS   embedded-statement
+    ;
+    
+do-statement
+    :   DO   embedded-statement   WHILE   OPEN_PARENS   boolean-expression   CLOSE_PARENS   SEMICOLON
+    ;
+
+for-statement
+    :   FOR   OPEN_PARENS   SEMICOLON   SEMICOLON   CLOSE_PARENS   embedded-statement
+    |   FOR   OPEN_PARENS   for-initializer   SEMICOLON   SEMICOLON   CLOSE_PARENS   embedded-statement
+    |   FOR   OPEN_PARENS   SEMICOLON   for-condition   SEMICOLON   CLOSE_PARENS   embedded-statement
+    |   FOR   OPEN_PARENS   SEMICOLON   SEMICOLON   for-iterator   CLOSE_PARENS   embedded-statement
+    |   FOR   OPEN_PARENS   for-initializer   SEMICOLON   for-condition   SEMICOLON   CLOSE_PARENS   embedded-statement
+    |   FOR   OPEN_PARENS   for-initializer   SEMICOLON   SEMICOLON   for-iterator   CLOSE_PARENS   embedded-statement
+    |   FOR   OPEN_PARENS   SEMICOLON   for-condition   SEMICOLON   for-iterator   CLOSE_PARENS   embedded-statement
+    |   FOR   OPEN_PARENS   for-initializer   SEMICOLON   for-condition   SEMICOLON   for-iterator   CLOSE_PARENS   embedded-statement
+    ;
+
+for-initializer
+    :   local-variable-declaration
+    |   statement-expression-list
+    ;
+
+for-condition
+    :   boolean-expression
+    ;
+    
+for-iterator
+    :   statement-expression-list
+    ;
+    
+statement-expression-list
+    :   statement-expression
+    |   statement-expression-list   COMMA   statement-expression
+    ;
+
+foreach-statement
+    :   FOREACH   OPEN_PARENS   type   IDENTIFIER   IN   expression   CLOSE_PARENS   embedded-statement
+    ;
+    
+jump-statement
+    :   break-statement
+    |   continue-statement
+    |   goto-statement
+    |   return-statement
+    |   throw-statement
+    ;
+    
+break-statement
+    :   BREAK   SEMICOLON
+    ;
+
+continue-statement
+    :   CONTINUE   SEMICOLON
+    ;
+
+goto-statement
+    :   GOTO   IDENTIFIER   SEMICOLON
+    |   GOTO   CASE   constant-expression   SEMICOLON
+    |   GOTO   DEFAULT   SEMICOLON
+    ;
+    
+return-statement
+    :   RETURN   SEMICOLON
+    |   RETURN   expression   SEMICOLON
+    ;
+
+throw-statement
+    :   THROW   SEMICOLON
+    |   THROW   expression   SEMICOLON
+    ;
+    
+try-statement
+    :   TRY   block   catch-clauses
+    |   TRY   block   finally-clause
+    |   TRY   block   catch-clauses   finally-clause
+    ;
+
+catch-clauses
+    :   specific-catch-clauses
+    |   general-catch-clause
+    |   specific-catch-clauses   general-catch-clause
+    ;
+
+specific-catch-clauses
+    :   specific-catch-clause
+    |   specific-catch-clauses   specific-catch-clause
+    ;
+
+specific-catch-clause
+    :   CATCH   OPEN_PARENS   class-type   CLOSE_PARENS   block
+    |   CATCH   OPEN_PARENS   class-type   IDENTIFIER   CLOSE_PARENS   block
+    ;
+    
+general-catch-clause
+    :   CATCH   block
+    ;
+    
+finally-clause
+    :   FINALLY   block
+    ;
+    
+checked-statement
+    :   CHECKED   block
+    ;
+    
+unchecked-statement
+    :   UNCHECKED   block
+    ;
+    
+lock-statement
+    :   LOCK   OPEN_PARENS   expression   CLOSE_PARENS   embedded-statement
+    ;
+    
+using-statement
+    :   USING   OPEN_PARENS    resource-acquisition   CLOSE_PARENS    embedded-statement
+    ;
+    
+resource-acquisition
+    :   local-variable-declaration
+    |   expression
+    ;
+
+ 
+ 
+/* C.2.9 Arrays */
+ 
+array-initializer
+    :   OPEN_BRACE   CLOSE_BRACE
+    |   OPEN_BRACE   variable-initializer-list   CLOSE_BRACE
+    |   OPEN_BRACE   variable-initializer-list   COMMA   CLOSE_BRACE
+    ;
+
+variable-initializer-list
+    :   variable-initializer
+    |   variable-initializer-list   COMMA   variable-initializer
+    ;
+
+variable-initializer
+    :   expression
+    |   array-initializer
+    ;
 
 
 

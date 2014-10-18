@@ -86,9 +86,6 @@ Connecting_character            {UNICODE_CLASS_Pc}
 Formatting_character            {UNICODE_CLASS_Cf}
 
 
-/* Boolearn Literals */
-BOOLEAN_LITERAL                 'true'|'false';
-
 
 /* Real Literals */
 REAL_LITERAL                    {Decimal_digits}{DOT}{Decimal_digits}{Exponent_part}?{Real_type_suffix}?|{DOT}{Decimal_digits}{Exponent_part}?{Real_type_suffix}?|{Decimal_digits}{Exponent_part}{Real_type_suffix}?|{Decimal_digits}{Real_type_suffix}
@@ -224,8 +221,7 @@ Hexadecimal_escape_sequence     '\\x'{HEX_DIGIT}{4}|'\\x'{HEX_DIGIT}{3}|'\\x'{HE
 "while"                         return 'WHILE';
 
 {Unicode_escape_sequence}       return 'Unicode_escape_sequence';
-
-{BOOLEAN_LITERAL}               return 'BOOLEAN_LITERAL';
+ 
 {REAL_LITERAL}                  return 'REAL_LITERAL';
 {INTEGER_LITERAL}               return 'INTEGER_LITERAL'; 
 {STRING_LITERAL}                return 'STRING_LITERAL';
@@ -251,7 +247,7 @@ Hexadecimal_escape_sequence     '\\x'{HEX_DIGIT}{4}|'\\x'{HEX_DIGIT}{3}|'\\x'{HE
 "^"                             return 'CARET';
 "!"                             return 'BANG';
 "~"                             return 'TILDE';
-"="                             return 'ASSIGNMENT';
+"="                             return 'ASSIGN';
 "<"                             return 'LT';
 ">"                             return 'GT';
 "?"                             return 'INTERR';
