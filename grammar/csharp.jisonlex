@@ -258,6 +258,8 @@ Hexadecimal_escape_sequence     '\\x'{HEX_DIGIT}{4}|'\\x'{HEX_DIGIT}{3}|'\\x'{HE
 "property"                      return 'PROPERTY';
 "type"                          return 'TYPE';
 
+"get"                           return 'GET';
+"set"                           return 'SET';
 
 {Unicode_escape_sequence}       return 'Unicode_escape_sequence';
  

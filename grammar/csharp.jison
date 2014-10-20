@@ -5,6 +5,8 @@
 
 %token ASSEMBLY MODULE FIELD METHOD PARAM PROPERTY TYPE
 
+%token GET SET
+
 %token REAL_LITERAL
 %token INTEGER_LITERAL   
 %token STRING_LITERAL
@@ -50,6 +52,10 @@ e
         {
             console.log('attributes '+$1);
         }
+    |   interface-declaration
+    {
+        console.log('interface-declaration '+$1);
+    }
     |   enum-declaration
     {
         console.log('enum-declaration '+$1);
@@ -874,6 +880,11 @@ return-type
     |   type
     ;
  
+interface-type-list
+    :   interface-type
+    |   interface-type-list   COMMA   interface-type
+    ;
+
 
 /* C.2.12 Delegates */
 
@@ -947,7 +958,93 @@ enum-member-declaration
     ;
 
 
+/* C.2.10 Interfaces */
+interface-declaration
+    :   INTERFACE   IDENTIFIER   interface-body
+    |   attributes   INTERFACE   IDENTIFIER   interface-body 
+    |   enum-modifiers   INTERFACE   IDENTIFIER   interface-body
+    |   INTERFACE   IDENTIFIER   interface-base   interface-body   
+    |   INTERFACE   IDENTIFIER   interface-body   SEMICOLON
+    |   attributes   enum-modifiers   INTERFACE   IDENTIFIER   interface-body
+    |   attributes   INTERFACE   IDENTIFIER   interface-base   interface-body
+    |   attributes   INTERFACE   IDENTIFIER   interface-body   SEMICOLON
+    |   enum-modifiers   INTERFACE   IDENTIFIER   interface-base   interface-body   
+    |   enum-modifiers   INTERFACE   IDENTIFIER   interface-body   SEMICOLON
+    |   INTERFACE   IDENTIFIER   interface-base   interface-body   SEMICOLON
+    |   enum-modifiers   INTERFACE   IDENTIFIER   interface-base   interface-body   SEMICOLON
+    |   attributes   INTERFACE   IDENTIFIER   interface-base   interface-body   SEMICOLON
+    |   attributes   enum-modifiers   INTERFACE   IDENTIFIER   interface-body   SEMICOLON
+    |   attributes   enum-modifiers   INTERFACE   IDENTIFIER   interface-base   interface-body  
+    |   attributes   enum-modifiers   INTERFACE   IDENTIFIER   interface-base   interface-body   SEMICOLON
+    ;
+ 
+interface-base
+    :   interface-type-list
+    ;
+    
+interface-body
+    :   OPEN_BRACE   CLOSE_BRACE
+    |   OPEN_BRACE   interface-member-declarations   CLOSE_BRACE
+    ;
+    
+interface-member-declarations
+    :   interface-member-declaration
+    |   interface-member-declarations   interface-member-declaration
+    ;
 
+interface-member-declaration
+    :   interface-method-declaration
+    |   interface-property-declaration
+    |   interface-event-declaration
+    |   interface-indexer-declaration
+    ;
+    
+interface-method-declaration
+    :   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
+    |   attributes   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
+    |   NEW   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
+    |   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
+    |   NEW   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
+    |   attributes   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
+    |   attributes   NEW   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
+    |   attributes   NEW   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
+    ;
+
+interface-property-declaration
+    :   type   IDENTIFIER   OPEN_BRACE   interface-accessors   CLOSE_BRACE
+    |   attributes   type   IDENTIFIER   OPEN_BRACE   interface-accessors   CLOSE_BRACE
+    |   NEW   type   IDENTIFIER   OPEN_BRACE   interface-accessors   CLOSE_BRACE
+    |   attributes   NEW   type   IDENTIFIER   OPEN_BRACE   interface-accessors   CLOSE_BRACE
+    ;
+    
+interface-accessors
+    :   GET   SEMICOLON
+    |   attributes   GET   SEMICOLON
+    |   SET   SEMICOLON
+    |   attributes   SET   SEMICOLON
+    |   GET   SEMICOLON   SET   SEMICOLON
+    |   attributes   GET   SEMICOLON   SET   SEMICOLON
+    |   GET   SEMICOLON   attributes   SET   SEMICOLON
+    |   attributes   GET   SEMICOLON   attributes   SET   SEMICOLON
+    |   SET   SEMICOLON   GET   SEMICOLON
+    |   attributes   SET   SEMICOLON   GET   SEMICOLON
+    |   SET   SEMICOLON   attributes   GET   SEMICOLON
+    |   attributes   SET   SEMICOLON   attributes   GET   SEMICOLON
+    ;
+    
+interface-event-declaration
+    :   EVENT   type   IDENTIFIER   SEMICOLON
+    |   attributes   EVENT   type   IDENTIFIER   SEMICOLON
+    |   NEW   EVENT   type   IDENTIFIER   SEMICOLON
+    |   attributes   NEW   EVENT   type   IDENTIFIER   SEMICOLON
+    ;
+
+interface-indexer-declaration
+    :   type   THIS   OPEN_BRACKET   formal-parameter-list   CLOSE_BRACKET   OPEN_BRACE   interface-accessors   CLOSE_BRACE
+    |   attributes   type   THIS   OPEN_BRACKET   formal-parameter-list   CLOSE_BRACKET   OPEN_BRACE   interface-accessors   CLOSE_BRACE
+    |   NEW   type   THIS   OPEN_BRACKET   formal-parameter-list   CLOSE_BRACKET   OPEN_BRACE   interface-accessors   CLOSE_BRACE
+    |   attributes   NEW   type   THIS   OPEN_BRACKET   formal-parameter-list   CLOSE_BRACKET   OPEN_BRACE   interface-accessors   CLOSE_BRACE
+    ;
 
 
 
