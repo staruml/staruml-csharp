@@ -50,6 +50,10 @@ e
         {
             console.log('attributes '+$1);
         }
+    |   delegate-declaration
+    {
+        console.log('delegate-declaration '+$1);
+    }
     |   block             
         { 
             console.log('block '+$1);
@@ -831,12 +835,67 @@ attribute-argument-expression
     ;
 
 
+/* C.2.7 Classes */
 
+formal-parameter-list
+    :   fixed-parameters
+    |   fixed-parameters   COMMA   parameter-array
+    |   parameter-array
+    ;
 
+fixed-parameters
+    :   fixed-parameter
+    |   fixed-parameters   COMMA   fixed-parameter
+    ;
 
+fixed-parameter
+    :   type   IDENTIFIER
+    |   parameter-modifier   type   IDENTIFIER
+    |   attributes   type   IDENTIFIER
+    |   attributes   parameter-modifieropt   type   IDENTIFIER
+    ;
 
+parameter-modifier
+    :   REF
+    |   OUT
+    ;
 
+parameter-array
+    :   params   array-type   IDENTIFIER
+    |   attributes   params   array-type   IDENTIFIER
+    ;
 
+return-type
+    :   VOID
+    |   type
+    ;
+ 
+
+/* C.2.12 Delegates */
+
+delegate-declaration
+    :   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
+    |   attributes   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
+    |   delegate-modifiers   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
+    |   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
+    |   delegate-modifiers   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
+    |   attributes   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
+    |   attributes   delegate-modifiers   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
+    |   attributes   delegate-modifiers   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
+    ;
+    
+delegate-modifiers
+    :   delegate-modifier
+    |   delegate-modifiers   delegate-modifier
+    ;
+
+delegate-modifier
+    :   NEW
+    |   PUBLIC
+    |   PROTECTED
+    |   INTERNAL
+    |   PRIVATE
+    ;
 
 
 
