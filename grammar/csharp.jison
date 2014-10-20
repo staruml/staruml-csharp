@@ -50,6 +50,10 @@ e
         {
             console.log('attributes '+$1);
         }
+    |   enum-declaration
+    {
+        console.log('enum-declaration '+$1);
+    }
     |   delegate-declaration
     {
         console.log('delegate-declaration '+$1);
@@ -876,29 +880,71 @@ return-type
 delegate-declaration
     :   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
     |   attributes   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
-    |   delegate-modifiers   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
+    |   enum-modifiers   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
     |   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
-    |   delegate-modifiers   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
+    |   enum-modifiers   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
     |   attributes   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
-    |   attributes   delegate-modifiers   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
-    |   attributes   delegate-modifiers   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
+    |   attributes   enum-modifiers   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
+    |   attributes   enum-modifiers   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
     ;
     
-delegate-modifiers
-    :   delegate-modifier
-    |   delegate-modifiers   delegate-modifier
+ 
+
+/* C.2.11 Enums */
+enum-declaration
+    :   ENUM   IDENTIFIER   enum-body
+    |   attributes   ENUM   IDENTIFIER   enum-body 
+    |   enum-modifiers   ENUM   IDENTIFIER   enum-body
+    |   ENUM   IDENTIFIER   enum-base   enum-body   
+    |   ENUM   IDENTIFIER   enum-body   SEMICOLON
+    |   attributes   enum-modifiers   ENUM   IDENTIFIER   enum-body
+    |   attributes   ENUM   IDENTIFIER   enum-base   enum-body
+    |   attributes   ENUM   IDENTIFIER   enum-body   SEMICOLON
+    |   enum-modifiers   ENUM   IDENTIFIER   enum-base   enum-body   
+    |   enum-modifiers   ENUM   IDENTIFIER   enum-body   SEMICOLON
+    |   ENUM   IDENTIFIER   enum-base   enum-body   SEMICOLON
+    |   enum-modifiers   ENUM   IDENTIFIER   enum-base   enum-body   SEMICOLON
+    |   attributes   ENUM   IDENTIFIER   enum-base   enum-body   SEMICOLON
+    |   attributes   enum-modifiers   ENUM   IDENTIFIER   enum-body   SEMICOLON
+    |   attributes   enum-modifiers   ENUM   IDENTIFIER   enum-base   enum-body  
+    |   attributes   enum-modifiers   ENUM   IDENTIFIER   enum-base   enum-body   SEMICOLON
+    ;
+    
+
+enum-base
+    :   COLON   integral-type
+    ;
+    
+enum-body
+    :   OPEN_BRACE   CLOSE_BRACE
+    |   OPEN_BRACE   enum-member-declarations   CLOSE_BRACE
+    |   OPEN_BRACE   enum-member-declarations   COMMA   CLOSE_BRACE
     ;
 
-delegate-modifier
+enum-modifiers
+    :   enum-modifier
+    |   enum-modifiers   enum-modifier
+    ;
+    
+enum-modifier
     :   NEW
     |   PUBLIC
     |   PROTECTED
     |   INTERNAL
     |   PRIVATE
     ;
-
-
-
+    
+enum-member-declarations
+    :   enum-member-declaration
+    |   enum-member-declarations   COMMA   enum-member-declaration
+    ;
+    
+enum-member-declaration
+    :   IDENTIFIER
+    |   attributes   IDENTIFIER
+    |   IDENTIFIER   ASSIGN   constant-expression
+    |   attributes   IDENTIFIER   ASSIGN   constant-expression
+    ;
 
 
 
