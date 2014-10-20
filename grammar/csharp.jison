@@ -3,6 +3,7 @@
 
 %token ABSTRACT AS BASE BOOL BREAK BYTE CASE CATCH CHAR CHECKED CLASS CONST CONTINUE DECIMAL DEFAULT DELEGATE DO DOUBLE ELSE ENUM EVENT EXPLICIT EXTERN FALSE FINALLY FIXED FLOAT FOR FOREACH GOTO IF IMPLICIT IN INT INTERFACE INTERNAL IS LOCK LONG NAMESPACE NEW NULL OBJECT OPERATOR OUT OVERRIDE PARAMS PRIVATE PROTECTED PUBLIC READONLY REF RETURN SBYTE SEALED SHORT SIZEOF STACKALLOC STATIC STRING STRUCT SWITCH THIS THROW TRUE TRY TYPEOF UINT ULONG UNCHECKED UNSAFE USHORT USING VIRTUAL VOID VOLATILE WHILE 
 
+%token ASSEMBLY MODULE FIELD METHOD PARAM PROPERTY TYPE
 
 %token REAL_LITERAL
 %token INTEGER_LITERAL   
@@ -45,10 +46,14 @@ es
     
 
 e  
-    :   block             
+    :  attributes
+        {
+            console.log('attributes '+$1);
+        }
+    |   block             
         { 
             console.log('block '+$1);
-        } 
+        }    
     |   %empty             
         { 
             console.log('EMPTY');
@@ -728,7 +733,102 @@ variable-initializer
 
 
 
+/* C.2.13 Attributes */
+global-attributes
+    :   global-attribute-sections
+    ;
+    
+global-attribute-sections
+    :   global-attribute-section
+    |   global-attribute-sections global-attribute-section
+    ;
+    
+global-attribute-section
+    :   OPEN_BRACKET   global-attribute-target-specifier   attribute-list   CLOSE_BRACKET
+    |   OPEN_BRACKET   global-attribute-target-specifier   attribute-list   COMMA   CLOSE_BRACKET
+    ;
+    
+global-attribute-target-specifier
+    :   global-attribute-target   COLON
+    ;
 
+global-attribute-target
+    :   ASSEMBLY
+    |   MODULE
+    ;
+    
+attributes
+    :   attribute-sections
+    ;
+
+attribute-sections
+    :   attribute-section
+    |   attribute-sections   attribute-section
+    ;
+    
+attribute-section
+    :   OPEN_BRACKET   attribute-list   CLOSE_BRACKET
+    |   OPEN_BRACKET   attribute-list   COMMA   CLOSE_BRACKET
+    |   OPEN_BRACKET   attribute-target-specifier   attribute-list   CLOSE_BRACKET
+    |   OPEN_BRACKET   attribute-target-specifier   attribute-list   COMMA   CLOSE_BRACKET
+    ;
+
+attribute-target-specifier
+    :   attribute-target   COLON
+    ;
+
+attribute-target
+    :   FIELD
+    |   EVENT
+    |   METHOD
+    |   PARAM
+    |   PROPERTY
+    |   RETURN
+    |   TYPE
+    ;
+    
+attribute-list
+    :   attribute
+    |   attribute-list   COMMA   attribute
+    ;
+
+attribute
+    :   attribute-name  
+    |   attribute-name   attribute-arguments   
+    ;
+
+attribute-name
+    :   type-name
+    ;
+    
+attribute-arguments
+    :   OPEN_PARENS   CLOSE_PARENS
+    |   OPEN_PARENS   positional-argument-list   CLOSE_PARENS
+    |   OPEN_PARENS   positional-argument-list   COMMA   named-argument-list   CLOSE_PARENS
+    |   OPEN_PARENS   named-argument-list   CLOSE_PARENS
+    ;
+    
+positional-argument-list
+    :   positional-argument
+    |   positional-argument-list   COMMA   positional-argument
+    ;
+
+positional-argument
+    :   attribute-argument-expression
+    ;
+
+named-argument-list
+    :   named-argument
+    |   named-argument-list   COMMA   named-argument
+    ;
+    
+named-argument
+    :   IDENTIFIER   ASSIGN   attribute-argument-expression
+    ;
+    
+attribute-argument-expression
+    :   expression
+    ;
 
 
 

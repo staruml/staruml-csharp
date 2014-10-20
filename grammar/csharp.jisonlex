@@ -11,13 +11,12 @@ NEW_LINE                        [\u000D]|[\u000A]|([\u000D][\u000A])|[\u0085]|[\
    
 
 /* Comments */
-SINGLE_LINE_COMMENT             '//' {Input_characters}?  
+SINGLE_LINE_COMMENT             [/]{2} .*                       /* skip comments */
 Input_characters                {Input_character}+
 
 /* <Any Unicode Character Except A NEW_LINE_CHARACTER> */
 Input_character                 [^(\u000D|\u000A|\u0085|\u2028|\u2029|'\n')]
-NEW_LINE_CHARACTER              [\u000D]|[\u000A]|[\u0085]|[\u2028]|[\u2029]|'\n'
-DELIMITED_COMMENT               '/*'{Delimited_comment_text}?{Asterisks}'/'  
+NEW_LINE_CHARACTER              [\u000D]|[\u000A]|[\u0085]|[\u2028]|[\u2029]|'\n' 
 Delimited_comment_text          {Delimited_comment_section}+
 Delimited_comment_section       '/'|({Asterisks}?{Not_slash_or_asterisk})
 Asterisks                       '*'+
@@ -128,18 +127,48 @@ Single_character                [^('\''|'\\'|\u000D|\u000A|\u0085|\u2028|\u2029)
 Simple_escape_sequence          '\\\''|'\\"'|{DOUBLE_BACK_SLASH}|'\\0'|'\\a'|'\\b'|'\\f'|'\\n'|'\\r'|'\\t'|'\\v'  
 Hexadecimal_escape_sequence     '\\x'{HEX_DIGIT}{4}|'\\x'{HEX_DIGIT}{3}|'\\x'{HEX_DIGIT}{2}|'\\x'{HEX_DIGIT}
   
-        
+%s                              comment
 %%      
         
 {WHITESPACE}                    /* skip */
 {NEW_LINE_CHARACTER}            /* skip */
         
-{SINGLE_LINE_COMMENT}           /* skip */
-{DELIMITED_COMMENT}             /* skip */
+{SINGLE_LINE_COMMENT}           /* skip */ 
 
 {SINGLE_LINE_DOC_COMMENT}       /* skip */
 {DELIMITED_DOC_COMMENT}         /* skip */
 {NEW_LINE}                      /* skip */
+
+((("/*")))                      %{ this.begin('comment'); %}
+
+<comment>[^\*]+                 %{
+                                    if (yy.__currentComment) {
+                                        yy.__currentComment += "\n" + yytext.trim();
+                                    } else {
+                                        yy.__currentComment = yytext.trim();
+                                    }
+                                %}
+<comment>[\"]                   /* skip */                  
+<comment>[=]                    /* skip */
+<comment>[\*][=\"']*            %{
+                                    var currentChar = yytext;                                    
+                                    // console.log("currentChar" + currentChar);
+                                    if(currentChar === '*') {
+                                        var nxtChar = this._input[0]; // peek into next char without altering lexer's position
+                                        //console.log("* match :"+yytext)
+                                        //console.log("* match, nxt char:"+nxtChar)
+                                        if(nxtChar === '/')
+                                        {
+                                            //console.log("inside popBlock"+nxtChar);
+                                            nxtChar = this.input();
+                                            if(nxtChar.length > 1)
+                                            this.unput(2,nxtChar.length);
+                                            //console.log("popped state");
+                                            //console.log(this.showPosition());
+                                            this.popState();
+                                        }
+                                    }
+                                %}
 
 /* Keywords */
 "abstract"                      return 'ABSTRACT';
@@ -219,6 +248,16 @@ Hexadecimal_escape_sequence     '\\x'{HEX_DIGIT}{4}|'\\x'{HEX_DIGIT}{3}|'\\x'{HE
 "void"                          return 'VOID';
 "volatile"                      return 'VOLATILE';
 "while"                         return 'WHILE';
+
+"assembly"                      return 'ASSEMBLY';
+"module"                        return 'MODULE';
+
+"field"                         return 'FIELD';
+"method"                        return 'METHOD';
+"param"                         return 'PARAM';
+"property"                      return 'PROPERTY';
+"type"                          return 'TYPE';
+
 
 {Unicode_escape_sequence}       return 'Unicode_escape_sequence';
  
