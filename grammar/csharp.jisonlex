@@ -261,6 +261,9 @@ Hexadecimal_escape_sequence     '\\x'{HEX_DIGIT}{4}|'\\x'{HEX_DIGIT}{3}|'\\x'{HE
 "get"                           return 'GET';
 "set"                           return 'SET';
 
+"add"                           return 'ADD';
+"remove"                        return 'REMOVE';
+
 {Unicode_escape_sequence}       return 'Unicode_escape_sequence';
  
 {REAL_LITERAL}                  return 'REAL_LITERAL';

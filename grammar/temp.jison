@@ -50,11 +50,26 @@ es
     
 
 e  
-    :  statement
+    :  attributes
         {
-            console.log('embedded-statement '+$1);
+            console.log('attributes '+$1);
         }
-    
+    |   interface-declaration
+    {
+        console.log('interface-declaration '+$1);
+    }
+    |   enum-declaration
+    {
+        console.log('enum-declaration '+$1);
+    }
+    |   delegate-declaration
+    {
+        console.log('delegate-declaration '+$1);
+    }
+    |   block             
+        { 
+            console.log('block '+$1);
+        }    
     |   %empty             
         { 
             console.log('EMPTY');
@@ -89,21 +104,41 @@ type-name
     ;
     
 namespace-or-type-name
-    :   namespace-or-type-name DOT IDENTIFIER
-    |   IDENTIFIER
+    :   IDENTIFIER
+    |   namespace-or-type-name DOT IDENTIFIER
     ;
 
 
 /* C.2.2 Types */
 
 type 
-    :   non-array-type
-    |   array-type  
+    :   value-type
+    |   reference-type
+    ;
+    
+value-type
+    :   struct-type
+    |   enum-type
     ;
 
-non-array-type
+struct-type
     :   type-name
-    |   SBYTE
+    |   simple-type
+    ;
+    
+simple-type
+    :   numeric-type
+    |   BOOL
+    ;
+    
+numeric-type
+    :    integral-type
+    |    floating-point-type
+    |    DECIMAL
+    ;
+    
+integral-type
+    :   SBYTE
     |   BYTE
     |   SHORT
     |   USHORT
@@ -112,19 +147,41 @@ non-array-type
     |   LONG
     |   ULONG
     |   CHAR
-    |   FLOAT
+    ;
+    
+floating-point-type
+    :   FLOAT
     |   DOUBLE
-    |   DECIMAL
-    |   BOOL 
+    ;
+    
+enum-type
+    :   type-name
+    ;
+    
+reference-type
+    :   class-type
+    |   interface-type
+    |   array-type
+    |   delegate-type
+    ;
+    
+class-type
+    :   type-name
     |   OBJECT
-    |   STRING  
-    |   VOID 
+    |   STRING
+    ;
+    
+interface-type
+    :   type-name
     ;
     
 array-type
-    :   type  rank-specifiers
+    :   non-array-type  rank-specifiers
     ;
-     
+    
+non-array-type
+    :   type
+    ;
     
 rank-specifiers
     :   rank-specifier
@@ -140,7 +197,11 @@ dim-separators
     :   COMMA
     |   dim-separators  COMMA
     ;
- 
+
+delegate-type
+    :   type-name
+    ;
+
 
 /* C.2.3 Variables */
 variable-reference
@@ -167,6 +228,7 @@ primary-expression
 
 primary-no-array-creation-expression
     :   literal
+    |   simple-name
     |   parenthesized-expression
     |   member-access
     |   invocation-expression
@@ -181,7 +243,6 @@ primary-no-array-creation-expression
     |   sizeof-expression
     |   checked-expression
     |   unchecked-expression
-    |   simple-name
     ;
     
 simple-name
@@ -194,7 +255,25 @@ parenthesized-expression
 
 member-access
     :   primary-expression   DOT   IDENTIFIER
-    |   type   DOT   IDENTIFIER
+    |   predefined-type   DOT   IDENTIFIER
+    ;
+
+predefined-type
+    :   BOOL
+    |   BYTE
+    |   CHAR
+    |   DECIMAL
+    |   DOUBLE
+    |   FLOAT
+    |   INT
+    |   LONG
+    |   OBJECT
+    |   SBYTE
+    |   SHORT
+    |   STRING
+    |   UINT
+    |   ULONG
+    |   USHORT
     ; 
 
 invocation-expression
@@ -216,8 +295,8 @@ this-access
     ;
     
 base-access
-    :   BASE   DOT   IDENTIFIER
-    |   BASE   OPEN_BRACKET   expression-list   CLOSE_BRACKET
+    :   base   DOT   IDENTIFIER
+    |   base   OPEN_BRACKET   expression-list   CLOSE_BRACKET
     ;
     
 post-increment-expression
@@ -242,11 +321,12 @@ array-creation-expression
     ;
     
 delegate-creation-expression
-    :   NEW   type   OPEN_PARENS   expression   CLOSE_PARENS
+    :   NEW   delegate-type   OPEN_PARENS   expression   CLOSE_PARENS
     ;
     
 typeof-expression
     :   TYPEOF   OPEN_PARENS   type   CLOSE_PARENS
+    |   TYPEOF   OPEN_PARENS   VOID   CLOSE_PARENS
     ;
 
 checked-expression
@@ -389,7 +469,7 @@ statement
 embedded-statement
     :   block
     |   empty-statement
-    |   statement-expression SEMICOLON
+    |   expression-statement
     |   selection-statement
     |   iteration-statement
     |   jump-statement
@@ -424,8 +504,7 @@ declaration-statement
     ;
     
 local-variable-declaration
-    :   primary-expression   local-variable-declarators
-    |   type   local-variable-declarators
+    :   type   local-variable-declarators
     ;
 
 local-variable-declarators
@@ -439,8 +518,8 @@ local-variable
     ;
     
 local-variable-declarator
-    :   IDENTIFIER
-    |   IDENTIFIER   ASSIGN   local-variable-initializer
+    :   local-variable
+    |   local-variable   ASSIGN   local-variable-initializer
     ;
     
 local-variable-initializer
@@ -461,7 +540,9 @@ constant-declarator
     :   IDENTIFIER   ASSIGN   constant-expression
     ;
     
- 
+expression-statement
+    :   statement-expression   SEMICOLON
+    ;
     
 statement-expression
     :   invocation-expression
@@ -613,8 +694,8 @@ specific-catch-clauses
     ;
 
 specific-catch-clause
-    :   CATCH   OPEN_PARENS   type   CLOSE_PARENS   block
-    |   CATCH   OPEN_PARENS   type   IDENTIFIER   CLOSE_PARENS   block
+    :   CATCH   OPEN_PARENS   class-type   CLOSE_PARENS   block
+    |   CATCH   OPEN_PARENS   class-type   IDENTIFIER   CLOSE_PARENS   block
     ;
     
 general-catch-clause
@@ -773,14 +854,14 @@ attribute-argument-expression
 /* C.2.12 Delegates */
 
 delegate-declaration
-    :   DELEGATE   type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
-    |   attributes   DELEGATE   type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
-    |   modifiers   DELEGATE   type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
-    |   DELEGATE   type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
-    |   modifiers   DELEGATE   type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
-    |   attributes   DELEGATE   type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
-    |   attributes   modifiers   DELEGATE   type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
-    |   attributes   modifiers   DELEGATE   type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
+    :   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
+    |   attributes   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
+    |   enum-modifiers   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
+    |   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
+    |   enum-modifiers   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
+    |   attributes   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
+    |   attributes   enum-modifiers   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
+    |   attributes   enum-modifiers   DELEGATE   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
     ;
     
  
@@ -789,25 +870,25 @@ delegate-declaration
 enum-declaration
     :   ENUM   IDENTIFIER   enum-body
     |   attributes   ENUM   IDENTIFIER   enum-body 
-    |   modifiers   ENUM   IDENTIFIER   enum-body
+    |   enum-modifiers   ENUM   IDENTIFIER   enum-body
     |   ENUM   IDENTIFIER   enum-base   enum-body   
     |   ENUM   IDENTIFIER   enum-body   SEMICOLON
-    |   attributes   modifiers   ENUM   IDENTIFIER   enum-body
+    |   attributes   enum-modifiers   ENUM   IDENTIFIER   enum-body
     |   attributes   ENUM   IDENTIFIER   enum-base   enum-body
     |   attributes   ENUM   IDENTIFIER   enum-body   SEMICOLON
-    |   modifiers   ENUM   IDENTIFIER   enum-base   enum-body   
-    |   modifiers   ENUM   IDENTIFIER   enum-body   SEMICOLON
+    |   enum-modifiers   ENUM   IDENTIFIER   enum-base   enum-body   
+    |   enum-modifiers   ENUM   IDENTIFIER   enum-body   SEMICOLON
     |   ENUM   IDENTIFIER   enum-base   enum-body   SEMICOLON
-    |   modifiers   ENUM   IDENTIFIER   enum-base   enum-body   SEMICOLON
+    |   enum-modifiers   ENUM   IDENTIFIER   enum-base   enum-body   SEMICOLON
     |   attributes   ENUM   IDENTIFIER   enum-base   enum-body   SEMICOLON
-    |   attributes   modifiers   ENUM   IDENTIFIER   enum-body   SEMICOLON
-    |   attributes   modifiers   ENUM   IDENTIFIER   enum-base   enum-body  
-    |   attributes   modifiers   ENUM   IDENTIFIER   enum-base   enum-body   SEMICOLON
+    |   attributes   enum-modifiers   ENUM   IDENTIFIER   enum-body   SEMICOLON
+    |   attributes   enum-modifiers   ENUM   IDENTIFIER   enum-base   enum-body  
+    |   attributes   enum-modifiers   ENUM   IDENTIFIER   enum-base   enum-body   SEMICOLON
     ;
     
 
 enum-base
-    :   COLON   type
+    :   COLON   integral-type
     ;
     
 enum-body
@@ -846,20 +927,20 @@ enum-member-declaration
 interface-declaration
     :   INTERFACE   IDENTIFIER   interface-body
     |   attributes   INTERFACE   IDENTIFIER   interface-body 
-    |   modifiers   INTERFACE   IDENTIFIER   interface-body
+    |   enum-modifiers   INTERFACE   IDENTIFIER   interface-body
     |   INTERFACE   IDENTIFIER   interface-base   interface-body   
     |   INTERFACE   IDENTIFIER   interface-body   SEMICOLON
-    |   attributes   modifiers   INTERFACE   IDENTIFIER   interface-body
+    |   attributes   enum-modifiers   INTERFACE   IDENTIFIER   interface-body
     |   attributes   INTERFACE   IDENTIFIER   interface-base   interface-body
     |   attributes   INTERFACE   IDENTIFIER   interface-body   SEMICOLON
-    |   modifiers   INTERFACE   IDENTIFIER   interface-base   interface-body   
-    |   modifiers   INTERFACE   IDENTIFIER   interface-body   SEMICOLON
+    |   enum-modifiers   INTERFACE   IDENTIFIER   interface-base   interface-body   
+    |   enum-modifiers   INTERFACE   IDENTIFIER   interface-body   SEMICOLON
     |   INTERFACE   IDENTIFIER   interface-base   interface-body   SEMICOLON
-    |   modifiers   INTERFACE   IDENTIFIER   interface-base   interface-body   SEMICOLON
+    |   enum-modifiers   INTERFACE   IDENTIFIER   interface-base   interface-body   SEMICOLON
     |   attributes   INTERFACE   IDENTIFIER   interface-base   interface-body   SEMICOLON
-    |   attributes   modifiers   INTERFACE   IDENTIFIER   interface-body   SEMICOLON
-    |   attributes   modifiers   INTERFACE   IDENTIFIER   interface-base   interface-body  
-    |   attributes   modifiers   INTERFACE   IDENTIFIER   interface-base   interface-body   SEMICOLON
+    |   attributes   enum-modifiers   INTERFACE   IDENTIFIER   interface-body   SEMICOLON
+    |   attributes   enum-modifiers   INTERFACE   IDENTIFIER   interface-base   interface-body  
+    |   attributes   enum-modifiers   INTERFACE   IDENTIFIER   interface-base   interface-body   SEMICOLON
     ;
  
 interface-base
@@ -884,14 +965,14 @@ interface-member-declaration
     ;
     
 interface-method-declaration
-    :   type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
-    |   attributes   type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
-    |   NEW   type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
-    |   type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
-    |   NEW   type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
-    |   attributes   type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
-    |   attributes   NEW   type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
-    |   attributes   NEW   type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
+    :   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
+    |   attributes   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
+    |   NEW   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
+    |   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
+    |   NEW   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
+    |   attributes   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
+    |   attributes   NEW   return-type   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
+    |   attributes   NEW   return-type   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
     ;
 
 interface-property-declaration
@@ -935,20 +1016,20 @@ interface-indexer-declaration
 struct-declaration 
     :   STRUCT   IDENTIFIER   struct-body
     |   attributes   STRUCT   IDENTIFIER   struct-body 
-    |   modifiers   STRUCT   IDENTIFIER   struct-body
+    |   enum-modifiers   STRUCT   IDENTIFIER   struct-body
     |   STRUCT   IDENTIFIER   struct-interfaces   struct-body   
     |   STRUCT   IDENTIFIER   struct-body   SEMICOLON
-    |   attributes   modifiers   STRUCT   IDENTIFIER   struct-body
+    |   attributes   enum-modifiers   STRUCT   IDENTIFIER   struct-body
     |   attributes   STRUCT   IDENTIFIER   struct-interfaces   struct-body
     |   attributes   STRUCT   IDENTIFIER   struct-body   SEMICOLON
-    |   modifiers   STRUCT   IDENTIFIER   struct-interfaces   interface-body   
-    |   modifiers   STRUCT   IDENTIFIER   struct-body   SEMICOLON
+    |   enum-modifiers   STRUCT   IDENTIFIER   struct-interfaces   interface-body   
+    |   enum-modifiers   STRUCT   IDENTIFIER   struct-body   SEMICOLON
     |   STRUCT   IDENTIFIER   struct-interfaces   struct-body   SEMICOLON
-    |   modifiers   STRUCT   IDENTIFIER   struct-interfaces   struct-body   SEMICOLON
+    |   enum-modifiers   STRUCT   IDENTIFIER   struct-interfaces   struct-body   SEMICOLON
     |   attributes   STRUCT   IDENTIFIER   struct-interfaces   struct-body   SEMICOLON
-    |   attributes   modifiers   STRUCT   IDENTIFIER   struct-body   SEMICOLON
-    |   attributes   modifiers   STRUCT   IDENTIFIER   struct-interfaces   struct-body  
-    |   attributes   modifiers   STRUCT   IDENTIFIER   struct-interfaces   struct-body   SEMICOLON 
+    |   attributes   enum-modifiers   STRUCT   IDENTIFIER   struct-body   SEMICOLON
+    |   attributes   enum-modifiers   STRUCT   IDENTIFIER   struct-interfaces   struct-body  
+    |   attributes   enum-modifiers   STRUCT   IDENTIFIER   struct-interfaces   struct-body   SEMICOLON 
     ;
  
 struct-interfaces
@@ -993,10 +1074,14 @@ compilation-unit
     ;
 
 namespace-declaration
-    :   NAMESPACE   namespace-or-type-name   namespace-body 
-    |   NAMESPACE   namespace-or-type-name   namespace-body   SEMICOLON
+    :   NAMESPACE   qualified-identifier   namespace-body 
+    |   NAMESPACE   qualified-identifier   namespace-body   SEMICOLON
     ;
- 
+
+qualified-identifier
+    :   IDENTIFIER
+    |   qualified-identifier   DOT   IDENTIFIER
+    ;
 
 namespace-body
     :   OPEN_BRACE   CLOSE_BRACE
@@ -1042,62 +1127,50 @@ type-declaration
     ;
 
 
-/* Modifier */ 
-
- 
-modifier
-    :   enum-modifier
-    |   class-modifier
-    |   field-modifier
-    |   method-modifier
-    ;
-
-modifiers
-    :   modifier
-    |   modifiers   modifier
-    ;
-
 /* C.2.7 Classes */
 class-declaration 
     :   CLASS   IDENTIFIER   class-body
     |   attributes   CLASS   IDENTIFIER   class-body 
-    |   modifiers   CLASS   IDENTIFIER   class-body
+    |   class-modifiers   CLASS   IDENTIFIER   class-body
     |   CLASS   IDENTIFIER   class-base   class-body   
     |   CLASS   IDENTIFIER   class-body   SEMICOLON
-    |   attributes   modifiers   CLASS   IDENTIFIER   class-body
+    |   attributes   class-modifiers   CLASS   IDENTIFIER   class-body
     |   attributes   CLASS   IDENTIFIER   class-base   class-body
     |   attributes   CLASS   IDENTIFIER   class-body   SEMICOLON
-    |   modifiers   CLASS   IDENTIFIER   class-base   class-body   
-    |   modifiers   CLASS   IDENTIFIER   class-body   SEMICOLON
+    |   class-modifiers   CLASS   IDENTIFIER   class-base   class-body   
+    |   class-modifiers   CLASS   IDENTIFIER   class-body   SEMICOLON
     |   CLASS   IDENTIFIER   class-base   class-body   SEMICOLON
-    |   modifiers   CLASS   IDENTIFIER   class-base   class-body   SEMICOLON
+    |   class-modifiers   CLASS   IDENTIFIER   class-base   class-body   SEMICOLON
     |   attributes   CLASS   IDENTIFIER   class-base   class-body   SEMICOLON
-    |   attributes   modifiers   CLASS   IDENTIFIER   class-body   SEMICOLON
-    |   attributes   modifiers   CLASS   IDENTIFIER   class-base   class-body  
-    |   attributes   modifiers   CLASS   IDENTIFIER   class-base   class-body   SEMICOLON
+    |   attributes   class-modifiers   CLASS   IDENTIFIER   class-body   SEMICOLON
+    |   attributes   class-modifiers   CLASS   IDENTIFIER   class-base   class-body  
+    |   attributes   class-modifiers   CLASS   IDENTIFIER   class-base   class-body   SEMICOLON
     ;
     
 class-modifiers
     :   class-modifier
     |   class-modifiers   class-modifier
     ;
-    
+
 class-modifier
-    :   enum-modifier
+    :   NEW
+    |   PUBLIC
+    |   PROTECTED
+    |   INTERNAL
+    |   PRIVATE
     |   ABSTRACT
     |   SEALED
     ;
- 
 
 class-base
-    :   COLON   type
+    :   COLON   class-type
     |   COLON   interface-type-list
-    |   COLON   type   COMMA   interface-type-list
+    |   COLON   class-type   COMMA   interface-type-list
     ;
 
 interface-type-list
-    :   type
-    |   interface-type-list   COMMA   type
+    :   interface-type
+    |   interface-type-list   COMMA   interface-type
     ;
 
 class-body
@@ -1112,16 +1185,27 @@ class-member-declarations
 
 class-member-declaration
     :   constant-declaration
+    |   field-declaration
     |   method-declaration
-    |   field-declaration 
+    |   property-declaration
+    |   event-declaration
+    |   indexer-declaration
+    |   operator-declaration
+    |   constructor-declaration
+    |   destructor-declaration
+    |   static-constructor-declaration
+    |   type-declaration
     ;
+
+
+
 
 
 constant-declaration
     :   CONST   type   constant-declarators   SEMICOLON
     |   attributes   CONST   type   constant-declarators   SEMICOLON
-    |   modifiers   CONST   type   constant-declarators   SEMICOLON
-    |   attributes   modifiers   CONST   type   constant-declarators   SEMICOLON
+    |   enum-modifiers   CONST   type   constant-declarators   SEMICOLON
+    |   attributes   enum-modifiers   CONST   type   constant-declarators   SEMICOLON
     ;
  
 constant-declarators
@@ -1136,10 +1220,9 @@ constant-declarator
 field-declaration
     :   type   variable-declarators   SEMICOLON
     |   attributes   type   variable-declarators   SEMICOLON
-    |   modifiers   type   variable-declarators   SEMICOLON
-    |   attributes    modifiers   type   variable-declarators   SEMICOLON
+    |   field-modifiers   type   variable-declarators   SEMICOLON
+    |   attributes   field-modifiers   type   variable-declarators   SEMICOLON
     ;
-     
 
 field-modifiers
     :   field-modifier
@@ -1147,12 +1230,15 @@ field-modifiers
     ;
 
 field-modifier
-    :   enum-modifier
+    :   NEW
+    |   PUBLIC
+    |   PROTECTED
+    |   INTERNAL
+    |   PRIVATE
     |   STATIC
     |   READONLY
     |   VOLATILE
     ;
-    
     
 variable-declarators
     :   variable-declarator
@@ -1168,6 +1254,273 @@ variable-initializer
     :   expression
     |   array-initializer
     ;
+
+method-declaration
+    :   method-header   method-body
+    ;
+
+method-header
+    :   return-type   member-name   OPEN_PARENS   CLOSE_PARENS
+    |   attributes   return-type   member-name   OPEN_PARENS   CLOSE_PARENS
+    |   method-modifiers   return-type   member-name   OPEN_PARENS   CLOSE_PARENS
+    |   return-type   member-name   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS
+    |   method-modifiers   return-type   member-name   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS
+    |   attributes   return-type   member-name   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS
+    |   attributes   method-modifiers   return-type   member-name   OPEN_PARENS   CLOSE_PARENS
+    |   attributes   method-modifiers   return-type   member-name   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS
+    ;
+    
+method-modifiers
+    :   method-modifier
+    |   method-modifiers   method-modifier
+    ;
+    
+method-modifier
+    :   NEW  
+    |   PUBLIC  
+    |   PROTECTED  
+    |   INTERNAL  
+    |   PRIVATE  
+    |   STATIC  
+    |   VIRTUAL  
+    |   SEALED  
+    |   OVERRIDE  
+    |   ABSTRACT  
+    |   EXTERN  
+    ;
+
+return-type
+    :   type
+    |   VOID
+    ;
+    
+    
+    
+    
+    
+    
+    
+member-name
+    :   IDENTIFIER
+    |   interface-type   DOT   IDENTIFIER
+    ;
+
+method-body
+    :   block
+    |   SEMICOLON
+    ;
+
+formal-parameter-list
+    :   fixed-parameters
+    |   fixed-parameters   COMMA   parameter-array
+    |   parameter-array
+    ;
+
+fixed-parameters
+    :   fixed-parameter
+    |   fixed-parameters   COMMA   fixed-parameter
+    ;
+
+fixed-parameter
+    :   type   IDENTIFIER
+    |   attributes   type   IDENTIFIER
+    |   parameter-modifier   type   IDENTIFIER
+    |   attributes   parameter-modifier   type   IDENTIFIER
+    ;
+
+parameter-modifier
+    :   REF
+    |   OUT
+    ;
+
+parameter-array
+    :   PARAMS   array-type   IDENTIFIER
+    |   attributes   PARAMS   array-type   IDENTIFIER
+    ;
+
+property-declaration
+    :   type   member-name   OPEN_BRACE   accessor-declarations   CLOSE_BRACE
+    |   attributes   type   member-name   OPEN_BRACE   accessor-declarations   CLOSE_BRACE
+    |   method-modifiers   type   member-name   OPEN_BRACE   accessor-declarations   CLOSE_BRACE
+    |   attributes   method-modifiers   type   member-name   OPEN_BRACE   accessor-declarations   CLOSE_BRACE
+    ;
+
+
+accessor-declarations
+    :   get-accessor-declaration 
+    |   get-accessor-declaration   set-accessor-declaration
+    |   set-accessor-declaration 
+    |   set-accessor-declaration   get-accessor-declaration
+    ;
+
+get-accessor-declaration
+    :   GET   method-body
+    |   attributes   GET   method-body
+    ;
+
+set-accessor-declaration
+    :   SET   method-body
+    |   attributes   SET   method-body
+    ;
+
+
+
+
+
+event-declaration
+    :   EVENT   type   variable-declarators   SEMICOLON
+    |   attributes   EVENT   type   variable-declarators   SEMICOLON
+    |   method-modifiers   EVENT   type   variable-declarators   SEMICOLON
+    |   attributes   method-modifiers   EVENT   type   variable-declarators   SEMICOLON
+    |   EVENT   type   member-name   OPEN_BRACE   event-accessor-declarations   CLOSE_BRACE
+    |   attributes   EVENT   type   member-name   OPEN_BRACE   event-accessor-declarations   CLOSE_BRACE
+    |   method-modifiers   EVENT   type   member-name   OPEN_BRACE   event-accessor-declarations   CLOSE_BRACE
+    |   attributes   method-modifiers   EVENT   type   member-name   OPEN_BRACE   event-accessor-declarations   CLOSE_BRACE
+    ;
+ 
+event-accessor-declarations
+    :   add-accessor-declaration   remove-accessor-declaration
+    |   remove-accessor-declaration   add-accessor-declaration
+    ;
+
+add-accessor-declaration
+    :   ADD   block
+    |   attributes   ADD   block
+    ;
+
+remove-accessor-declaration
+    :   REMOVE   block
+    |   attributes   REMOVE   block
+    ;
+
+
+
+
+
+
+indexer-declaration
+    :   indexer-declarator   OPEN_BRACE   accessor-declarations   CLOSE_BRACE
+    |   attributes   indexer-declarator   OPEN_BRACE   accessor-declarations   CLOSE_BRACE
+    |   method-modifiers   indexer-declarator   OPEN_BRACE   accessor-declarations   CLOSE_BRACE
+    |   attributes   method-modifiers   indexer-declarator   OPEN_BRACE   accessor-declarations   CLOSE_BRACE
+    ;
+
+indexer-declarator
+    :   type   THIS   OPEN_BRACKET   formal-parameter-list   CLOSE_BRACKET
+    |   type   interface-type   DOT   THIS   OPEN_BRACKET   formal-parameter-list   CLOSE_BRACKET
+    ;
+
+operator-declaration
+    :   operator-modifiers   operator-declarator   method-body
+    |   attributes   operator-modifiers   operator-declarator   method-body 
+    ;
+
+operator-modifiers
+    :   operator-modifier
+    |   operator-modifiers   operator-modifier
+    ;
+
+operator-modifier
+    :   PUBLIC
+    |   STATIC
+    |   EXTERN
+    ;
+
+operator-declarator
+    :   unary-operator-declarator
+    |   binary-operator-declarator
+    |   conversion-operator-declarator
+    ;
+
+unary-operator-declarator
+    :   type   OPERATOR   overloadable-unary-operator   OPEN_PARENS   type   IDENTIFIER   CLOSE_PARENS
+    ;
+
+overloadable-unary-operator
+    :   OP_INC
+    |   OP_DEC
+    |   MINUS
+    |   BANG
+    |   TILDE
+    |   PLUS
+    |   TRUE
+    |   FALSE
+    ;
+    
+binary-operator-declarator
+    :   type   OPERATOR   overloadable-binary-operator   OPEN_PARENS   type   IDENTIFIER   COMMA   type   IDENTIFIER   CLOSE_PARENS
+    ;
+
+overloadable-binary-operator
+    :   PLUS
+    |   MINUS
+    |   STAR
+    |   DIV
+    |   PERCENT
+    |   AMP
+    |   BITWISE_OR
+    |   CARET
+    |   OP_LEFT_SHIFT
+    |   RIGHT_SHIFT
+    |   OP_EQ
+    |   OP_NE
+    |   OP_GE
+    |   OP_LE
+    |   GT
+    |   LT
+    ;
+
+conversion-operator-declarator
+    :   IMPLICIT   OPERATOR   type   OPEN_PARENS   type   IDENTIFIER   CLOSE_PARENS
+    |   EXPLICIT   OPERATOR   type   OPEN_PARENS   type   IDENTIFIER   CLOSE_PARENS
+    ;
+ 
+
+constructor-declaration
+    :   constructor-declarator   method-body
+    |   attributes   constructor-declarator   method-body
+    |   enum-modifiers   constructor-declarator   method-body
+    |   attributes   enum-modifiers   constructor-declarator   method-body
+    ;
+ 
+constructor-declarator
+    :   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS
+    |   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS
+    |   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   constructor-initializer
+    |   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   constructor-initializer
+    ;
+
+constructor-initializer
+    :   COLON   BASE   OPEN_PARENS   CLOSE_PARENS
+    |   COLON   BASE   OPEN_PARENS   argument-list   CLOSE_PARENS
+    |   COLON   THIS   OPEN_PARENS   CLOSE_PARENS
+    |   COLON   THIS   OPEN_PARENS   argument-list   CLOSE_PARENS
+    ;
+ 
+
+static-constructor-declaration
+    :   static-constructor-modifiers   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   method-body
+    |   attributes   static-constructor-modifiers   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   method-body
+    ;
+
+static-constructor-modifiers
+    :   STATIC
+    |   EXTERN STATIC
+    |   STATIC EXTERN
+    ; 
+ 
+
+destructor-declaration
+    :   TILDE   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS    method-body
+    |   attributes   TILDE   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS    method-body
+    |   EXTERN   TILDE   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS    method-body
+    |   attributes   EXTERN   TILDE   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS    method-body
+    ;
+ 
+
+
+
+
 
 
 
