@@ -1114,6 +1114,14 @@ class-member-declaration
     :   constant-declaration
     |   method-declaration
     |   field-declaration 
+    |   property-declaration
+    |   event-declaration
+    |   indexer-declaration
+    |   operator-declaration
+    |   constructor-declaration
+    |   static-constructor-declaration
+    |   destructor-declaration
+    |   type-declaration
     ;
 
 
@@ -1241,21 +1249,188 @@ parameter-array
 
 
 
+property-declaration
+    :   type   member-name   OPEN_BRACE   accessor-declarations   CLOSE_BRACE
+    |   attributes   type   member-name   OPEN_BRACE   accessor-declarations   CLOSE_BRACE
+    |   modifiers   type   member-name   OPEN_BRACE   accessor-declarations   CLOSE_BRACE
+    |   attributes   modifiers   type   member-name   OPEN_BRACE   accessor-declarations   CLOSE_BRACE
+    ;
+
+accessor-declarations
+    :   get-accessor-declaration 
+    |   get-accessor-declaration   set-accessor-declaration
+    |   set-accessor-declaration 
+    |   set-accessor-declaration   get-accessor-declaration
+    ;
+
+get-accessor-declaration
+    :   GET   method-body
+    |   attributes   GET   method-body
+    ;
+
+set-accessor-declaration
+    :   SET   method-body
+    |   attributes   SET   method-body
+    ;
 
 
 
+event-declaration
+    :   EVENT   type   variable-declarators   SEMICOLON
+    |   attributes   EVENT   type   variable-declarators   SEMICOLON
+    |   modifiers   EVENT   type   variable-declarators   SEMICOLON
+    |   attributes   modifiers   EVENT   type   variable-declarators   SEMICOLON
+    |   EVENT   type   member-name   OPEN_BRACE   event-accessor-declarations   CLOSE_BRACE
+    |   attributes   EVENT   type   member-name   OPEN_BRACE   event-accessor-declarations   CLOSE_BRACE
+    |   modifiers   EVENT   type   member-name   OPEN_BRACE   event-accessor-declarations   CLOSE_BRACE
+    |   attributes   modifiers   EVENT   type   member-name   OPEN_BRACE   event-accessor-declarations   CLOSE_BRACE
+    ;
+ 
+event-accessor-declarations
+    :   add-accessor-declaration   remove-accessor-declaration
+    |   remove-accessor-declaration   add-accessor-declaration
+    ;
+
+add-accessor-declaration
+    :   ADD   block
+    |   attributes   ADD   block
+    ;
+
+remove-accessor-declaration
+    :   REMOVE   block
+    |   attributes   REMOVE   block
+    ;
 
 
 
+indexer-declaration
+    :   indexer-declarator   OPEN_BRACE   accessor-declarations   CLOSE_BRACE
+    |   attributes   indexer-declarator   OPEN_BRACE   accessor-declarations   CLOSE_BRACE
+    |   modifiers   indexer-declarator   OPEN_BRACE   accessor-declarations   CLOSE_BRACE
+    |   attributes   modifiers   indexer-declarator   OPEN_BRACE   accessor-declarations   CLOSE_BRACE
+    ;
+
+indexer-declarator
+    :   type   THIS   OPEN_BRACKET   formal-parameter-list   CLOSE_BRACKET
+    |   type   member-name   DOT   THIS   OPEN_BRACKET   formal-parameter-list   CLOSE_BRACKET
+    ;
 
 
 
+operator-declaration
+    :   modifiers   operator-declarator   method-body
+    |   attributes   modifiers   operator-declarator   method-body 
+    ;
+
+operator-modifiers
+    :   operator-modifier
+    |   operator-modifiers   operator-modifier
+    ;
+
+operator-modifier
+    :   PUBLIC
+    |   STATIC
+    |   EXTERN
+    ;
+
+operator-declarator
+    :   unary-operator-declarator
+    |   binary-operator-declarator
+    |   conversion-operator-declarator
+    ;
+
+unary-operator-declarator
+    :   type   OPERATOR   overloadable-operator   OPEN_PARENS   type   IDENTIFIER   CLOSE_PARENS
+    ;
+
+overloadable-operator
+    :   overloadable-unary-operator
+    |   overloadable-binary-operator
+    ;
+    
+
+overloadable-unary-operator
+    :   OP_INC
+    |   OP_DEC
+    |   MINUS
+    |   BANG
+    |   TILDE
+    |   PLUS
+    |   TRUE
+    |   FALSE
+    ;
+    
+binary-operator-declarator
+    :   type   OPERATOR   overloadable-operator   OPEN_PARENS   type   IDENTIFIER   COMMA   type   IDENTIFIER   CLOSE_PARENS
+    ;
+
+overloadable-binary-operator
+    :   PLUS
+    |   MINUS
+    |   STAR
+    |   DIV
+    |   PERCENT
+    |   AMP
+    |   BITWISE_OR
+    |   CARET
+    |   OP_LEFT_SHIFT
+    |   RIGHT_SHIFT
+    |   OP_EQ
+    |   OP_NE
+    |   OP_GE
+    |   OP_LE
+    |   GT
+    |   LT
+    ;
+
+conversion-operator-declarator
+    :   IMPLICIT   OPERATOR   type   OPEN_PARENS   type   IDENTIFIER   CLOSE_PARENS
+    |   EXPLICIT   OPERATOR   type   OPEN_PARENS   type   IDENTIFIER   CLOSE_PARENS
+    ;
+
+
+constructor-declaration
+    :   constructor-declarator   method-body
+    |   attributes   constructor-declarator   method-body
+    |   modifiers   constructor-declarator   method-body
+    |   attributes   modifiers   constructor-declarator   method-body
+    ;
+ 
+constructor-declarator
+    :   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS
+    |   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS
+    |   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   constructor-initializer
+    |   IDENTIFIER   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   constructor-initializer
+    ;
+
+constructor-initializer
+    :   COLON   BASE   OPEN_PARENS   CLOSE_PARENS
+    |   COLON   BASE   OPEN_PARENS   argument-list   CLOSE_PARENS
+    |   COLON   THIS   OPEN_PARENS   CLOSE_PARENS
+    |   COLON   THIS   OPEN_PARENS   argument-list   CLOSE_PARENS
+    ;
 
 
 
+static-constructor-declaration
+    :   static-constructor-modifiers   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   method-body
+    |   attributes   static-constructor-modifiers   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS   method-body
+    ;
 
+static-constructor-modifiers
+    :   EXTERN STATIC
+    |   STATIC EXTERN
+    |   STATIC
+    ; 
+ 
 
-
+destructor-declaration
+    :   TILDE   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS    method-body
+    |   attributes   TILDE   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS    method-body
+    |   EXTERN   TILDE   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS    method-body
+    |   attributes   EXTERN   TILDE   IDENTIFIER   OPEN_PARENS   CLOSE_PARENS    method-body
+    ;
+ 
 
 
 
