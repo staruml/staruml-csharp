@@ -1134,10 +1134,10 @@ constant-declarator
     ;
 
 field-declaration
-    :   type   variable-declarators   SEMICOLON
-    |   attributes   type   variable-declarators   SEMICOLON
-    |   modifiers   type   variable-declarators   SEMICOLON
-    |   attributes    modifiers   type   variable-declarators   SEMICOLON
+    :   type    member-name   SEMICOLON
+    |   attributes   type    member-name   SEMICOLON
+    |   modifiers   type    member-name   SEMICOLON
+    |   attributes    modifiers   type    member-name   SEMICOLON
     ;
      
 
@@ -1168,6 +1168,78 @@ variable-initializer
     :   expression
     |   array-initializer
     ;
+
+
+method-declaration
+    :   method-header   block
+    |   method-header   SEMICOLON
+    ;
+
+method-header  
+    :   type   member-name   OPEN_PARENS   CLOSE_PARENS   
+    |   attributes   type   member-name   OPEN_PARENS   CLOSE_PARENS   
+    |   modifiers   type   member-name   OPEN_PARENS   CLOSE_PARENS    
+    |   type   member-name   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS    
+    |   modifiers   type   member-name   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS    
+    |   attributes   type   member-name   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   
+    |   attributes   modifiers   type   member-name   OPEN_PARENS   CLOSE_PARENS    
+    |   attributes   modifiers   type   member-name   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS 
+    ;
+     
+    
+method-modifier
+    :   enum-modifier 
+    |   STATIC  
+    |   VIRTUAL  
+    |   SEALED  
+    |   OVERRIDE  
+    |   ABSTRACT  
+    |   EXTERN  
+    ;
+
+
+member-name
+    :   variable-declarators
+    |   type-name   DOT   IDENTIFIER
+    ;
+
+    
+
+method-body
+    :   block
+    |   SEMICOLON
+    ;
+
+formal-parameter-list
+    :   fixed-parameters
+    |   fixed-parameters   COMMA   parameter-array
+    |   parameter-array
+    ;
+
+fixed-parameters
+    :   fixed-parameter
+    |   fixed-parameters   COMMA   fixed-parameter
+    ;
+
+fixed-parameter
+    :   type   IDENTIFIER
+    |   attributes   type   IDENTIFIER
+    |   parameter-modifier   type   IDENTIFIER
+    |   attributes   parameter-modifier   type   IDENTIFIER
+    ;
+
+parameter-modifier
+    :   REF
+    |   OUT
+    ;
+
+parameter-array
+    :   PARAMS   array-type   IDENTIFIER
+    |   attributes   PARAMS   array-type   IDENTIFIER
+    ;
+
+
+
 
 
 
