@@ -241,6 +241,9 @@ post-decrement-expression
 object-creation-expression
     :   NEW   type   OPEN_PARENS   CLOSE_PARENS
     |   NEW   type   OPEN_PARENS   argument-list   CLOSE_PARENS 
+    |   NEW   type   OPEN_BRACE    CLOSE_BRACE
+    |   NEW   type   OPEN_BRACE    argument-list   CLOSE_BRACE
+    |   NEW   type   OPEN_BRACE    argument-list   COMMA    CLOSE_BRACE
     ;
 
 array-creation-expression
