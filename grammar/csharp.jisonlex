@@ -62,9 +62,12 @@ Whitespace_character            {UNICODE_CLASS_Zs}|[\u0009]|[\u000B]|[\u000C]|[\
 /* Unicode Character Escape Sequences */
 Unicode_escape_sequence         '\\u' {HEX_DIGIT}{4}|'\\U' {HEX_DIGIT}{8} 
 
-        
+
+
+Template                        [<][^=\(\);\|\+\-\"\'\{\*\\}:]+[>]+
+
 /* Identifiers  */
-IDENTIFIER                      {Available_identifier}|'@'{Identifier_or_keyword}
+IDENTIFIER                      ({Available_identifier}|'@'{Identifier_or_keyword}){Template}?
 
 /* <An Identifier_or_keyword That Is Not A Keyword> */
 Available_identifier            {Identifier_or_keyword}
@@ -293,6 +296,89 @@ Hexadecimal_escape_sequence     '\\x'{HEX_DIGIT}{4}|'\\x'{HEX_DIGIT}{3}|'\\x'{HE
 ">>"                            return 'RIGHT_SHIFT';
 ">>="                           return 'RIGHT_SHIFT_ASSIGNMENT';
 {DOT}                           return 'DOT'
+
+{Template}                      %{
+                                    var r = yytext;
+                                    var forTest3 = "";
+                                    /* 
+                                     * test 1: check if it is template declaration or LT operator
+                                     * test 3: check for && operator. if found, its not a template
+                                     * test 2: balanced < and > symbols
+                                    */
+                                    var test1=false,test2=false,test3=false, skipTest3= false;
+                                    for(var i=1; i<r.length; i++) {
+                                        if((r[i] === ' ')||(r[i]==='\t')||(r[i]==='\n'))
+                                            continue; 
+                                        else {
+                                            if(r[i]==='<') {
+                                                //console.log(this.showPosition());
+                                                //this.parseError("Invalid bitshift/template expression. Try grouping with parantheses",{text:yytext,token:'',line:yylineno})
+                                                test1 = false;
+                                                this.unput(r.substring(2,r.length));
+                                                return 'LSHIFT';
+                                                break;
+                                            } else {
+                                                test1 = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    /* Start Test 2 */
+                                    r = yytext;
+                                    var balance = 1;
+                                    var splitPos = -1;
+                                    for(var i=1; i<r.length; i++) {
+                                        if(r[i] === '<')
+                                            balance = balance+1;
+                                        if(r[i] === '>')
+                                            balance = balance-1;
+                                        if(balance === 0) {
+                                            splitPos = i;
+                                            break;
+                                        }
+                                    }
+                                    if(balance === 0) {
+                                        if(splitPos === (r.length-1)) {
+                                            test2 = true;
+                                            forTest3 = r;
+                                        }
+                                        else {
+                                            if(r[splitPos+1]=='>') { /* >> left shift operator */
+                                                /* test case /openjdk/hotspot/test/compiler/6711117/Test.java:76 */
+                                                test2 = false;
+                                                this.unput(r.substring(1,r.length));
+                                                return 'LT';
+                                            } else {
+                                                forTest3 = r.substring(0,splitPos+1);
+                                                //console.log("inside test2: "+yytext);
+                                                //console.log("test2 unput: "+r.substring(splitPos+1,r.length));
+                                                this.unput(r.substring(splitPos+1,r.length))
+                                                test2 = true;
+                                            }
+                                        }
+                                    }
+                                    else {
+                                        test2 = false;
+                                        this.unput(r.substring(1,r.length));
+                                        return 'LT';
+                                    }
+                                    /* Start Test 3 */
+                                    //console.log("test3 start"+forTest3);
+                                    if(forTest3.search("&&") === -1) {
+                                        test3 = true;
+                                    }
+                                    else
+                                    {
+                                        test3 = false;
+                                        //console.log("inside test3: "+forTest3);
+                                        this.unput(forTest3.substring(1,forTest3.length));
+                                        return 'LT';
+                                    }
+                                    if(test1 && test2 && test3) {
+                                        yytext = forTest3;
+                                        return 'TEMPLATE'; 
+                                    }
+                                %}
 
 {IDENTIFIER}                    return 'IDENTIFIER';
  

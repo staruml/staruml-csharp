@@ -50,9 +50,9 @@ es
     
 
 e  
-    :  statement
+    :  expression
         {
-            console.log('embedded-statement '+$1);
+            console.log('expression '+$1);
         }
     
     |   %empty             
@@ -147,6 +147,7 @@ variable-reference
     :   expression
     ;
     
+    
 
 /* C.2.4 Expressions */
 argument-list
@@ -167,6 +168,7 @@ primary-expression
 
 primary-no-array-creation-expression
     :   literal
+    |   cast-expression
     |   parenthesized-expression
     |   member-access
     |   invocation-expression
@@ -190,6 +192,9 @@ simple-name
     
 parenthesized-expression
     :   OPEN_PARENS   expression   CLOSE_PARENS
+    {
+        console.log('parentthisized '+$2);
+    }
     ;
 
 member-access
@@ -230,7 +235,7 @@ post-decrement-expression
     
 object-creation-expression
     :   NEW   type   OPEN_PARENS   CLOSE_PARENS
-    |   NEW   type   OPEN_PARENS   argument-list   CLOSE_PARENS
+    |   NEW   type   OPEN_PARENS   argument-list   CLOSE_PARENS 
     ;
 
 array-creation-expression
@@ -258,7 +263,7 @@ unchecked-expression
     ;
 
 unary-expression
-    :   primary-expression
+    :   cast-expression
     |   PLUS    unary-expression
     |   MINUS   unary-expression
     |   BANG    unary-expression
@@ -266,7 +271,7 @@ unary-expression
     |   STAR    unary-expression
     |   pre-increment-expression
     |   pre-decrement-expression
-    |   cast-expression
+    |   primary-expression
     ;
 
 pre-increment-expression
@@ -278,7 +283,14 @@ pre-decrement-expression
     ;
 
 cast-expression
-    :   OPEN_PARENS   type   CLOSE_PARENS   unary-expression
+    :   OPEN_PARENS   expression   CLOSE_PARENS   unary-expression
+    {
+        console.log('cast_ex');
+    }
+    |   OPEN_PARENS   type   CLOSE_PARENS   unary-expression
+    {
+        console.log('cast');
+    }
     ;
 
 multiplicative-expression
