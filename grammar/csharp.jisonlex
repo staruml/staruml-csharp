@@ -11,18 +11,22 @@ NEW_LINE                        [\u000D]|[\u000A]|([\u000D][\u000A])|[\u0085]|[\
    
 
 /* Comments */
-SINGLE_LINE_COMMENT             [/]{2} .*                       /* skip comments */
+SINGLE_LINE_COMMENT             [/]{2} {Input_characters}?                       /* skip comments */
 Input_characters                {Input_character}+
 
 /* <Any Unicode Character Except A NEW_LINE_CHARACTER> */
-Input_character                 [^(\u000D|\u000A|\u0085|\u2028|\u2029|'\n')]
+Input_character                 [^\u000D\u000A\u0085\u2028\u2029\n]
 NEW_LINE_CHARACTER              [\u000D]|[\u000A]|[\u0085]|[\u2028]|[\u2029]|'\n' 
-Delimited_comment_text          {Delimited_comment_section}+
-Delimited_comment_section       '/'|({Asterisks}?{Not_slash_or_asterisk})
-Asterisks                       '*'+
-  
-/* <Any Unicode Character Except / Or *> */
-Not_slash_or_asterisk           [^('/'|'*')]
+
+
+delimited-comment               '/*' {delimited-comment-characters}?   '*/'
+delimited-comment-characters    {delimited-comment-character}*
+
+delimited-comment-character     {not-asterisk}|('*' {not-slash} )
+not-asterisk                    [^*]
+not-slash                       [^/]
+
+ 
 
 
 /* Custome Lexer rules */
@@ -126,8 +130,7 @@ Character                       {Single_character}|{Simple_escape_sequence}|{Hex
 Single_character                [^'\\\u000D\u000A\u0085\u2028\u2029]
 Simple_escape_sequence          '\\\''|'\\"'|{DOUBLE_BACK_SLASH}|'\\0'|'\\a'|'\\b'|'\\f'|'\\n'|'\\r'|'\\t'|'\\v'  
 Hexadecimal_escape_sequence     '\\x'{HEX_DIGIT}{4}|'\\x'{HEX_DIGIT}{3}|'\\x'{HEX_DIGIT}{2}|'\\x'{HEX_DIGIT}
-  
-%s                              comment
+   
 %%      
         
 {WHITESPACE}                    /* skip */
@@ -139,36 +142,7 @@ Hexadecimal_escape_sequence     '\\x'{HEX_DIGIT}{4}|'\\x'{HEX_DIGIT}{3}|'\\x'{HE
 {DELIMITED_DOC_COMMENT}         /* skip */
 {NEW_LINE}                      /* skip */
 
-((("/*")))                      %{ this.begin('comment'); %}
-
-<comment>[^\*]+                 %{
-                                    if (yy.__currentComment) {
-                                        yy.__currentComment += "\n" + yytext.trim();
-                                    } else {
-                                        yy.__currentComment = yytext.trim();
-                                    }
-                                %}
-<comment>[\"]                   /* skip */                  
-<comment>[=]                    /* skip */
-<comment>[\*][=\"']*            %{
-                                    var currentChar = yytext;                                    
-                                    // console.log("currentChar" + currentChar);
-                                    if(currentChar === '*') {
-                                        var nxtChar = this._input[0]; // peek into next char without altering lexer's position
-                                        //console.log("* match :"+yytext)
-                                        //console.log("* match, nxt char:"+nxtChar)
-                                        if(nxtChar === '/')
-                                        {
-                                            //console.log("inside popBlock"+nxtChar);
-                                            nxtChar = this.input();
-                                            if(nxtChar.length > 1)
-                                            this.unput(2,nxtChar.length);
-                                            //console.log("popped state");
-                                            //console.log(this.showPosition());
-                                            this.popState();
-                                        }
-                                    }
-                                %}
+{delimited-comment}             /* skip */
 
 /* Keywords */
 "abstract"                      return 'ABSTRACT';
