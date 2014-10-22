@@ -111,7 +111,7 @@ Regular_string_literal_characters           {Regular_string_literal_character}+
 Regular_string_literal_character            {Single_regular_string_literal_character}|{Simple_escape_sequence}|{Hexadecimal_escape_sequence}|{Unicode_escape_sequence}
   
 /* <Any Character Except " (U+0022), \\ (U+005C), And NEW_LINE_CHARACTER> */
-Single_regular_string_literal_character     [^('"'|'\\'|\u000D|\u000A|\u0085|\u2028|\u2029)]
+Single_regular_string_literal_character     [^"\\\u000D\u000A\u0085\u2028\u2029]
 
 Verbatim_string_literal                     '@'{DOUBLE_QUOTE}{Verbatim_string_literal_characters}?{DOUBLE_QUOTE}
 Verbatim_string_literal_characters          {Verbatim_string_literal_character}+
@@ -123,7 +123,7 @@ Quote_escape_sequence                       '""'
 /* Character Literals */
 CHARACTER_LITERAL               {QUOTE}{Character}{QUOTE}
 Character                       {Single_character}|{Simple_escape_sequence}|{Hexadecimal_escape_sequence}|{Unicode_escape_sequence}
-Single_character                [^('\''|'\\'|\u000D|\u000A|\u0085|\u2028|\u2029)]
+Single_character                [^'\\\u000D\u000A\u0085\u2028\u2029]
 Simple_escape_sequence          '\\\''|'\\"'|{DOUBLE_BACK_SLASH}|'\\0'|'\\a'|'\\b'|'\\f'|'\\n'|'\\r'|'\\t'|'\\v'  
 Hexadecimal_escape_sequence     '\\x'{HEX_DIGIT}{4}|'\\x'{HEX_DIGIT}{3}|'\\x'{HEX_DIGIT}{2}|'\\x'{HEX_DIGIT}
   
