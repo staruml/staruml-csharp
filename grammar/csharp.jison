@@ -61,6 +61,11 @@ e
         }
     ;
     
+/* COLON IDENTIFIER */
+COLON_IDENTIFIER
+    :   COLON_IDENTIFIER COLON IDENTIFIER
+    |   IDENTIFIER
+    ;
 
 /* Boolearn Literals */
 BOOLEAN_LITERAL
@@ -183,7 +188,7 @@ primary-no-array-creation-expression
     |   sizeof-expression
     |   checked-expression
     |   unchecked-expression
-    |   simple-name
+    |   COLON_IDENTIFIER
     ;
     
 simple-name
