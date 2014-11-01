@@ -37,6 +37,10 @@ DOUBLE_BACK_SLASH               '\\\\'
 SHARP                           '#'
 DOT                             '.'  
 
+TRUE                            'true'
+FALSE                           'false'
+OP_OR                           '||'
+
 
 /* Unicode character classes */  
 UNICODE_CLASS_Zs                [\u0020]|[\u00A0]|[\u1680]|[\u180E]|[\u2000]|[\u2001]|[\u2002]|[\u2003]|[\u2004]|[\u2005]|[\u2006]|[\u2008]|[\u2009]|[\u200A]|[\u202F]|[\u3000]|[\u205F] 
@@ -64,10 +68,10 @@ Unicode_escape_sequence         '\\u' {HEX_DIGIT}{4}|'\\U' {HEX_DIGIT}{8}
 
 
 
-Template                        [<][^=\(\);\|\+\-\"\'\{\*\\}:]+[>]+
+Template                        [<][^=\(\);\|\+\-\"\'\{\*\\}:]*[>]+
 
 /* Identifiers  */
-IDENTIFIER                      ({Available_identifier}|'@'{Identifier_or_keyword}){Template}?
+IDENTIFIER                      ({Available_identifier}|'@'{Identifier_or_keyword}) 
 
 /* <An Identifier_or_keyword That Is Not A Keyword> */
 Available_identifier            {Identifier_or_keyword}
@@ -115,24 +119,29 @@ HEX_DIGIT                       [0-9a-fA-F]
 STRING_LITERAL                              {Regular_string_literal}|{Verbatim_string_literal}
 Regular_string_literal                      {DOUBLE_QUOTE}{Regular_string_literal_characters}?{DOUBLE_QUOTE}
 Regular_string_literal_characters           {Regular_string_literal_character}+  
-Regular_string_literal_character            {Single_regular_string_literal_character}|{Simple_escape_sequence}|{Hexadecimal_escape_sequence}|{Unicode_escape_sequence}
+Regular_string_literal_character            {Single_regular_string_literal_character}|{Simple_escape_sequence}|{Hexadecimal_escape_sequence}|{Unicode_escape_sequence}|'\"'|'\\'
   
 /* <Any Character Except " (U+0022), \\ (U+005C), And NEW_LINE_CHARACTER> */
-Single_regular_string_literal_character     [^"\\\u000D\u000A\u0085\u2028\u2029]
+Single_regular_string_literal_character     [^"\\]
 
 Verbatim_string_literal                     '@'{DOUBLE_QUOTE}{Verbatim_string_literal_characters}?{DOUBLE_QUOTE}
 Verbatim_string_literal_characters          {Verbatim_string_literal_character}+
-Verbatim_string_literal_character           {Single_verbatim_string_literal_character}|{Quote_escape_sequence}  
-Single_verbatim_string_literal_character    [^('"')]
+Verbatim_string_literal_character           {Single_verbatim_string_literal_character}|{Quote_escape_sequence}|'\"'|'\\' 
+Single_verbatim_string_literal_character    [^"]
 Quote_escape_sequence                       '""'
   
 
 /* Character Literals */
 CHARACTER_LITERAL               {QUOTE}{Character}{QUOTE}
 Character                       {Single_character}|{Simple_escape_sequence}|{Hexadecimal_escape_sequence}|{Unicode_escape_sequence}
-Single_character                [^'\\\u000D\u000A\u0085\u2028\u2029]
+Single_character                [^']
 Simple_escape_sequence          '\\\''|'\\"'|{DOUBLE_BACK_SLASH}|'\\0'|'\\a'|'\\b'|'\\f'|'\\n'|'\\r'|'\\t'|'\\v'  
 Hexadecimal_escape_sequence     '\\x'{HEX_DIGIT}{4}|'\\x'{HEX_DIGIT}{3}|'\\x'{HEX_DIGIT}{2}|'\\x'{HEX_DIGIT}
+   
+   
+/* C.1.10 Pre-processing directives */
+SINGLE_PREPROCESSING            [#] {Input_characters}? 
+   
    
 %%      
         
@@ -146,6 +155,8 @@ Hexadecimal_escape_sequence     '\\x'{HEX_DIGIT}{4}|'\\x'{HEX_DIGIT}{3}|'\\x'{HE
 {NEW_LINE}                      /* skip */
 
 {delimited-comment}             /* skip */
+
+{SINGLE_PREPROCESSING}          /* skip */
 
 /* Keywords */
 "abstract"                      return 'ABSTRACT';
@@ -171,7 +182,7 @@ Hexadecimal_escape_sequence     '\\x'{HEX_DIGIT}{4}|'\\x'{HEX_DIGIT}{3}|'\\x'{HE
 "event"                         return 'EVENT';
 "explicit"                      return 'EXPLICIT';
 "extern"                        return 'EXTERN';
-"false"                         return 'FALSE';
+{FALSE}                         return 'FALSE';
 "finally"                       return 'FINALLY';
 "fixed"                         return 'FIXED';
 "float"                         return 'FLOAT';
@@ -212,7 +223,7 @@ Hexadecimal_escape_sequence     '\\x'{HEX_DIGIT}{4}|'\\x'{HEX_DIGIT}{3}|'\\x'{HE
 "switch"                        return 'SWITCH';
 "this"                          return 'THIS';
 "throw"                         return 'THROW';
-"true"                          return 'TRUE';
+{TRUE}                          return 'TRUE';
 "try"                           return 'TRY';
 "typeof"                        return 'TYPEOF';
 "uint"                          return 'UINT';
@@ -232,14 +243,16 @@ Hexadecimal_escape_sequence     '\\x'{HEX_DIGIT}{4}|'\\x'{HEX_DIGIT}{3}|'\\x'{HE
 "field"                         return 'FIELD';
 "method"                        return 'METHOD';
 "param"                         return 'PARAM';
-"property"                      return 'PROPERTY';
-"type"                          return 'TYPE';
+"property"                      return 'PROPERTY'; 
 
 "get"                           return 'GET';
 "set"                           return 'SET';
 
 "add"                           return 'ADD';
 "remove"                        return 'REMOVE';
+
+"partial"                       return 'PARTIAL';
+"yield"                         return 'YIELD';
 
 {Unicode_escape_sequence}       return 'Unicode_escape_sequence';
  
@@ -277,8 +290,9 @@ Hexadecimal_escape_sequence     '\\x'{HEX_DIGIT}{4}|'\\x'{HEX_DIGIT}{3}|'\\x'{HE
 "++"                            return 'OP_INC';
 "--"                            return 'OP_DEC';
 "&&"                            return 'OP_AND';
-"||"                            return 'OP_OR';
+{OP_OR}                         return 'OP_OR';
 "->"                            return 'OP_PTR';
+"=>"                            return 'OP_DBLPTR';
 "=="                            return 'OP_EQ';
 "!="                            return 'OP_NE';
 "<="                            return 'OP_LE';
@@ -298,6 +312,7 @@ Hexadecimal_escape_sequence     '\\x'{HEX_DIGIT}{4}|'\\x'{HEX_DIGIT}{3}|'\\x'{HE
 {DOT}                           return 'DOT'
 
 {Template}                      %{
+                                        //console.log(this.showPosition());
                                     var r = yytext;
                                     var forTest3 = "";
                                     /* 
@@ -306,12 +321,13 @@ Hexadecimal_escape_sequence     '\\x'{HEX_DIGIT}{4}|'\\x'{HEX_DIGIT}{3}|'\\x'{HE
                                      * test 2: balanced < and > symbols
                                     */
                                     var test1=false,test2=false,test3=false, skipTest3= false;
+                                     
                                     for(var i=1; i<r.length; i++) {
                                         if((r[i] === ' ')||(r[i]==='\t')||(r[i]==='\n'))
                                             continue; 
                                         else {
                                             if(r[i]==='<') {
-                                                //console.log(this.showPosition());
+                                                console.log(this.showPosition());
                                                 //this.parseError("Invalid bitshift/template expression. Try grouping with parantheses",{text:yytext,token:'',line:yylineno})
                                                 test1 = false;
                                                 this.unput(r.substring(2,r.length));
