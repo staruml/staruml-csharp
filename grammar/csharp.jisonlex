@@ -19,7 +19,7 @@ Input_character                 [^\u000D\u000A\u0085\u2028\u2029\n]
 NEW_LINE_CHARACTER              [\u000D]|[\u000A]|[\u0085]|[\u2028]|[\u2029]|'\n' 
 
 
-delimited-comment               '/*' {delimited-comment-characters}?   '*/'
+delimited-comment               '/*' ([*]*)? {delimited-comment-characters}?  ([*]*)? '*/'
 delimited-comment-characters    {delimited-comment-character}*
 
 delimited-comment-character     {not-asterisk}|('*' {not-slash} )
@@ -142,9 +142,12 @@ Hexadecimal_escape_sequence     '\\x'{HEX_DIGIT}{4}|'\\x'{HEX_DIGIT}{3}|'\\x'{HE
 /* C.1.10 Pre-processing directives */
 SINGLE_PREPROCESSING            [#] {Input_characters}? 
    
-   
-%%      
-        
+         
+ 
+%%
+ 
+
+
 {WHITESPACE}                    /* skip */
 {NEW_LINE_CHARACTER}            /* skip */
         
@@ -253,6 +256,11 @@ SINGLE_PREPROCESSING            [#] {Input_characters}?
 
 "partial"                       return 'PARTIAL';
 "yield"                         return 'YIELD';
+
+"async"                         return 'ASYNC';
+"await"                         return 'AWAIT';
+
+"where"                         return 'WHERE';
 
 {Unicode_escape_sequence}       return 'Unicode_escape_sequence';
  

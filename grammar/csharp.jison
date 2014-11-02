@@ -13,7 +13,7 @@
 
 %token TEMPLATE
 
-%token YIELD
+%token YIELD  ASYNC  AWAIT  WHERE
 
 %token REAL_LITERAL
 %token INTEGER_LITERAL   
@@ -110,9 +110,14 @@ EMPTY_TEMPLATE
 
 /* C.2.2 Types */
 
+STARS
+    :   STARS   STAR
+    |   STAR
+    ;
+
 type 
-    :   non-array-type    STAR
-    |   array-type     STAR 
+    :   non-array-type    STARS
+    |   array-type     STARS 
     |   non-array-type  
     |   array-type       
     ;
@@ -191,6 +196,8 @@ primary-expression
 
 primary-no-array-creation-expression
     :   literal
+    |   lambda-expression
+    |   cast-expression     
     |   parenthesized-expression
     |   double-colon-access
     |   member-access
@@ -206,8 +213,36 @@ primary-no-array-creation-expression
     |   sizeof-expression
     |   checked-expression
     |   unchecked-expression
+    |   IDENTIFIER_WITH_KEYWORD OP_DBLPTR   expression
+    |   IDENTIFIER_WITH_KEYWORD OP_DBLPTR   block
     |   IDENTIFIER_WITH_KEYWORD
-    |   delegate-expression
+    |   DELEGATE block
+    |   delegate-expression 
+    ;
+ 
+
+id-list
+    :   id-list     COMMA   IDENTIFIER_WITH_KEYWORD
+    |   IDENTIFIER_WITH_KEYWORD
+    ;
+    
+type-expression-list
+    :   type-expression-list  COMMA   type  expression
+    |   type    expression
+    ;
+    
+dbl-expression-list
+    :   dbl-expression-list  COMMA   expression  expression
+    |   expression    expression
+    ;
+
+lambda-expression
+    :   OPEN_PARENS   dbl-expression-list   CLOSE_PARENS  OP_DBLPTR     expression 
+    |   OPEN_PARENS   dbl-expression-list   CLOSE_PARENS  OP_DBLPTR     block
+    |   OPEN_PARENS   type-expression-list   CLOSE_PARENS  OP_DBLPTR     expression 
+    |   OPEN_PARENS   type-expression-list   CLOSE_PARENS  OP_DBLPTR     block
+    |   OPEN_PARENS   expression-list   CLOSE_PARENS  OP_DBLPTR     expression 
+    |   OPEN_PARENS   expression-list   CLOSE_PARENS  OP_DBLPTR     block
     ;
 
 delegate-expression
@@ -219,12 +254,16 @@ simple-name
     :   IDENTIFIER_WITH_TEMPLATE
     ;
     
+cast-expression
+    :   OPEN_PARENS   type  expression   CLOSE_PARENS   OP_DBLPTR   expression    block
+    |   OPEN_PARENS   expression   CLOSE_PARENS   OP_DBLPTR   expression    block
+    |   OPEN_PARENS   expression   CLOSE_PARENS   OP_DBLPTR   expression
+    |   OPEN_PARENS   expression   CLOSE_PARENS   expression
+    |   OPEN_PARENS   type-with-interr     CLOSE_PARENS   expression
+    ;
+    
 parenthesized-expression
-    :   OPEN_PARENS   expression    INTERR    CLOSE_PARENS
-    {
-        //console.log('parentthisized '+$2);
-    }
-    |    OPEN_PARENS   expression    CLOSE_PARENS
+    :    OPEN_PARENS   expression    CLOSE_PARENS
     ;
 
 double-colon-access
@@ -246,7 +285,10 @@ keyword-invocation
 
 
 invocation-expression
-    :   primary-expression   OPEN_PARENS   type   CLOSE_PARENS   
+    :   AWAIT   primary-expression   OPEN_PARENS   type   CLOSE_PARENS   
+    |   AWAIT   primary-expression   OPEN_PARENS   argument-list   CLOSE_PARENS      
+    |   AWAIT   primary-expression   OPEN_PARENS   CLOSE_PARENS  
+    |   primary-expression   OPEN_PARENS   type   CLOSE_PARENS   
     |   primary-expression   OPEN_PARENS   argument-list   CLOSE_PARENS      
     |   primary-expression   OPEN_PARENS   CLOSE_PARENS   
     ;
@@ -279,16 +321,32 @@ post-decrement-expression
     :   primary-expression   OP_DEC
     ;
     
+type-with-identifier
+    :   IDENTIFIER  TEMPLATE  
+    |   non-array-type 
+    ;
+    
 object-creation-expression
-    :   NEW   type   OPEN_PARENS   argument-list    CLOSE_PARENS    invocation-expressions    IDENTIFIER_WITH_DOT      argument-list-with-brace
-    |   NEW   type   OPEN_PARENS   CLOSE_PARENS      invocation-expressions     IDENTIFIER_WITH_DOT    argument-list-with-brace
-    |   NEW   type   OPEN_PARENS   argument-list    CLOSE_PARENS    invocation-expressions      IDENTIFIER_WITH_DOT
-    |   NEW   type   OPEN_PARENS   CLOSE_PARENS      invocation-expressions     IDENTIFIER_WITH_DOT 
-    |   NEW   type   OPEN_BRACE    argument-list-with-braces    COMMA     CLOSE_BRACE
-    |   NEW   type   OPEN_BRACE    argument-list-with-braces    CLOSE_BRACE
-    |   NEW   type   OPEN_BRACE    argument-list   COMMA    CLOSE_BRACE
-    |   NEW   type   OPEN_BRACE    argument-list   CLOSE_BRACE
-    |   NEW   type   OPEN_BRACE    CLOSE_BRACE
+    :   NEW   type-with-identifier   OPEN_PARENS   argument-list    CLOSE_PARENS    invocation-expressions    IDENTIFIER_WITH_DOT      block-expression-with-brace
+    |   NEW   type-with-identifier   OPEN_PARENS   argument-list    CLOSE_PARENS    invocation-expressions      IDENTIFIER_WITH_DOT
+    |   NEW   type-with-identifier   OPEN_PARENS   CLOSE_PARENS      invocation-expressions     IDENTIFIER_WITH_DOT    block-expression-with-brace
+    |   NEW   type-with-identifier   OPEN_PARENS   CLOSE_PARENS      invocation-expressions     IDENTIFIER_WITH_DOT 
+    |   NEW   type-with-identifier   OPEN_PARENS   CLOSE_PARENS     block-expression-with-brace
+    |   NEW   type-with-identifier    block-expression-with-brace
+    
+    |   NEW   non-array-type   rank-specifiers     block-expression-with-brace
+    |   NEW   non-array-type   OPEN_BRACKET   argument-list   CLOSE_BRACKET    block-expression-with-brace
+    |   NEW   non-array-type   OPEN_BRACKET   argument-list   CLOSE_BRACKET    
+    
+    |   NEW   type-with-identifier   rank-specifiers    block-expression-with-brace 
+    |   NEW   type-with-identifier   OPEN_BRACKET   argument-list   CLOSE_BRACKET    block-expression-with-brace
+    |   NEW   type-with-identifier   OPEN_BRACKET   argument-list   CLOSE_BRACKET     
+    
+    
+    |   NEW   rank-specifiers   block-expression-with-brace
+    |   NEW   rank-specifiers     
+    
+    |   NEW   block-expression-with-brace
     ;
     
 IDENTIFIER_WITH_DOT
@@ -316,17 +374,7 @@ invocation-expressions
     ;
 
 array-creation-expression
-    :   NEW   non-array-type   OPEN_BRACKET   CLOSE_BRACKET     OPEN_BRACE    CLOSE_BRACE
-    |   NEW   non-array-type   OPEN_BRACKET   CLOSE_BRACKET     OPEN_BRACE    argument-list   CLOSE_BRACE
-    |   NEW   non-array-type   OPEN_BRACKET   CLOSE_BRACKET     OPEN_BRACE    argument-list  COMMA   CLOSE_BRACE
-    |   NEW   non-array-type   OPEN_BRACKET   expression-list   CLOSE_BRACKET   
-    |   NEW   non-array-type   OPEN_BRACKET   expression-list   CLOSE_BRACKET   rank-specifiers   
-    |   NEW   non-array-type   OPEN_BRACKET   expression-list   CLOSE_BRACKET   array-initializer
-    |   NEW   non-array-type   OPEN_BRACKET   expression-list   CLOSE_BRACKET   rank-specifiers   array-initializer
-    |   NEW   array-type   array-initializer
-    |   STACKALLOC   non-array-type   OPEN_BRACKET   CLOSE_BRACKET     OPEN_BRACE    CLOSE_BRACE
-    |   STACKALLOC   non-array-type   OPEN_BRACKET   CLOSE_BRACKET     OPEN_BRACE    argument-list   CLOSE_BRACE
-    |   STACKALLOC   non-array-type   OPEN_BRACKET   CLOSE_BRACKET     OPEN_BRACE    argument-list  COMMA   CLOSE_BRACE
+    :   STACKALLOC   non-array-type   OPEN_BRACKET   CLOSE_BRACKET     argument-list-with-brace
     |   STACKALLOC   non-array-type   OPEN_BRACKET   expression-list   CLOSE_BRACKET   
     |   STACKALLOC   non-array-type   OPEN_BRACKET   expression-list   CLOSE_BRACKET   rank-specifiers   
     |   STACKALLOC   non-array-type   OPEN_BRACKET   expression-list   CLOSE_BRACKET   array-initializer
@@ -335,8 +383,11 @@ array-creation-expression
     ;
     
 delegate-creation-expression
-    :   NEW   type   OPEN_PARENS   expression   CLOSE_PARENS    argument-list-with-brace
-    |   NEW   type   OPEN_PARENS   expression   CLOSE_PARENS    
+    :   NEW   type   OPEN_PARENS   argument-list   CLOSE_PARENS    block-expression-with-brace
+    |   NEW   type   OPEN_PARENS   argument-list   CLOSE_PARENS  
+    |   NEW   type   OPEN_PARENS   CLOSE_PARENS    block-expression-with-brace
+    |   NEW   type   OPEN_PARENS   CLOSE_PARENS  
+    |   NEW   type   block-expression-with-brace
     ;
     
 
@@ -358,8 +409,7 @@ unchecked-expression
     ;
 
 unary-expression
-    :   cast-expression
-    |   pre-increment-expression
+    :   pre-increment-expression
     |   pre-decrement-expression
     |   PLUS    unary-expression
     |   OP_PTR  unary-expression
@@ -370,6 +420,7 @@ unary-expression
     |   STAR    unary-expression 
     |   primary-expression  
     ;
+
 
  
 
@@ -385,12 +436,9 @@ expression-with-comma
     :   expression-with-comma   COMMA    expression
     |   expression
     ;
+ 
+ 
 
-cast-expression
-    :   OPEN_PARENS   expression   CLOSE_PARENS   unary-expression 
-    |   OPEN_PARENS   type  INTERR   CLOSE_PARENS   unary-expression 
-    |   OPEN_PARENS   type   CLOSE_PARENS   unary-expression 
-    ;
 
 multiplicative-expression
     :   unary-expression
@@ -419,6 +467,7 @@ relational-expression
     |   relational-expression   GT      shift-expression
     |   relational-expression   OP_LE   shift-expression
     |   relational-expression   OP_GE   shift-expression
+    |   relational-expression   OP_COALESCING    shift-expression
     |   relational-expression   IS      type
     |   relational-expression   AS      type
     ;
@@ -462,7 +511,28 @@ conditional-expression
     
 assignment
     :   unary-expression   assignment-operator   expression
+    |   unary-expression   assignment-operator   block-expression-with-brace
     ;
+
+block-expression
+    :   block-expression-with-brace
+    |   OPEN_BRACE     expression-list    CLOSE_BRACE
+    ;
+ 
+block-expression-list-unit
+    :   block-expression-with-brace
+    |   expression
+    ;
+
+block-expression-list
+    :   block-expression-list   COMMA   block-expression-list-unit
+    |   block-expression-list-unit
+    ;
+
+block-expression-with-brace
+    :   OPEN_BRACE    block-expression-list    CLOSE_BRACE
+    ;
+ 
     
 assignment-operator
     :   ASSIGN
@@ -497,7 +567,7 @@ boolean-expression
 statement
     :   labeled-statement
     |   declaration-statement
-    |   embedded-statement 
+    |   embedded-statement  
     ;
  
 
@@ -514,13 +584,13 @@ embedded-statement
     |   lock-statement
     |   using-statement
     |   unsafe-statement
-    |   fixed-statement
-    |   block-statement
+    |   fixed-statement 
     ;
  
 
 fixed-statement
-    :   FIXED   OPEN_PARENS   type   local-variable-declarators   CLOSE_PARENS   embedded-statement
+    :   modifiers   FIXED   OPEN_PARENS   type   local-variable-declarators   CLOSE_PARENS   embedded-statement
+    |   FIXED   OPEN_PARENS   type   local-variable-declarators   CLOSE_PARENS   embedded-statement
     ;
 
 unsafe-statement
@@ -529,7 +599,7 @@ unsafe-statement
     
 block
     :   OPEN_BRACE   CLOSE_BRACE 
-    |   OPEN_BRACE   statement-list   CLOSE_BRACE
+    |   OPEN_BRACE   statement-list   CLOSE_BRACE 
     ;
 
 statement-list
@@ -542,7 +612,8 @@ empty-statement
     ;
 
 labeled-statement
-    :   IDENTIFIER_WITH_KEYWORD   COLON   statement
+    :   IDENTIFIER_WITH_KEYWORD   COLON   switch-labels
+    |   IDENTIFIER_WITH_KEYWORD   COLON   statement
     ;
 
 declaration-statement
@@ -563,7 +634,7 @@ local-variable-declarators
 local-variable
     :   %empty 
     |   INTERR  IDENTIFIER_WITH_KEYWORD
-    |   STAR   IDENTIFIER_WITH_KEYWORD  
+    |   STARS   IDENTIFIER_WITH_KEYWORD  
     |   IDENTIFIER_WITH_KEYWORD
     ;
     
@@ -614,9 +685,6 @@ if-statement
     
 boolean-expression
     :   expression 
-    |   REMOVE
-    |   SET
-    |   PARAMS
     ;
 
 switch-statement
@@ -629,8 +697,8 @@ switch-block
     ;
 
 switch-sections
-    :   switch-section
-    |   switch-sections   switch-section
+    :   switch-sections   switch-section
+    |   switch-section
     ;
     
 switch-section
@@ -638,13 +706,13 @@ switch-section
     ;
     
 switch-labels
-    :   switch-label
-    |   switch-labels   switch-label
+    :   switch-labels   switch-label
+    |   switch-label
     ;
     
 switch-label
     :   CASE   constant-expression   COLON
-    |   DEFAULT   COLON
+    |   DEFAULT   COLON     
     ;
 
 iteration-statement
@@ -719,8 +787,10 @@ goto-statement
     ;
     
 return-statement
-    :   YIELD    RETURN    expression   SEMICOLON
+    :   YIELD    RETURN      block-expression-with-brace      SEMICOLON
+    |   YIELD    RETURN    expression   SEMICOLON
     |   YIELD    RETURN    SEMICOLON
+    |   RETURN   block-expression-with-brace  SEMICOLON
     |   RETURN   SEMICOLON
     |   RETURN   expression   SEMICOLON
     ;
@@ -908,14 +978,14 @@ attribute-argument-expression
 /* C.2.12 Delegates */
 
 delegate-declaration
-    :   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
-    |   attributes   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
-    |   modifiers   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
-    |   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
-    |   modifiers   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
-    |   attributes   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
-    |   attributes   modifiers   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
-    |   attributes   modifiers   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
+    :   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   CLOSE_PARENS    where-base    SEMICOLON
+    |   attributes   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   CLOSE_PARENS    where-base    SEMICOLON
+    |   modifiers   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   CLOSE_PARENS     where-base   SEMICOLON
+    |   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS     where-base   SEMICOLON
+    |   modifiers   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS    where-base    SEMICOLON
+    |   attributes   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS     where-base   SEMICOLON
+    |   attributes   modifiers   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   CLOSE_PARENS     where-base   SEMICOLON
+    |   attributes   modifiers   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS     where-base   SEMICOLON
     ;
     
  
@@ -979,22 +1049,22 @@ enum-member-declaration
 
 /* C.2.10 Interfaces */
 interface-declaration
-    :   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-body
-    |   attributes   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-body 
-    |   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-body
-    |   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base   interface-body   
-    |   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-body   SEMICOLON
-    |   attributes   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-body
-    |   attributes   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base   interface-body
-    |   attributes   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-body   SEMICOLON
-    |   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base   interface-body   
-    |   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-body   SEMICOLON
-    |   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base   interface-body   SEMICOLON
-    |   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base   interface-body   SEMICOLON
-    |   attributes   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base   interface-body   SEMICOLON
-    |   attributes   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-body   SEMICOLON
-    |   attributes   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base   interface-body  
-    |   attributes   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base   interface-body   SEMICOLON
+    :   INTERFACE   IDENTIFIER_WITH_TEMPLATE    where-base    interface-body
+    |   attributes   INTERFACE   IDENTIFIER_WITH_TEMPLATE   where-base     interface-body 
+    |   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE   where-base     interface-body
+    |   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base    where-base    interface-body   
+    |   INTERFACE   IDENTIFIER_WITH_TEMPLATE    where-base    interface-body   SEMICOLON
+    |   attributes   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE    where-base    interface-body
+    |   attributes   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base   where-base     interface-body
+    |   attributes   INTERFACE   IDENTIFIER_WITH_TEMPLATE    where-base    interface-body   SEMICOLON
+    |   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base    where-base    interface-body   
+    |   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE    where-base    interface-body   SEMICOLON
+    |   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base   where-base     interface-body   SEMICOLON
+    |   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base    where-base    interface-body   SEMICOLON
+    |   attributes   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base    where-base    interface-body   SEMICOLON
+    |   attributes   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE    where-base    interface-body   SEMICOLON
+    |   attributes   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base    where-base    interface-body  
+    |   attributes   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base    where-base    interface-body   SEMICOLON
     ;
  
 interface-base
@@ -1019,14 +1089,14 @@ interface-member-declaration
     ;
     
 interface-method-declaration
-    :   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
-    |   attributes   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
-    |   NEW   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
-    |   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
-    |   NEW   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
-    |   attributes   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
-    |   attributes   NEW   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   CLOSE_PARENS   SEMICOLON
-    |   attributes   NEW   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   SEMICOLON
+    :   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   CLOSE_PARENS    where-base   SEMICOLON
+    |   attributes   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   CLOSE_PARENS    where-base   SEMICOLON
+    |   NEW   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   CLOSE_PARENS    where-base   SEMICOLON
+    |   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS    where-base   SEMICOLON
+    |   NEW   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   where-base    SEMICOLON
+    |   attributes   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   where-base    SEMICOLON
+    |   attributes   NEW   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   CLOSE_PARENS    where-base   SEMICOLON
+    |   attributes   NEW   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS    where-base   SEMICOLON
     ;
 
 interface-property-declaration
@@ -1068,22 +1138,22 @@ interface-indexer-declaration
 
 /* C.2.8 Structs */
 struct-declaration 
-    :   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-body
-    |   attributes   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-body 
-    |   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-body
-    |   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces   struct-body   
-    |   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-body   SEMICOLON
-    |   attributes   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-body
-    |   attributes   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces   struct-body
-    |   attributes   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-body   SEMICOLON
-    |   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces   struct-body   
-    |   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-body   SEMICOLON
-    |   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces   struct-body   SEMICOLON
-    |   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces   struct-body   SEMICOLON
-    |   attributes   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces   struct-body   SEMICOLON
-    |   attributes   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-body   SEMICOLON
-    |   attributes   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces   struct-body  
-    |   attributes   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces   struct-body   SEMICOLON 
+    :   STRUCT   IDENTIFIER_WITH_TEMPLATE    where-base    struct-body
+    |   attributes   STRUCT   IDENTIFIER_WITH_TEMPLATE    where-base    struct-body 
+    |   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE    where-base    struct-body
+    |   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces   where-base     struct-body   
+    |   STRUCT   IDENTIFIER_WITH_TEMPLATE   where-base     struct-body   SEMICOLON
+    |   attributes   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   where-base     struct-body
+    |   attributes   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces   where-base     struct-body
+    |   attributes   STRUCT   IDENTIFIER_WITH_TEMPLATE    where-base    struct-body   SEMICOLON
+    |   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces    where-base    struct-body   
+    |   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   where-base     struct-body   SEMICOLON
+    |   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces    where-base    struct-body   SEMICOLON
+    |   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces    where-base    struct-body   SEMICOLON
+    |   attributes   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces    where-base    struct-body   SEMICOLON
+    |   attributes   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   where-base     struct-body   SEMICOLON
+    |   attributes   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces   where-base     struct-body  
+    |   attributes   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces   where-base     struct-body   SEMICOLON 
     ;
  
 struct-interfaces
@@ -1182,6 +1252,7 @@ type-declaration
  
 modifier
     :   UNSAFE 
+    |   ASYNC
     |   PUBLIC
     |   PARTIAL
     |   PROTECTED
@@ -1205,22 +1276,22 @@ modifiers
 
 /* C.2.7 Classes */
 class-declaration 
-    :   CLASS   IDENTIFIER_WITH_TEMPLATE   class-body
-    |   attributes   CLASS   IDENTIFIER_WITH_TEMPLATE   class-body 
-    |   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE   class-body
-    |   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base   class-body   
-    |   CLASS   IDENTIFIER_WITH_TEMPLATE   class-body   SEMICOLON
-    |   attributes   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE   class-body
-    |   attributes   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base   class-body
-    |   attributes   CLASS   IDENTIFIER_WITH_TEMPLATE   class-body   SEMICOLON
-    |   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base   class-body   
-    |   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE   class-body   SEMICOLON
-    |   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base   class-body   SEMICOLON
-    |   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base   class-body   SEMICOLON
-    |   attributes   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base   class-body   SEMICOLON
-    |   attributes   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE   class-body   SEMICOLON
-    |   attributes   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base   class-body  
-    |   attributes   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base   class-body   SEMICOLON
+    :   CLASS   IDENTIFIER_WITH_TEMPLATE  where-base     class-body
+    |   attributes   CLASS   IDENTIFIER_WITH_TEMPLATE   where-base    class-body 
+    |   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE  where-base     class-body
+    |   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base   where-base    class-body   
+    |   CLASS   IDENTIFIER_WITH_TEMPLATE   where-base    class-body   SEMICOLON
+    |   attributes   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE  where-base     class-body
+    |   attributes   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base  where-base     class-body
+    |   attributes   CLASS   IDENTIFIER_WITH_TEMPLATE  where-base     class-body   SEMICOLON
+    |   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base  where-base     class-body   
+    |   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE  where-base     class-body   SEMICOLON
+    |   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base  where-base     class-body   SEMICOLON
+    |   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base  where-base     class-body   SEMICOLON
+    |   attributes   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base  where-base     class-body   SEMICOLON
+    |   attributes   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE  where-base     class-body   SEMICOLON
+    |   attributes   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base  where-base     class-body  
+    |   attributes   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base  where-base     class-body   SEMICOLON
     ;
     
 class-modifiers
@@ -1233,7 +1304,35 @@ class-modifier
     |   ABSTRACT
     |   SEALED
     ;
+
+where-base
+    :   where-units    COMMA    NEW   OPEN_PARENS   CLOSE_PARENS
+    |   where-units
+    ;
+
+
+where-units
+    :   where-units  where-unit
+    |   where-unit
+    ;
+
+where-names
+    :   where-names   COMMA    where-name
+    |   where-name
+    ;
+
+where-name
+    :   type-name
+    |   type
+    |   CLASS
+    |   STRUCT
+    |   NEW   OPEN_PARENS   CLOSE_PARENS
+    ;
  
+where-unit
+    :   WHERE   type-name   COLON   where-names   
+    |   %empty
+    ;
 
 class-base
     :   COLON   type-with-interr
@@ -1330,14 +1429,14 @@ method-declaration
     ;
 
 method-header  
-    :   type-with-interr   member-name   OPEN_PARENS   CLOSE_PARENS   
-    |   attributes   type-with-interr   member-name   OPEN_PARENS   CLOSE_PARENS   
-    |   modifiers   type-with-interr   member-name   OPEN_PARENS   CLOSE_PARENS    
-    |   type-with-interr   member-name   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS    
-    |   modifiers   type-with-interr   member-name   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS    
-    |   attributes   type-with-interr   member-name   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS   
-    |   attributes   modifiers   type-with-interr   member-name   OPEN_PARENS   CLOSE_PARENS    
-    |   attributes   modifiers   type-with-interr   member-name   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS 
+    :   type-with-interr   member-name   OPEN_PARENS   CLOSE_PARENS      where-base
+    |   attributes   type-with-interr   member-name   OPEN_PARENS   CLOSE_PARENS      where-base
+    |   modifiers   type-with-interr   member-name   OPEN_PARENS   CLOSE_PARENS       where-base
+    |   type-with-interr   member-name   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS       where-base
+    |   modifiers   type-with-interr   member-name   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS       where-base
+    |   attributes   type-with-interr   member-name   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS      where-base
+    |   attributes   modifiers   type-with-interr   member-name   OPEN_PARENS   CLOSE_PARENS       where-base
+    |   attributes   modifiers   type-with-interr   member-name   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS    where-base
     ;
      
     
@@ -1389,6 +1488,8 @@ IDENTIFIER_WITH_KEYWORD
     |   FIELD 
     |   TYPE
     |   THIS
+    |   ASYNC
+    |   WHERE
     ;
 
 fixed-parameter
