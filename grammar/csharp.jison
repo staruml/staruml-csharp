@@ -30,8 +30,7 @@
 
 %%
 compilationUnit
-    : compilation-unit   EOF
-    /*:   es  EOF */
+    : compilation-unit   EOF 
         {   
             return {
                 "node": "CompilationUnit1",
