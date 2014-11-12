@@ -22,12 +22,12 @@
  */
 
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50, regexp: true, continue:true */
-/*global define, $, _, window, app, type, document, csharp */
+/*global define, $, _, window, app, type, document, csharp, parser */
 define(function (require, exports, module) {
     "use strict";
 
     var Core            = app.getModule("core/Core"),
-        Repository      = app.getModule("engine/Repository"),
+        Repository      = app.getModule("core/Repository"),
         CommandManager  = app.getModule("command/CommandManager"),
         UML             = app.getModule("uml/UML"),
         FileSystem      = app.getModule("filesystem/FileSystem"),
@@ -122,6 +122,16 @@ define(function (require, exports, module) {
         return promise;
     };
     
+    CsharpCodeAnalyzer.prototype.JSONtoString = function (object) {
+        var results = [];
+        for (var property in object) {
+            var value = object[property];
+            if (value) {
+                results.push(property.toString() + ': ' + value);
+            }
+        }
+        return '{' + results.join(', ') + '}';
+    };
     
     /**
      * Perform First Phase
@@ -141,7 +151,15 @@ define(function (require, exports, module) {
 //                        self._currentCompilationUnit = ast;
 //                        self._currentCompilationUnit.file = file;
 //                        self.translateCompilationUnit(options, self._root, ast);
-                        console.log("test " + ast["unicode"]);
+                         
+                        var results = [];
+                        for (var property in ast) {
+                            var value = ast[property];
+                            if (value) {
+                                results.push(property.toString() + ': ' + value);
+                            }
+                        }
+                        console.log( JSON.stringify(ast) ); 
                         result.resolve();
                     } catch (ex) {
                         console.error("[C#] Failed to parse - " + file._name + "  : " + ex);

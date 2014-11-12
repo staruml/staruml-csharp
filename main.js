@@ -28,7 +28,7 @@ define(function (require, exports, module) {
     "use strict";
     
     var AppInit             = staruml.getModule("utils/AppInit"),
-        Repository          = staruml.getModule("engine/Repository"),
+        Repository          = staruml.getModule("core/Repository"),
         Engine              = staruml.getModule("engine/Engine"),
         Commands            = staruml.getModule("command/Commands"),
         CommandManager      = staruml.getModule("command/CommandManager"),

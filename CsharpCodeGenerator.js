@@ -27,7 +27,7 @@
 define(function (require, exports, module) {
     "use strict";
 
-    var Repository = app.getModule("engine/Repository"),
+    var Repository = app.getModule("core/Repository"),
         Engine     = app.getModule("engine/Engine"),
         FileSystem = app.getModule("filesystem/FileSystem"),
         FileUtils  = app.getModule("file/FileUtils"),
