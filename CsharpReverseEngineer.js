@@ -116,7 +116,7 @@ define(function (require, exports, module) {
         // Generate Diagrams
 //        promise.always(function () {
 //            self.generateDiagrams(options);
-//            console.log("[Java] done.");
+//            console.log("[C#] done.");
 //        });
 
         return promise;
@@ -460,6 +460,39 @@ define(function (require, exports, module) {
 //        this.translateTypeParameters(options, _operation, methodNode.typeParameters);
     };
 
+    
+    /**
+     * Add a Tag
+     * @param {type.Model} elem
+     * @param {string} kind Kind of Tag
+     * @param {string} name
+     * @param {?} value Value of Tag
+     */
+    CsharpCodeAnalyzer.prototype._addTag = function (elem, kind, name, value) {
+        var tag = new type.Tag();
+        tag._parent = elem;
+        tag.name = name;
+        tag.kind = kind;
+        switch (kind) {
+        case Core.TK_STRING:
+            tag.value = value;
+            break;
+        case Core.TK_BOOLEAN:
+            tag.checked = value;
+            break;
+        case Core.TK_NUMBER:
+            tag.number = value;
+            break;
+        case Core.TK_REFERENCE:
+            tag.reference = value;
+            break;
+        case Core.TK_HIDDEN:
+            tag.value = value;
+            break;
+        }
+        elem.tags.push(tag);
+    };
+    
     
     /**
      * Translate Method Parameters
