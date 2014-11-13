@@ -123,8 +123,27 @@ namespace-or-type-name
     
 IDENTIFIER_WITH_TEMPLATE
     :   IDENTIFIER  TEMPLATE
-    {
-        $$ = $1 + "" + $2;
+    { 
+    
+        $$ = {
+            "name": $1
+        };
+        
+        $$["typeParameters"] = [];
+        if ($2[0] === "<" && $2[$2.length-1] === ">") {
+            var i, _temp, _param, _bounded;
+            $2 = $2.substring(1, $2.length-1);
+            _temp = $2.split(",");
+            for (i = 0; i < _temp.length; i++) {
+                _param = _temp[i].trim();
+                 
+                $$["typeParameters"].push({
+                    "node": "TypeParameter",
+                    "name": _param
+                }); 
+                 
+            }
+        }
     }
     |   IDENTIFIER
     {
@@ -1569,73 +1588,121 @@ delegate-declaration
     {
         $$ = {
             "node": "delegate", 
-            "type": $2,
-            "name": $3 
+            "type": $2
         };
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   attributes   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   CLOSE_PARENS    where-base    SEMICOLON
     {
         $$ = {
             "node": "delegate", 
-            "type": $3,
-            "name": $4 
+            "type": $3 
         };
+        if($4["typeParameters"]){
+            $$["name"] = $4["name"];
+            $$["typeParameters"] = $4["typeParameters"];
+        }
+        else {
+            $$["name"] = $4;
+        }
     }
     |   modifiers   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   CLOSE_PARENS     where-base   SEMICOLON
     {
         $$ = {
             "node": "delegate",
             "modifiers": $1,
-            "type": $3,
-            "name": $4 
+            "type": $3 
         };
+        if($4["typeParameters"]){
+            $$["name"] = $4["name"];
+            $$["typeParameters"] = $4["typeParameters"];
+        }
+        else {
+            $$["name"] = $4;
+        }
     }
     |   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS     where-base   SEMICOLON
     {
         $$ = {
             "node": "delegate", 
-            "type": $2,
-            "name": $3,
+            "type": $2, 
             "parameters": $5
         };
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   modifiers   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS    where-base    SEMICOLON
     {
         $$ = {
             "node": "delegate",
             "modifiers": $1,
-            "type": $3,
-            "name": $4,
+            "type": $3, 
             "parameters": $6
         };
+        if($4["typeParameters"]){
+            $$["name"] = $4["name"];
+            $$["typeParameters"] = $4["typeParameters"];
+        }
+        else {
+            $$["name"] = $4;
+        }
     }
     |   attributes   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS     where-base   SEMICOLON
     {
         $$ = {
             "node": "delegate", 
-            "type": $3,
-            "name": $4,
+            "type": $3, 
             "parameters": $6
         };
+        if($4["typeParameters"]){
+            $$["name"] = $4["name"];
+            $$["typeParameters"] = $4["typeParameters"];
+        }
+        else {
+            $$["name"] = $4;
+        }
     }
     |   attributes   modifiers   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   CLOSE_PARENS     where-base   SEMICOLON
     {
         $$ = {
             "node": "delegate",
             "modifiers": $2,
-            "type": $4,
-            "name": $5 
+            "type": $4
         };
+        if($5["typeParameters"]){
+            $$["name"] = $5["name"];
+            $$["typeParameters"] = $5["typeParameters"];
+        }
+        else {
+            $$["name"] = $5;
+        }
     }
     |   attributes   modifiers   DELEGATE   type-with-interr   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   formal-parameter-list   CLOSE_PARENS     where-base   SEMICOLON
     {
         $$ = {
             "node": "delegate",
             "modifiers": $2,
-            "type": $4,
-            "name": $5,
+            "type": $4, 
             "parameters": $7
         };
+        if($5["typeParameters"]){
+            $$["name"] = $5["name"];
+            $$["typeParameters"] = $5["typeParameters"];
+        }
+        else {
+            $$["name"] = $5;
+        }
     }
     ;
     
@@ -1646,146 +1713,258 @@ enum-declaration
     :   ENUM   IDENTIFIER_WITH_TEMPLATE   enum-body
     {
         $$ = {
-            "node": "enum",
-            "name": $2,
+            "node": "enum", 
             "body": $3
         };
+        
+        if($2["typeParameters"]){
+            $$["name"] = $2["name"];
+            $$["typeParameters"] = $2["typeParameters"];
+        }
+        else {
+            $$["name"] = $2;
+        }
     }
     |   attributes   ENUM   IDENTIFIER_WITH_TEMPLATE   enum-body
     {
         $$ = {
-            "node": "enum",
-            "name": $3,
+            "node": "enum", 
             "body": $4
         };
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   modifiers   ENUM   IDENTIFIER_WITH_TEMPLATE   enum-body
     {
         $$ = {
             "node": "enum",
-            "modifiers": $1,
-            "name": $3,
+            "modifiers": $1, 
             "body": $4
         };
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   ENUM   IDENTIFIER_WITH_TEMPLATE   enum-base   enum-body   
     {
         $$ = {
-            "node": "enum",
-            "name": $2,
+            "node": "enum", 
             "base": $3,
             "body": $4
         };
+        
+        if($2["typeParameters"]){
+            $$["name"] = $2["name"];
+            $$["typeParameters"] = $2["typeParameters"];
+        }
+        else {
+            $$["name"] = $2;
+        }
     }
     |   ENUM   IDENTIFIER_WITH_TEMPLATE   enum-body   SEMICOLON
     {
         $$ = {
-            "node": "enum",
-            "name": $2,
+            "node": "enum", 
             "body": $3
         };
+        
+        if($2["typeParameters"]){
+            $$["name"] = $2["name"];
+            $$["typeParameters"] = $2["typeParameters"];
+        }
+        else {
+            $$["name"] = $2;
+        }
     }
     |   attributes   modifiers   ENUM   IDENTIFIER_WITH_TEMPLATE   enum-body
     {
         $$ = {
             "node": "enum",
-            "modifiers": $2,
-            "name": $4,
+            "modifiers": $2, 
             "body": $5
         };
+        
+        if($4["typeParameters"]){
+            $$["name"] = $4["name"];
+            $$["typeParameters"] = $4["typeParameters"];
+        }
+        else {
+            $$["name"] = $4;
+        }
     }
     |   attributes   ENUM   IDENTIFIER_WITH_TEMPLATE   enum-base   enum-body
     {
         $$ = {
-            "node": "enum",
-            "name": $3,
+            "node": "enum", 
             "base": $4,
             "body": $5
         };
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   attributes   ENUM   IDENTIFIER_WITH_TEMPLATE   enum-body   SEMICOLON
     {
         $$ = {
-            "node": "enum",
-            "name": $3,
+            "node": "enum", 
             "body": $4
         };
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   modifiers   ENUM   IDENTIFIER_WITH_TEMPLATE   enum-base   enum-body   
     {
         $$ = {
             "node": "enum",
-            "modifiers": $1,
-            "name": $3,
+            "modifiers": $1, 
             "base": $4,
             "body": $5
         };
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   modifiers   ENUM   IDENTIFIER_WITH_TEMPLATE   enum-body   SEMICOLON
     {
         $$ = {
             "node": "enum",
-            "modifiers": $1,
-            "name": $3, 
+            "modifiers": $1, 
             "body": $4
         };
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   ENUM   IDENTIFIER_WITH_TEMPLATE   enum-base   enum-body   SEMICOLON
     {
         $$ = {
-            "node": "enum", 
-            "name": $2,
+            "node": "enum",  
             "base": $3,
             "body": $4
         };
+        
+        if($2["typeParameters"]){
+            $$["name"] = $2["name"];
+            $$["typeParameters"] = $2["typeParameters"];
+        }
+        else {
+            $$["name"] = $2;
+        }
     }
     |   modifiers   ENUM   IDENTIFIER_WITH_TEMPLATE   enum-base   enum-body   SEMICOLON
     {
         $$ = {
             "node": "enum",
-            "modifiers": $1,
-            "name": $3,
+            "modifiers": $1, 
             "base": $4,
             "body": $5
         };
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   attributes   ENUM   IDENTIFIER_WITH_TEMPLATE   enum-base   enum-body   SEMICOLON
     {
         $$ = {
-            "node": "enum", 
-            "name": $3,
+            "node": "enum",  
             "base": $4,
             "body": $5
         };
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   attributes   modifiers   ENUM   IDENTIFIER_WITH_TEMPLATE   enum-body   SEMICOLON
     {
         $$ = {
             "node": "enum",
-            "modifiers": $2,
-            "name": $4,
+            "modifiers": $2, 
             "body": $5
         };
+        
+        if($4["typeParameters"]){
+            $$["name"] = $4["name"];
+            $$["typeParameters"] = $4["typeParameters"];
+        }
+        else {
+            $$["name"] = $4;
+        }
     }
     |   attributes   modifiers   ENUM   IDENTIFIER_WITH_TEMPLATE   enum-base   enum-body 
     {
         $$ = {
             "node": "enum",
-            "modifiers": $2,
-            "name": $4,
+            "modifiers": $2, 
             "base": $5,
             "body": $6
         };
+        
+        if($4["typeParameters"]){
+            $$["name"] = $4["name"];
+            $$["typeParameters"] = $4["typeParameters"];
+        }
+        else {
+            $$["name"] = $4;
+        }
     }
     |   attributes   modifiers   ENUM   IDENTIFIER_WITH_TEMPLATE   enum-base   enum-body   SEMICOLON
     {
         $$ = {
             "node": "enum",
-            "modifiers": $2,
-            "name": $4,
+            "modifiers": $2, 
             "base": $5,
             "body": $6
         };
+        
+        if($4["typeParameters"]){
+            $$["name"] = $4["name"];
+            $$["typeParameters"] = $4["typeParameters"];
+        }
+        else {
+            $$["name"] = $4;
+        }
     }
     ;
     
@@ -1857,146 +2036,258 @@ interface-declaration
     :   INTERFACE   IDENTIFIER_WITH_TEMPLATE    where-base    interface-body
     {
         $$ = {
-            "node": "interface",
-            "name": $2,
+            "node": "interface", 
             "body": $4
         };
+        
+        if($2["typeParameters"]){
+            $$["name"] = $2["name"];
+            $$["typeParameters"] = $2["typeParameters"];
+        }
+        else {
+            $$["name"] = $2;
+        }
     }
     |   attributes   INTERFACE   IDENTIFIER_WITH_TEMPLATE   where-base     interface-body 
     {
         $$ = {
-            "node": "interface",
-            "name": $3,
+            "node": "interface", 
             "body": $5
         };
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE   where-base     interface-body
     {
         $$ = {
             "node": "interface",
-            "modifiers": $1,
-            "name": $3,
+            "modifiers": $1, 
             "body": $5
         };
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base    where-base    interface-body   
     {
         $$ = {
-            "node": "interface", 
-            "name": $2,
+            "node": "interface",  
             "base": $3,
             "body": $5
         };
+        
+        if($2["typeParameters"]){
+            $$["name"] = $2["name"];
+            $$["typeParameters"] = $2["typeParameters"];
+        }
+        else {
+            $$["name"] = $2;
+        }
     }
     |   INTERFACE   IDENTIFIER_WITH_TEMPLATE    where-base    interface-body   SEMICOLON
     {
         $$ = {
-            "node": "interface", 
-            "name": $2,
+            "node": "interface",  
             "body": $4
         };
+        
+        if($2["typeParameters"]){
+            $$["name"] = $2["name"];
+            $$["typeParameters"] = $2["typeParameters"];
+        }
+        else {
+            $$["name"] = $2;
+        }
     }
     |   attributes   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE    where-base    interface-body
     {
         $$ = {
             "node": "interface",
-            "modifiers": $2,
-            "name": $4,
+            "modifiers": $2, 
             "body": $6
         };
+        
+        if($4["typeParameters"]){
+            $$["name"] = $4["name"];
+            $$["typeParameters"] = $4["typeParameters"];
+        }
+        else {
+            $$["name"] = $4;
+        }
     }
     |   attributes   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base   where-base     interface-body
     {
         $$ = {
-            "node": "interface", 
-            "name": $3,
+            "node": "interface",  
             "base": $4,
             "body": $6
         };
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   attributes   INTERFACE   IDENTIFIER_WITH_TEMPLATE    where-base    interface-body   SEMICOLON
     {
         $$ = {
-            "node": "interface", 
-            "name": $3,
+            "node": "interface",  
             "body": $5
         };
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base    where-base    interface-body   
     {
         $$ = {
             "node": "interface",
-            "modifiers": $1,
-            "name": $3,
+            "modifiers": $1, 
             "base": $4,
             "body": $6
         };
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE    where-base    interface-body   SEMICOLON
     {
         $$ = {
             "node": "interface",
-            "modifiers": $1,
-            "name": $3,
+            "modifiers": $1, 
             "body": $5
         };
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base   where-base     interface-body   SEMICOLON
     {
         $$ = {
-            "node": "interface", 
-            "name": $2,
+            "node": "interface",  
             "base": $3,
             "body": $5
         };
+        
+        if($2["typeParameters"]){
+            $$["name"] = $2["name"];
+            $$["typeParameters"] = $2["typeParameters"];
+        }
+        else {
+            $$["name"] = $2;
+        }
     }
     |   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base    where-base    interface-body   SEMICOLON
     {
         $$ = {
             "node": "interface",
-            "modifiers": $1,
-            "name": $3,
+            "modifiers": $1, 
             "base": $4,
             "body": $6
         };
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   attributes   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base    where-base    interface-body   SEMICOLON
     {
         $$ = {
-            "node": "interface",
-            "name": $3,
+            "node": "interface", 
             "base": $4,
             "body": $6
         };
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   attributes   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE    where-base    interface-body   SEMICOLON
     {
         $$ = {
             "node": "interface",
-            "modifiers": $2,
-            "name": $4,
+            "modifiers": $2, 
             "body": $6
         };
+        
+        if($4["typeParameters"]){
+            $$["name"] = $4["name"];
+            $$["typeParameters"] = $4["typeParameters"];
+        }
+        else {
+            $$["name"] = $4;
+        }
     }
     |   attributes   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base    where-base    interface-body  
     {
         $$ = {
             "node": "interface",
-            "modifiers": $2,
-            "name": $4,
+            "modifiers": $2, 
             "base": $5,
             "body": $7
         };
+        
+        if($4["typeParameters"]){
+            $$["name"] = $4["name"];
+            $$["typeParameters"] = $4["typeParameters"];
+        }
+        else {
+            $$["name"] = $4;
+        }
     }
     |   attributes   modifiers   INTERFACE   IDENTIFIER_WITH_TEMPLATE   interface-base    where-base    interface-body   SEMICOLON
     {
         $$ = {
             "node": "interface",
-            "modifiers": $2,
-            "name": $4,
+            "modifiers": $2, 
             "base": $5,
             "body": $7
         };
+        
+        if($4["typeParameters"]){
+            $$["name"] = $4["name"];
+            $$["typeParameters"] = $4["typeParameters"];
+        }
+        else {
+            $$["name"] = $4;
+        }
     }
     ;
  
@@ -2247,146 +2538,258 @@ struct-declaration
     :   STRUCT   IDENTIFIER_WITH_TEMPLATE    where-base    struct-body
     {
         $$ = {
-            "node": "struct",
-            "name": $2,
+            "node": "struct", 
             "body": $4
         };  
+        
+        if($2["typeParameters"]){
+            $$["name"] = $2["name"];
+            $$["typeParameters"] = $2["typeParameters"];
+        }
+        else {
+            $$["name"] = $2;
+        }
     }
     |   attributes   STRUCT   IDENTIFIER_WITH_TEMPLATE    where-base    struct-body 
     {
         $$ = {
-            "node": "struct",
-            "name": $3,
+            "node": "struct", 
             "body": $5
         };  
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE    where-base    struct-body
     {
         $$ = {
             "node": "struct",
-            "modifiers": $1,
-            "name": $3,
+            "modifiers": $1, 
             "body": $5
         };  
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces   where-base     struct-body   
     {
         $$ = {
-            "node": "struct",
-            "name": $2,
+            "node": "struct", 
             "base": $3,
             "body": $5
         };  
+        
+        if($2["typeParameters"]){
+            $$["name"] = $2["name"];
+            $$["typeParameters"] = $2["typeParameters"];
+        }
+        else {
+            $$["name"] = $2;
+        }
     }
     |   STRUCT   IDENTIFIER_WITH_TEMPLATE   where-base     struct-body   SEMICOLON
     {
         $$ = {
-            "node": "struct",
-            "name": $2,
+            "node": "struct", 
             "body": $4
         };  
+        
+        if($2["typeParameters"]){
+            $$["name"] = $2["name"];
+            $$["typeParameters"] = $2["typeParameters"];
+        }
+        else {
+            $$["name"] = $2;
+        }
     }
     |   attributes   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   where-base     struct-body
     {
         $$ = {
             "node": "struct",
-            "modifiers": $2,
-            "name": $4,
+            "modifiers": $2, 
             "body": $6
         };  
+        
+        if($4["typeParameters"]){
+            $$["name"] = $4["name"];
+            $$["typeParameters"] = $4["typeParameters"];
+        }
+        else {
+            $$["name"] = $4;
+        }
     }
     |   attributes   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces   where-base     struct-body
     {
         $$ = {
-            "node": "struct",
-            "name": $3,
+            "node": "struct", 
             "base": $4,
             "body": $6
         };  
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   attributes   STRUCT   IDENTIFIER_WITH_TEMPLATE    where-base    struct-body   SEMICOLON
     {
         $$ = {
-            "node": "struct",
-            "name": $3,
+            "node": "struct", 
             "body": $5
         };  
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces    where-base    struct-body
     {
         $$ = {
             "node": "struct",
-            "modifiers": $1,
-            "name": $3,
+            "modifiers": $1, 
             "base": $4,
             "body": $6
         };  
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   where-base     struct-body   SEMICOLON
     {
         $$ = {
             "node": "struct",
-            "modifiers": $1,
-            "name": $3,
+            "modifiers": $1, 
             "body": $5
         };  
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces    where-base    struct-body   SEMICOLON
     {
         $$ = {
-            "node": "struct",
-            "name": $2,
+            "node": "struct", 
             "base": $3,
             "body": $5
         };  
+        
+        if($2["typeParameters"]){
+            $$["name"] = $2["name"];
+            $$["typeParameters"] = $2["typeParameters"];
+        }
+        else {
+            $$["name"] = $2;
+        }
     }
     |   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces    where-base    struct-body   SEMICOLON
     {
         $$ = {
             "node": "struct",
-            "modifiers": $1,
-            "name": $3,
+            "modifiers": $1, 
             "base": $4,
             "body": $6
         };  
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   attributes   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces    where-base    struct-body   SEMICOLON
     {
         $$ = {
-            "node": "struct",
-            "name": $3,
+            "node": "struct", 
             "base": $4,
             "body": $6
         };  
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   attributes   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   where-base     struct-body   SEMICOLON
     {
         $$ = {
             "node": "struct",
-            "modifiers": $2,
-            "name": $4,
+            "modifiers": $2, 
             "body": $6
         };  
+        
+        if($4["typeParameters"]){
+            $$["name"] = $4["name"];
+            $$["typeParameters"] = $4["typeParameters"];
+        }
+        else {
+            $$["name"] = $4;
+        }
     }
     |   attributes   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces   where-base     struct-body  
     {
         $$ = {
             "node": "struct",
-            "modifiers": $2,
-            "name": $4,
+            "modifiers": $2, 
             "base": $5,
             "body": $7
         };  
+        
+        if($4["typeParameters"]){
+            $$["name"] = $4["name"];
+            $$["typeParameters"] = $4["typeParameters"];
+        }
+        else {
+            $$["name"] = $4;
+        }
     }
     |   attributes   modifiers   STRUCT   IDENTIFIER_WITH_TEMPLATE   struct-interfaces   where-base     struct-body   SEMICOLON 
     {
         $$ = {
             "node": "struct",
-            "modifiers": $2,
-            "name": $4,
+            "modifiers": $2, 
             "base": $5,
             "body": $7
         };  
+        
+        if($4["typeParameters"]){
+            $$["name"] = $4["name"];
+            $$["typeParameters"] = $4["typeParameters"];
+        }
+        else {
+            $$["name"] = $4;
+        }
     }
     ;
  
@@ -2536,22 +2939,17 @@ namespace-body
     :   OPEN_BRACE   CLOSE_BRACE
     |   OPEN_BRACE   using-directives   CLOSE_BRACE
     {
-         $$ = {
-            "using" : $2 
-         };
+        $$ = $2;
     }
     |   OPEN_BRACE   namespace-member-declarations   CLOSE_BRACE
     {
-         $$ = {
-            "member" : $2
-         };
+        $$ = $2;
+        
     }
     |   OPEN_BRACE   using-directives   namespace-member-declarations   CLOSE_BRACE
     {
-         $$ = {
-            "using" : $2,
-            "member" : $3
-         };
+        
+        $$ = $2.concat($3);
     }   
     ;
 
@@ -2684,27 +3082,48 @@ class-declaration
     :   CLASS   IDENTIFIER_WITH_TEMPLATE    where-base     class-body
     { 
         $$ = {
-            "node": "class",
-            "name": $2,
+            "node": "class", 
             "body": $3
         };
+        
+        if($2["typeParameters"]){
+            $$["name"] = $2["name"];
+            $$["typeParameters"] = $2["typeParameters"];
+        }
+        else {
+            $$["name"] = $2;
+        }
     }
     |   attributes   CLASS   IDENTIFIER_WITH_TEMPLATE   where-base    class-body 
     {
         $$ = {
-            "node": "class",
-            "name": $3,
+            "node": "class", 
             "body": $5
         };
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE   where-base     class-body
     {
         $$ = {
             "node": "class",
-            "modifiers": $1,
-            "name": $3,
+            "modifiers": $1, 
             "body": $5  
         };
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base   where-base    class-body  
     {
@@ -2716,39 +3135,58 @@ class-declaration
         }
         if (isAnnotationType){
             $$ = {
-                "node": "class", 
-                "name": $2,
+                "node": "annotationType",  
                 "base": $3,
-                "body": $5,
-                "annotationType": "annotationType"
+                "body": $5
             };
         }
         else{
             $$ = {
-                "node": "class", 
-                "name": $2,
+                "node": "class",  
                 "base": $3,
                 "body": $5  
             };
+        }
+        
+        if($2["typeParameters"]){
+            $$["name"] = $2["name"];
+            $$["typeParameters"] = $2["typeParameters"];
+        }
+        else {
+            $$["name"] = $2;
         }
         
     }
     |   CLASS   IDENTIFIER_WITH_TEMPLATE   where-base    class-body   SEMICOLON
     {
         $$ = {
-            "node": "class", 
-            "name": $2, 
+            "node": "class",  
             "body": $4
         };
+        
+        if($2["typeParameters"]){
+            $$["name"] = $2["name"];
+            $$["typeParameters"] = $2["typeParameters"];
+        }
+        else {
+            $$["name"] = $2;
+        }
     }
     |   attributes   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE  where-base     class-body
     {
         $$ = {
             "node": "class", 
-            "modifiers": $2,
-            "name": $4, 
+            "modifiers": $2, 
             "body": $6
         };
+        
+        if($4["typeParameters"]){
+            $$["name"] = $4["name"];
+            $$["typeParameters"] = $4["typeParameters"];
+        }
+        else {
+            $$["name"] = $4;
+        }
     }
     |   attributes   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base  where-base     class-body
     {
@@ -2761,29 +3199,41 @@ class-declaration
         
         if (isAnnotationType){
             $$ = {
-                "node": "class",  
-                "name": $3,
+                "node": "annotationType",   
                 "base": $4,
-                "body": $6,
-                "annotationType": "annotationType"
+                "body": $6 
             };
         }
         else {
             $$ = {
-                "node": "class",  
-                "name": $3,
+                "node": "class",   
                 "base": $4,
                 "body": $6
             };
+        }
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
         }
     }
     |   attributes   CLASS   IDENTIFIER_WITH_TEMPLATE  where-base     class-body   SEMICOLON
     {
         $$ = {
-            "node": "class",
-            "name": $3,
+            "node": "class", 
             "body": $5
         };
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base  where-base     class-body
     {
@@ -2796,32 +3246,44 @@ class-declaration
         
         if (isAnnotationType){
             $$ = {
-                "node": "class",
-                "modifiers": $1,
-                "name": $3,
+                "node": "annotationType",
+                "modifiers": $1, 
                 "base": $4,
-                "body": $6,
-                "annotationType": "annotationType"
+                "body": $6 
             };
         }
         else {
             $$ = {
                 "node": "class",
-                "modifiers": $1,
-                "name": $3,
+                "modifiers": $1, 
                 "base": $4,
                 "body": $6
             };
         } 
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE  where-base     class-body   SEMICOLON
     {
         $$ = {
             "node": "class",
-            "modifiers": $1,
-            "name": $3,
+            "modifiers": $1, 
             "body": $5
         };
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        }
     }
     |   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base  where-base     class-body   SEMICOLON
     {
@@ -2833,22 +3295,25 @@ class-declaration
         }
         if (isAnnotationType){
             $$ = {
-                "node": "class",
-                "name": $2,
+                "node": "annotationType", 
                 "base": $3,
-                "body": $5,
-                "annotationType": "annotationType"
+                "body": $5 
             };
         }
         else {
             $$ = {
-                "node": "class",
-                "name": $2,
+                "node": "class", 
                 "base": $3,
                 "body": $5
             };
         }
-        
+        if($2["typeParameters"]){
+            $$["name"] = $2["name"];
+            $$["typeParameters"] = $2["typeParameters"];
+        }
+        else {
+            $$["name"] = $2;
+        }
     }
     |   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base  where-base     class-body   SEMICOLON
     {
@@ -2861,24 +3326,28 @@ class-declaration
         
         if (isAnnotationType){
             $$ = {
-                "node": "class",
-                "modifiers": $1,
-                "name": $3,
+                "node": "annotationType",
+                "modifiers": $1, 
                 "base": $4,
-                "body": $6,
-                "annotationType": "annotationType"
+                "body": $6 
             };
         }
         else {
             $$ = {
                 "node": "class",
-                "modifiers": $1,
-                "name": $3,
+                "modifiers": $1, 
                 "base": $4,
                 "body": $6
             };
-        }
+        } 
         
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
+        } 
     }
     |   attributes   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base  where-base     class-body   SEMICOLON
     {
@@ -2891,30 +3360,42 @@ class-declaration
         
         if (isAnnotationType){
             $$ = {
-                "node": "class", 
-                "name": $3,
+                "node": "annotationType",  
                 "base": $4,
-                "body": $6,
-                "annotationType": "annotationType"
+                "body": $6 
             };
         }
         else {
             $$ = {
-                "node": "class", 
-                "name": $3,
+                "node": "class",  
                 "base": $4,
                 "body": $6
             };
+        }
+        
+        if($3["typeParameters"]){
+            $$["name"] = $3["name"];
+            $$["typeParameters"] = $3["typeParameters"];
+        }
+        else {
+            $$["name"] = $3;
         }
     }
     |   attributes   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE  where-base     class-body   SEMICOLON
     {
         $$ = {
             "node": "class", 
-            "modifiers": $2,
-            "name": $4,
+            "modifiers": $2, 
             "body": $6
         };
+        
+        if($4["typeParameters"]){
+            $$["name"] = $4["name"];
+            $$["typeParameters"] = $4["typeParameters"];
+        }
+        else {
+            $$["name"] = $4;
+        }
     }
     |   attributes   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base  where-base   class-body  
     {
@@ -2927,22 +3408,27 @@ class-declaration
         
         if (isAnnotationType){
             $$ = {
-                "node": "class",
-                "modifiers": $2,
-                "name": $4,
+                "node": "annotationType",
+                "modifiers": $2, 
                 "base": $5,
-                "body": $7,
-                "annotationType": "annotationType"
+                "body": $7 
             };
         }
         else {
             $$ = {
                 "node": "class",
-                "modifiers": $2,
-                "name": $4,
+                "modifiers": $2, 
                 "base": $5,
                 "body": $7
             };
+        }
+        
+        if($4["typeParameters"]){
+            $$["name"] = $4["name"];
+            $$["typeParameters"] = $4["typeParameters"];
+        }
+        else {
+            $$["name"] = $4;
         }
     }
     |   attributes   modifiers   CLASS   IDENTIFIER_WITH_TEMPLATE   class-base  where-base   class-body   SEMICOLON
@@ -2956,22 +3442,27 @@ class-declaration
         
         if (isAnnotationType){
             $$ = {
-                "node": "class",
-                "modifiers": $2,
-                "name": $4,
+                "node": "annotationType",
+                "modifiers": $2, 
                 "base": $5,
-                "body": $7,
-                "annotationType": "annotationType"
+                "body": $7 
             };
         }
         else {
             $$ = {
                 "node": "class",
-                "modifiers": $2,
-                "name": $4,
+                "modifiers": $2, 
                 "base": $5,
                 "body": $7
             };
+        }
+        
+        if($4["typeParameters"]){
+            $$["name"] = $4["name"];
+            $$["typeParameters"] = $4["typeParameters"];
+        }
+        else {
+            $$["name"] = $4;
         }
     }
     ;

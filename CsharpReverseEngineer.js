@@ -148,10 +148,7 @@ define(function (require, exports, module) {
                 if (!err) {
                     try {
                         var ast = parser.parse(data);
-//                        self._currentCompilationUnit = ast;
-//                        self._currentCompilationUnit.file = file;
-//                        self.translateCompilationUnit(options, self._root, ast);
-                         
+                        
                         var results = [];
                         for (var property in ast) {
                             var value = ast[property];
@@ -160,6 +157,13 @@ define(function (require, exports, module) {
                             }
                         }
                         console.log( JSON.stringify(ast) ); 
+                        
+                        
+                        self._currentCompilationUnit = ast;
+                        self._currentCompilationUnit.file = file;
+                        self.translateCompilationUnit(options, self._root, ast);
+                          
+                        
                         result.resolve();
                     } catch (ex) {
                         console.error("[C#] Failed to parse - " + file._name + "  : " + ex);
@@ -173,6 +177,464 @@ define(function (require, exports, module) {
         }, false);
     };
 
+    
+    /**
+     * Translate C# CompilationUnit Node.
+     * @param {Object} options
+     * @param {type.Model} namespace
+     * @param {Object} compilationUnitNode
+     */
+    CsharpCodeAnalyzer.prototype.translateCompilationUnit = function (options, namespace, compilationUnitNode) 
+    {
+        var _namespace = namespace,
+            i,
+            len; 
+        
+        this.translateTypes(options, _namespace, compilationUnitNode["namespace"]);     
+        
+    };
+    
+    /**
+     * Translate Type Nodes
+     * @param {Object} options
+     * @param {type.Model} namespace
+     * @param {Array.<Object>} typeNodeArray
+     */
+    CsharpCodeAnalyzer.prototype.translateTypes = function (options, namespace, typeNodeArray) {
+        var _namespace = namespace, i, len;
+        if (typeNodeArray.length > 0) {
+            for (i = 0, len = typeNodeArray.length; i < len; i++) {
+                var typeNode = typeNodeArray[i];
+                switch (typeNode.node) {
+                case "namespace":
+                    var _package = this.translatePackage(options, _namespace, typeNode);
+                    if (_package !== null) {
+                        _namespace = _package;
+                    }
+                    // Translate Types
+                    this.translateTypes(options, _namespace, typeNode.body);
+                    break;
+                case "class":
+                    this.translateClass(options, namespace, typeNode);
+                    break;
+                case "interface":
+//                    this.translateInterface(options, namespace, typeNode);
+                    break;
+                case "enum":
+//                    this.translateEnum(options, namespace, typeNode);
+                    break;
+                case "annotationType":
+//                    this.translateAnnotationType(options, namespace, typeNode);
+                    break;
+                }
+            }
+        }
+    };
+    
+    /**
+     * Return visiblity from modifiers
+     *
+     * @param {Array.<string>} modifiers
+     * @return {string} Visibility constants for UML Elements
+     */
+    CsharpCodeAnalyzer.prototype._getVisibility = function (modifiers) {
+        if (_.contains(modifiers, "public")) {
+            return UML.VK_PUBLIC;
+        } else if (_.contains(modifiers, "protected")) {
+            return UML.VK_PROTECTED;
+        } else if (_.contains(modifiers, "private")) {
+            return UML.VK_PRIVATE;
+        }
+        return UML.VK_PACKAGE;
+    };
+
+    
+    /**
+     * Translate C# Class Node.
+     * @param {Object} options
+     * @param {type.Model} namespace
+     * @param {Object} compilationUnitNode
+     */
+    CsharpCodeAnalyzer.prototype.translateClass = function (options, namespace, classNode) {
+        var i, len, _class;
+
+        // Create Class
+        _class = new type.UMLClass();
+        _class._parent = namespace;
+        _class.name = classNode.name;
+
+        // Access Modifiers
+        _class.visibility = this._getVisibility(classNode.modifiers);
+
+        // Abstract Class
+        if (_.contains(classNode.modifiers, "abstract")) {
+            _class.isAbstract = true;
+        }
+
+        // Final Class
+        if (_.contains(classNode.modifiers, "sealed")) {
+            _class.isFinalSpecification = true;
+            _class.isLeaf = true;
+        }
+
+        // CsharpDoc
+//        if (classNode.comment) {
+//            _class.documentation = classNode.comment;
+//        }
+
+        namespace.ownedElements.push(_class);
+
+        // Register Extends for 2nd Phase Translation
+        if (classNode["base"]) {
+            var _extendPending = {
+                classifier: _class,
+                node: classNode["base"],
+                kind: "class",
+                compilationUnitNode: this._currentCompilationUnit
+            };
+            this._extendPendings.push(_extendPending);
+        }
+ 
+        
+        // Translate Type Parameters
+        this.translateTypeParameters(options, _class, classNode.typeParameters);
+        // Translate Types
+        this.translateTypes(options, _class, classNode.body);
+        // Translate Members
+        this.translateMembers(options, _class, classNode.body.members);
+    };
+    
+    
+    /**
+     * Translate Members Nodes
+     * @param {Object} options
+     * @param {type.Model} namespace
+     * @param {Array.<Object>} memberNodeArray
+     */
+    CsharpCodeAnalyzer.prototype.translateMembers = function (options, namespace, memberNodeArray) {
+        var i, len;
+        if (memberNodeArray.length > 0) {
+            for (i = 0, len = memberNodeArray.length; i < len; i++) {
+                var memberNode = memberNodeArray[i],
+                    visibility = this._getVisibility(memberNode.modifiers);
+
+                // Generate public members only if publicOnly == true
+                if (options.publicOnly && visibility !== UML.VK_PUBLIC) {
+                    continue;
+                }
+
+                memberNode.compilationUnitNode = this._currentCompilationUnit;
+                 
+                switch (memberNode.node) {
+                case "field":
+                case "property":
+                    if (options.association) {
+                        this.translateFieldAsAssociation(options, namespace, memberNode);
+                    } else {
+                        this.translateFieldAsAttribute(options, namespace, memberNode);
+                    }
+                    break;
+                case "constructor":
+                    this.translateMethod(options, namespace, memberNode, true);
+                    break;
+                case "method":
+                    this.translateMethod(options, namespace, memberNode);
+                    break;
+                case "constant":
+//                    this.translateEnumConstant(options, namespace, memberNode);
+                    break;
+                }
+            }
+        }
+    };
+
+    
+    /**
+     * Translate Enumeration Constant
+     * @param {Object} options
+     * @param {type.Model} namespace
+     * @param {Object} enumConstantNode
+     */
+    CsharpCodeAnalyzer.prototype.translateEnumConstant = function (options, namespace, enumConstantNode) {
+        var _literal = new type.UMLEnumerationLiteral();
+        _literal._parent = namespace;
+        _literal.name = enumConstantNode.name;
+
+        // CsharpDoc
+//        if (enumConstantNode.comment) {
+//            _literal.documentation = enumConstantNode.comment;
+//        }
+
+//        namespace.literals.push(_literal);
+    };
+    
+    
+    /**
+     * Translate Method
+     * @param {Object} options
+     * @param {type.Model} namespace
+     * @param {Object} methodNode
+     * @param {boolean} isConstructor
+     */
+    CsharpCodeAnalyzer.prototype.translateMethod = function (options, namespace, methodNode, isConstructor)
+    {
+        var i, len, _operation = new type.UMLOperation();
+        _operation._parent = namespace;
+        _operation.name = methodNode.name;
+        namespace.operations.push(_operation);
+
+        // Modifiers
+        _operation.visibility = this._getVisibility(methodNode.modifiers);
+        if (_.contains(methodNode.modifiers, "static")) {
+            _operation.isStatic = true;
+        }
+        if (_.contains(methodNode.modifiers, "abstract")) {
+            _operation.isAbstract = true;
+        }
+        if (_.contains(methodNode.modifiers, "sealed")) {
+            _operation.isLeaf = true;
+        }
+//        if (_.contains(methodNode.modifiers, "synchronized")) {
+//            _operation.concurrency = UML.CCK_CONCURRENT;
+//        }
+//        if (_.contains(methodNode.modifiers, "native")) {
+//            this._addTag(_operation, Core.TK_BOOLEAN, "native", true);
+//        }
+//        if (_.contains(methodNode.modifiers, "strictfp")) {
+//            this._addTag(_operation, Core.TK_BOOLEAN, "strictfp", true);
+//        }
+
+        // Constructor
+        if (isConstructor) {
+            _operation.stereotype = "constructor";
+        }
+
+        // Formal Parameters
+        if (methodNode.parameter && methodNode.parameter.length > 0) {
+            for (i = 0, len = methodNode.parameter.length; i < len; i++) {
+                var parameterNode = methodNode.parameter[i];
+                parameterNode.compilationUnitNode = methodNode.compilationUnitNode;
+                this.translateParameter(options, _operation, parameterNode);
+            }
+        }
+
+        // Return Type
+        if (methodNode.type) {
+            var _returnParam = new type.UMLParameter();
+            _returnParam._parent = _operation;
+            _returnParam.name = "";
+            _returnParam.direction = UML.DK_RETURN;
+            // Add to _typedFeaturePendings
+            this._typedFeaturePendings.push({
+                namespace: namespace,
+                feature: _returnParam,
+                node: methodNode
+            });
+            _operation.parameters.push(_returnParam);
+        }
+
+        // Throws
+//        if (methodNode.throws) {
+//            for (i = 0, len = methodNode.throws.length; i < len; i++) {
+//                var _throwNode = methodNode.throws[i];
+//                var _throwPending = {
+//                    operation: _operation,
+//                    node: _throwNode,
+//                    compilationUnitNode: methodNode.compilationUnitNode
+//                };
+//                this._throwPendings.push(_throwPending);
+//            }
+//        }
+
+        // CsharpDoc
+//        if (methodNode.comment) {
+//            _operation.documentation = methodNode.comment;
+//        }
+
+        // "default" for Annotation Type Element
+//        if (methodNode.defaultValue) {
+//            this._addTag(_operation, Core.TK_STRING, "default", methodNode.defaultValue);
+//        }
+
+        // Translate Type Parameters
+//        this.translateTypeParameters(options, _operation, methodNode.typeParameters);
+    };
+
+    
+    /**
+     * Translate Method Parameters
+     * @param {Object} options
+     * @param {type.Model} namespace
+     * @param {Object} parameterNode
+     */
+    CsharpCodeAnalyzer.prototype.translateParameter = function (options, namespace, parameterNode) {
+        var _parameter = new type.UMLParameter();
+        _parameter._parent = namespace;
+        _parameter.name = parameterNode.name;
+        namespace.parameters.push(_parameter);
+
+        // Add to _typedFeaturePendings
+        this._typedFeaturePendings.push({
+            namespace: namespace._parent,
+            feature: _parameter,
+            node: parameterNode
+        });
+    };
+
+    
+    /**
+     * Translate C# Field Node as UMLAssociation.
+     * @param {Object} options
+     * @param {type.Model} namespace
+     * @param {Object} fieldNode
+     */
+    CsharpCodeAnalyzer.prototype.translateFieldAsAssociation = function (options, namespace, fieldNode) {
+        var i, len;
+        if (fieldNode.name && fieldNode.name.length > 0) {
+            // Add to _associationPendings
+            var _associationPending = {
+                classifier: namespace,
+                node: fieldNode
+            };
+            this._associationPendings.push(_associationPending);
+        }
+    };
+
+    /**
+     * Translate C# Field Node as UMLAttribute.
+     * @param {Object} options
+     * @param {type.Model} namespace
+     * @param {Object} fieldNode
+     */
+    CsharpCodeAnalyzer.prototype.translateFieldAsAttribute = function (options, namespace, fieldNode) {
+        var i, len;
+        if (fieldNode.name && fieldNode.name.length > 0) {
+            for (i = 0, len = fieldNode.name.length; i < len; i++) {
+                var variableNode = fieldNode.name[i];
+
+                // Create Attribute
+                var _attribute = new type.UMLAttribute();
+                _attribute._parent = namespace;
+                _attribute.name = variableNode.name;
+
+                // Access Modifiers
+                _attribute.visibility = this._getVisibility(fieldNode.modifiers);
+                if (variableNode.initialize) {
+                    _attribute.defaultValue = variableNode.initialize;
+                }
+
+                // Static Modifier
+                if (_.contains(fieldNode.modifiers, "static")) {
+                    _attribute.isStatic = true;
+                }
+
+                // Final Modifier
+                if (_.contains(fieldNode.modifiers, "sealed")) {
+                    _attribute.isLeaf = true;
+                    _attribute.isReadOnly = true;
+                }
+
+                // Volatile Modifier
+                if (_.contains(fieldNode.modifiers, "volatile")) {
+                    this._addTag(_attribute, Core.TK_BOOLEAN, "volatile", true);
+                }
+ 
+                // CsharpDoc
+//                if (fieldNode.comment) {
+//                    _attribute.documentation = fieldNode.comment;
+//                }
+
+                namespace.attributes.push(_attribute);
+
+                // Add to _typedFeaturePendings
+                var _typedFeature = {
+                    namespace: namespace,
+                    feature: _attribute,
+                    node: fieldNode
+                };
+                this._typedFeaturePendings.push(_typedFeature);
+
+            }
+        }
+    };
+
+    
+    
+    /**
+     * Translate C# Type Parameter Nodes.
+     * @param {Object} options
+     * @param {type.Model} namespace
+     * @param {Object} typeParameterNodeArray
+     */
+    CsharpCodeAnalyzer.prototype.translateTypeParameters = function (options, namespace, typeParameterNodeArray) {
+        if (typeParameterNodeArray) {
+            var i, len, _typeParam;
+            for (i = 0, len = typeParameterNodeArray.length; i < len; i++) {
+                _typeParam = typeParameterNodeArray[i];
+                if (_typeParam.node === "TypeParameter") {
+                    var _templateParameter = new type.UMLTemplateParameter();
+                    _templateParameter._parent = namespace;
+                    _templateParameter.name = _typeParam.name; 
+                    if (_typeParam.type) {
+                        _templateParameter.parameterType = _typeParam.type;
+                    }
+                    namespace.templateParameters.push(_templateParameter);
+                }
+            }
+        }
+    };
+    
+    /**
+     * Translate C# Package Node.
+     * @param {Object} options
+     * @param {type.Model} namespace
+     * @param {Object} compilationUnitNode
+     */
+    CsharpCodeAnalyzer.prototype.translatePackage = function (options, namespace, packageNode) {
+        if (packageNode && packageNode.qualifiedName ) {
+            
+            var pathNames = packageNode.qualifiedName.split("."); 
+            return this._ensurePackage(namespace, pathNames);
+        }
+        return null;
+    };
+    
+    
+    /**
+     * Return the package of a given pathNames. If not exists, create the package.
+     * @param {type.Model} namespace
+     * @param {Array.<string>} pathNames
+     * @return {type.Model} Package element corresponding to the pathNames
+     */
+    CsharpCodeAnalyzer.prototype._ensurePackage = function (namespace, pathNames) {
+        if (pathNames.length > 0) {
+            var name = pathNames.shift();
+            if (name && name.length > 0) {
+                var elem = namespace.findByName(name);
+                if (elem !== null) {
+                    // Package exists
+                    if (pathNames.length > 0) {
+                        return this._ensurePackage(elem, pathNames);
+                    } else {
+                        return elem;
+                    }
+                } else {
+                    // Package not exists, then create one.
+                    var _package = new type.UMLPackage();
+                    namespace.ownedElements.push(_package);
+                    _package._parent = namespace;
+                    _package.name = name;
+                    if (pathNames.length > 0) {
+                        return this._ensurePackage(_package, pathNames);
+                    } else {
+                        return _package;
+                    }
+                }
+            }
+        } else {
+            return namespace;
+        }
+    };
     
     /**
      * Analyze all C# files in basePath

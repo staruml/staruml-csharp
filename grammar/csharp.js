@@ -110,7 +110,31 @@ case 18:
         this.$ = $$[$0-2] + "." + $$[$0];
     
 break;
-case 20: case 23: case 25: case 26: case 29: case 48: case 49: case 52: case 53: case 85: case 88: case 90: case 127: case 128: case 129: case 146: case 152: case 173: case 174: case 175: case 176: case 177: case 178: case 179: case 181: case 182:
+case 20:
+ 
+    
+        this.$ = {
+            "name": $$[$0-1]
+        };
+        
+        this.$["typeParameters"] = [];
+        if ($$[$0][0] === "<" && $$[$0][$$[$0].length-1] === ">") {
+            var i, _temp, _param, _bounded;
+            $$[$0] = $$[$0].substring(1, $$[$0].length-1);
+            _temp = $$[$0].split(",");
+            for (i = 0; i < _temp.length; i++) {
+                _param = _temp[i].trim();
+                 
+                this.$["typeParameters"].push({
+                    "node": "TypeParameter",
+                    "name": _param
+                }); 
+                 
+            }
+        }
+    
+break;
+case 23: case 25: case 26: case 29: case 48: case 49: case 52: case 53: case 85: case 88: case 90: case 127: case 128: case 129: case 146: case 152: case 173: case 174: case 175: case 176: case 177: case 178: case 179: case 181: case 182:
 
         this.$ = $$[$0-1] + "" + $$[$0];
     
@@ -209,33 +233,66 @@ case 292: case 452: case 453:
         };
     
 break;
-case 420: case 421:
+case 420:
 
         this.$ = {
             "node": "delegate", 
-            "type": $$[$0-5],
-            "name": $$[$0-4] 
+            "type": $$[$0-5]
         };
+        if($$[$0-4]["typeParameters"]){
+            this.$["name"] = $$[$0-4]["name"];
+            this.$["typeParameters"] = $$[$0-4]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-4];
+        }
     
 break;
-case 422: case 426:
+case 421:
+
+        this.$ = {
+            "node": "delegate", 
+            "type": $$[$0-5] 
+        };
+        if($$[$0-4]["typeParameters"]){
+            this.$["name"] = $$[$0-4]["name"];
+            this.$["typeParameters"] = $$[$0-4]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-4];
+        }
+    
+break;
+case 422:
 
         this.$ = {
             "node": "delegate",
             "modifiers": $$[$0-7],
-            "type": $$[$0-5],
-            "name": $$[$0-4] 
+            "type": $$[$0-5] 
         };
+        if($$[$0-4]["typeParameters"]){
+            this.$["name"] = $$[$0-4]["name"];
+            this.$["typeParameters"] = $$[$0-4]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-4];
+        }
     
 break;
 case 423: case 425:
 
         this.$ = {
             "node": "delegate", 
-            "type": $$[$0-6],
-            "name": $$[$0-5],
+            "type": $$[$0-6], 
             "parameters": $$[$0-3]
         };
+        if($$[$0-5]["typeParameters"]){
+            this.$["name"] = $$[$0-5]["name"];
+            this.$["typeParameters"] = $$[$0-5]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-5];
+        }
     
 break;
 case 424: case 427:
@@ -243,103 +300,171 @@ case 424: case 427:
         this.$ = {
             "node": "delegate",
             "modifiers": $$[$0-8],
-            "type": $$[$0-6],
-            "name": $$[$0-5],
+            "type": $$[$0-6], 
             "parameters": $$[$0-3]
         };
+        if($$[$0-5]["typeParameters"]){
+            this.$["name"] = $$[$0-5]["name"];
+            this.$["typeParameters"] = $$[$0-5]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-5];
+        }
+    
+break;
+case 426:
+
+        this.$ = {
+            "node": "delegate",
+            "modifiers": $$[$0-7],
+            "type": $$[$0-5]
+        };
+        if($$[$0-4]["typeParameters"]){
+            this.$["name"] = $$[$0-4]["name"];
+            this.$["typeParameters"] = $$[$0-4]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-4];
+        }
     
 break;
 case 428: case 429:
 
         this.$ = {
-            "node": "enum",
-            "name": $$[$0-1],
+            "node": "enum", 
             "body": $$[$0]
         };
+        
+        if($$[$0-1]["typeParameters"]){
+            this.$["name"] = $$[$0-1]["name"];
+            this.$["typeParameters"] = $$[$0-1]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-1];
+        }
     
 break;
 case 430: case 433:
 
         this.$ = {
             "node": "enum",
-            "modifiers": $$[$0-3],
-            "name": $$[$0-1],
+            "modifiers": $$[$0-3], 
             "body": $$[$0]
         };
+        
+        if($$[$0-1]["typeParameters"]){
+            this.$["name"] = $$[$0-1]["name"];
+            this.$["typeParameters"] = $$[$0-1]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-1];
+        }
     
 break;
 case 431: case 434:
 
         this.$ = {
-            "node": "enum",
-            "name": $$[$0-2],
+            "node": "enum", 
             "base": $$[$0-1],
             "body": $$[$0]
         };
+        
+        if($$[$0-2]["typeParameters"]){
+            this.$["name"] = $$[$0-2]["name"];
+            this.$["typeParameters"] = $$[$0-2]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-2];
+        }
     
 break;
 case 432: case 435:
 
         this.$ = {
-            "node": "enum",
-            "name": $$[$0-2],
+            "node": "enum", 
             "body": $$[$0-1]
         };
+        
+        if($$[$0-2]["typeParameters"]){
+            this.$["name"] = $$[$0-2]["name"];
+            this.$["typeParameters"] = $$[$0-2]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-2];
+        }
     
 break;
 case 436: case 442:
 
         this.$ = {
             "node": "enum",
-            "modifiers": $$[$0-4],
-            "name": $$[$0-2],
+            "modifiers": $$[$0-4], 
             "base": $$[$0-1],
             "body": $$[$0]
         };
+        
+        if($$[$0-2]["typeParameters"]){
+            this.$["name"] = $$[$0-2]["name"];
+            this.$["typeParameters"] = $$[$0-2]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-2];
+        }
     
 break;
-case 437:
+case 437: case 441:
 
         this.$ = {
             "node": "enum",
-            "modifiers": $$[$0-4],
-            "name": $$[$0-2], 
+            "modifiers": $$[$0-4], 
             "body": $$[$0-1]
         };
+        
+        if($$[$0-2]["typeParameters"]){
+            this.$["name"] = $$[$0-2]["name"];
+            this.$["typeParameters"] = $$[$0-2]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-2];
+        }
     
 break;
 case 438: case 440:
 
         this.$ = {
-            "node": "enum", 
-            "name": $$[$0-3],
+            "node": "enum",  
             "base": $$[$0-2],
             "body": $$[$0-1]
         };
+        
+        if($$[$0-3]["typeParameters"]){
+            this.$["name"] = $$[$0-3]["name"];
+            this.$["typeParameters"] = $$[$0-3]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-3];
+        }
     
 break;
 case 439: case 443:
 
         this.$ = {
             "node": "enum",
-            "modifiers": $$[$0-5],
-            "name": $$[$0-3],
+            "modifiers": $$[$0-5], 
             "base": $$[$0-2],
             "body": $$[$0-1]
         };
+        
+        if($$[$0-3]["typeParameters"]){
+            this.$["name"] = $$[$0-3]["name"];
+            this.$["typeParameters"] = $$[$0-3]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-3];
+        }
     
 break;
-case 441:
-
-        this.$ = {
-            "node": "enum",
-            "modifiers": $$[$0-4],
-            "name": $$[$0-2],
-            "body": $$[$0-1]
-        };
-    
-break;
-case 446: case 472: case 529: case 650: case 651: case 767: case 768:
+case 446: case 472: case 529: case 553: case 650: case 651: case 767: case 768:
 
         this.$ = $$[$0-1];
     
@@ -359,91 +484,154 @@ break;
 case 454: case 455:
 
         this.$ = {
-            "node": "interface",
-            "name": $$[$0-2],
+            "node": "interface", 
             "body": $$[$0]
         };
+        
+        if($$[$0-2]["typeParameters"]){
+            this.$["name"] = $$[$0-2]["name"];
+            this.$["typeParameters"] = $$[$0-2]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-2];
+        }
     
 break;
 case 456: case 459:
 
         this.$ = {
             "node": "interface",
-            "modifiers": $$[$0-4],
-            "name": $$[$0-2],
+            "modifiers": $$[$0-4], 
             "body": $$[$0]
         };
+        
+        if($$[$0-2]["typeParameters"]){
+            this.$["name"] = $$[$0-2]["name"];
+            this.$["typeParameters"] = $$[$0-2]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-2];
+        }
     
 break;
 case 457: case 460:
 
         this.$ = {
-            "node": "interface", 
-            "name": $$[$0-3],
+            "node": "interface",  
             "base": $$[$0-2],
             "body": $$[$0]
         };
+        
+        if($$[$0-3]["typeParameters"]){
+            this.$["name"] = $$[$0-3]["name"];
+            this.$["typeParameters"] = $$[$0-3]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-3];
+        }
     
 break;
 case 458: case 461:
 
         this.$ = {
-            "node": "interface", 
-            "name": $$[$0-3],
+            "node": "interface",  
             "body": $$[$0-1]
         };
+        
+        if($$[$0-3]["typeParameters"]){
+            this.$["name"] = $$[$0-3]["name"];
+            this.$["typeParameters"] = $$[$0-3]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-3];
+        }
     
 break;
 case 462: case 468:
 
         this.$ = {
             "node": "interface",
-            "modifiers": $$[$0-5],
-            "name": $$[$0-3],
+            "modifiers": $$[$0-5], 
             "base": $$[$0-2],
             "body": $$[$0]
         };
+        
+        if($$[$0-3]["typeParameters"]){
+            this.$["name"] = $$[$0-3]["name"];
+            this.$["typeParameters"] = $$[$0-3]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-3];
+        }
     
 break;
 case 463: case 467:
 
         this.$ = {
             "node": "interface",
-            "modifiers": $$[$0-5],
-            "name": $$[$0-3],
+            "modifiers": $$[$0-5], 
             "body": $$[$0-1]
         };
+        
+        if($$[$0-3]["typeParameters"]){
+            this.$["name"] = $$[$0-3]["name"];
+            this.$["typeParameters"] = $$[$0-3]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-3];
+        }
     
 break;
 case 464:
 
         this.$ = {
-            "node": "interface", 
-            "name": $$[$0-4],
+            "node": "interface",  
             "base": $$[$0-3],
             "body": $$[$0-1]
         };
+        
+        if($$[$0-4]["typeParameters"]){
+            this.$["name"] = $$[$0-4]["name"];
+            this.$["typeParameters"] = $$[$0-4]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-4];
+        }
     
 break;
 case 465: case 469:
 
         this.$ = {
             "node": "interface",
-            "modifiers": $$[$0-6],
-            "name": $$[$0-4],
+            "modifiers": $$[$0-6], 
             "base": $$[$0-3],
             "body": $$[$0-1]
         };
+        
+        if($$[$0-4]["typeParameters"]){
+            this.$["name"] = $$[$0-4]["name"];
+            this.$["typeParameters"] = $$[$0-4]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-4];
+        }
     
 break;
 case 466:
 
         this.$ = {
-            "node": "interface",
-            "name": $$[$0-4],
+            "node": "interface", 
             "base": $$[$0-3],
             "body": $$[$0-1]
         };
+        
+        if($$[$0-4]["typeParameters"]){
+            this.$["name"] = $$[$0-4]["name"];
+            this.$["typeParameters"] = $$[$0-4]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-4];
+        }
     
 break;
 case 474: case 531: case 557: case 563: case 588: case 626:
@@ -502,81 +690,137 @@ break;
 case 511: case 512:
 
         this.$ = {
-            "node": "struct",
-            "name": $$[$0-2],
+            "node": "struct", 
             "body": $$[$0]
         };  
+        
+        if($$[$0-2]["typeParameters"]){
+            this.$["name"] = $$[$0-2]["name"];
+            this.$["typeParameters"] = $$[$0-2]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-2];
+        }
     
 break;
 case 513: case 516:
 
         this.$ = {
             "node": "struct",
-            "modifiers": $$[$0-4],
-            "name": $$[$0-2],
+            "modifiers": $$[$0-4], 
             "body": $$[$0]
         };  
+        
+        if($$[$0-2]["typeParameters"]){
+            this.$["name"] = $$[$0-2]["name"];
+            this.$["typeParameters"] = $$[$0-2]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-2];
+        }
     
 break;
 case 514: case 517:
 
         this.$ = {
-            "node": "struct",
-            "name": $$[$0-3],
+            "node": "struct", 
             "base": $$[$0-2],
             "body": $$[$0]
         };  
+        
+        if($$[$0-3]["typeParameters"]){
+            this.$["name"] = $$[$0-3]["name"];
+            this.$["typeParameters"] = $$[$0-3]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-3];
+        }
     
 break;
 case 515: case 518:
 
         this.$ = {
-            "node": "struct",
-            "name": $$[$0-3],
+            "node": "struct", 
             "body": $$[$0-1]
         };  
+        
+        if($$[$0-3]["typeParameters"]){
+            this.$["name"] = $$[$0-3]["name"];
+            this.$["typeParameters"] = $$[$0-3]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-3];
+        }
     
 break;
 case 519: case 525:
 
         this.$ = {
             "node": "struct",
-            "modifiers": $$[$0-5],
-            "name": $$[$0-3],
+            "modifiers": $$[$0-5], 
             "base": $$[$0-2],
             "body": $$[$0]
         };  
+        
+        if($$[$0-3]["typeParameters"]){
+            this.$["name"] = $$[$0-3]["name"];
+            this.$["typeParameters"] = $$[$0-3]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-3];
+        }
     
 break;
 case 520: case 524:
 
         this.$ = {
             "node": "struct",
-            "modifiers": $$[$0-5],
-            "name": $$[$0-3],
+            "modifiers": $$[$0-5], 
             "body": $$[$0-1]
         };  
+        
+        if($$[$0-3]["typeParameters"]){
+            this.$["name"] = $$[$0-3]["name"];
+            this.$["typeParameters"] = $$[$0-3]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-3];
+        }
     
 break;
 case 521: case 523:
 
         this.$ = {
-            "node": "struct",
-            "name": $$[$0-4],
+            "node": "struct", 
             "base": $$[$0-3],
             "body": $$[$0-1]
         };  
+        
+        if($$[$0-4]["typeParameters"]){
+            this.$["name"] = $$[$0-4]["name"];
+            this.$["typeParameters"] = $$[$0-4]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-4];
+        }
     
 break;
 case 522: case 526:
 
         this.$ = {
             "node": "struct",
-            "modifiers": $$[$0-6],
-            "name": $$[$0-4],
+            "modifiers": $$[$0-6], 
             "base": $$[$0-3],
             "body": $$[$0-1]
         };  
+        
+        if($$[$0-4]["typeParameters"]){
+            this.$["name"] = $$[$0-4]["name"];
+            this.$["typeParameters"] = $$[$0-4]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-4];
+        }
     
 break;
 case 543:
@@ -639,26 +883,16 @@ case 551:
         };
     
 break;
-case 553:
-
-         this.$ = {
-            "using" : $$[$0-1] 
-         };
-    
-break;
 case 554:
 
-         this.$ = {
-            "member" : $$[$0-1]
-         };
+        this.$ = $$[$0-1];
+        
     
 break;
 case 555:
 
-         this.$ = {
-            "using" : $$[$0-2],
-            "member" : $$[$0-1]
-         };
+        
+        this.$ = $$[$0-2].concat($$[$0-1]);
     
 break;
 case 560: case 561:
@@ -672,29 +906,50 @@ break;
 case 589:
  
         this.$ = {
-            "node": "class",
-            "name": $$[$0-2],
+            "node": "class", 
             "body": $$[$0-1]
         };
+        
+        if($$[$0-2]["typeParameters"]){
+            this.$["name"] = $$[$0-2]["name"];
+            this.$["typeParameters"] = $$[$0-2]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-2];
+        }
     
 break;
 case 590:
 
         this.$ = {
-            "node": "class",
-            "name": $$[$0-2],
+            "node": "class", 
             "body": $$[$0]
         };
+        
+        if($$[$0-2]["typeParameters"]){
+            this.$["name"] = $$[$0-2]["name"];
+            this.$["typeParameters"] = $$[$0-2]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-2];
+        }
     
 break;
 case 591:
 
         this.$ = {
             "node": "class",
-            "modifiers": $$[$0-4],
-            "name": $$[$0-2],
+            "modifiers": $$[$0-4], 
             "body": $$[$0]  
         };
+        
+        if($$[$0-2]["typeParameters"]){
+            this.$["name"] = $$[$0-2]["name"];
+            this.$["typeParameters"] = $$[$0-2]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-2];
+        }
     
 break;
 case 592:
@@ -707,20 +962,25 @@ case 592:
         }
         if (isAnnotationType){
             this.$ = {
-                "node": "class", 
-                "name": $$[$0-3],
+                "node": "annotationType",  
                 "base": $$[$0-2],
-                "body": $$[$0],
-                "annotationType": "annotationType"
+                "body": $$[$0]
             };
         }
         else{
             this.$ = {
-                "node": "class", 
-                "name": $$[$0-3],
+                "node": "class",  
                 "base": $$[$0-2],
                 "body": $$[$0]  
             };
+        }
+        
+        if($$[$0-3]["typeParameters"]){
+            this.$["name"] = $$[$0-3]["name"];
+            this.$["typeParameters"] = $$[$0-3]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-3];
         }
         
     
@@ -728,20 +988,34 @@ break;
 case 593:
 
         this.$ = {
-            "node": "class", 
-            "name": $$[$0-3], 
+            "node": "class",  
             "body": $$[$0-1]
         };
+        
+        if($$[$0-3]["typeParameters"]){
+            this.$["name"] = $$[$0-3]["name"];
+            this.$["typeParameters"] = $$[$0-3]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-3];
+        }
     
 break;
 case 594:
 
         this.$ = {
             "node": "class", 
-            "modifiers": $$[$0-4],
-            "name": $$[$0-2], 
+            "modifiers": $$[$0-4], 
             "body": $$[$0]
         };
+        
+        if($$[$0-2]["typeParameters"]){
+            this.$["name"] = $$[$0-2]["name"];
+            this.$["typeParameters"] = $$[$0-2]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-2];
+        }
     
 break;
 case 595:
@@ -755,30 +1029,42 @@ case 595:
         
         if (isAnnotationType){
             this.$ = {
-                "node": "class",  
-                "name": $$[$0-3],
+                "node": "annotationType",   
                 "base": $$[$0-2],
-                "body": $$[$0],
-                "annotationType": "annotationType"
+                "body": $$[$0] 
             };
         }
         else {
             this.$ = {
-                "node": "class",  
-                "name": $$[$0-3],
+                "node": "class",   
                 "base": $$[$0-2],
                 "body": $$[$0]
             };
+        }
+        
+        if($$[$0-3]["typeParameters"]){
+            this.$["name"] = $$[$0-3]["name"];
+            this.$["typeParameters"] = $$[$0-3]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-3];
         }
     
 break;
 case 596:
 
         this.$ = {
-            "node": "class",
-            "name": $$[$0-3],
+            "node": "class", 
             "body": $$[$0-1]
         };
+        
+        if($$[$0-3]["typeParameters"]){
+            this.$["name"] = $$[$0-3]["name"];
+            this.$["typeParameters"] = $$[$0-3]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-3];
+        }
     
 break;
 case 597:
@@ -792,33 +1078,45 @@ case 597:
         
         if (isAnnotationType){
             this.$ = {
-                "node": "class",
-                "modifiers": $$[$0-5],
-                "name": $$[$0-3],
+                "node": "annotationType",
+                "modifiers": $$[$0-5], 
                 "base": $$[$0-2],
-                "body": $$[$0],
-                "annotationType": "annotationType"
+                "body": $$[$0] 
             };
         }
         else {
             this.$ = {
                 "node": "class",
-                "modifiers": $$[$0-5],
-                "name": $$[$0-3],
+                "modifiers": $$[$0-5], 
                 "base": $$[$0-2],
                 "body": $$[$0]
             };
         } 
+        
+        if($$[$0-3]["typeParameters"]){
+            this.$["name"] = $$[$0-3]["name"];
+            this.$["typeParameters"] = $$[$0-3]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-3];
+        }
     
 break;
 case 598:
 
         this.$ = {
             "node": "class",
-            "modifiers": $$[$0-5],
-            "name": $$[$0-3],
+            "modifiers": $$[$0-5], 
             "body": $$[$0-1]
         };
+        
+        if($$[$0-3]["typeParameters"]){
+            this.$["name"] = $$[$0-3]["name"];
+            this.$["typeParameters"] = $$[$0-3]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-3];
+        }
     
 break;
 case 599:
@@ -831,22 +1129,25 @@ case 599:
         }
         if (isAnnotationType){
             this.$ = {
-                "node": "class",
-                "name": $$[$0-4],
+                "node": "annotationType", 
                 "base": $$[$0-3],
-                "body": $$[$0-1],
-                "annotationType": "annotationType"
+                "body": $$[$0-1] 
             };
         }
         else {
             this.$ = {
-                "node": "class",
-                "name": $$[$0-4],
+                "node": "class", 
                 "base": $$[$0-3],
                 "body": $$[$0-1]
             };
         }
-        
+        if($$[$0-4]["typeParameters"]){
+            this.$["name"] = $$[$0-4]["name"];
+            this.$["typeParameters"] = $$[$0-4]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-4];
+        }
     
 break;
 case 600:
@@ -860,24 +1161,28 @@ case 600:
         
         if (isAnnotationType){
             this.$ = {
-                "node": "class",
-                "modifiers": $$[$0-6],
-                "name": $$[$0-4],
+                "node": "annotationType",
+                "modifiers": $$[$0-6], 
                 "base": $$[$0-3],
-                "body": $$[$0-1],
-                "annotationType": "annotationType"
+                "body": $$[$0-1] 
             };
         }
         else {
             this.$ = {
                 "node": "class",
-                "modifiers": $$[$0-6],
-                "name": $$[$0-4],
+                "modifiers": $$[$0-6], 
                 "base": $$[$0-3],
                 "body": $$[$0-1]
             };
-        }
+        } 
         
+        if($$[$0-4]["typeParameters"]){
+            this.$["name"] = $$[$0-4]["name"];
+            this.$["typeParameters"] = $$[$0-4]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-4];
+        } 
     
 break;
 case 601:
@@ -891,20 +1196,25 @@ case 601:
         
         if (isAnnotationType){
             this.$ = {
-                "node": "class", 
-                "name": $$[$0-4],
+                "node": "annotationType",  
                 "base": $$[$0-3],
-                "body": $$[$0-1],
-                "annotationType": "annotationType"
+                "body": $$[$0-1] 
             };
         }
         else {
             this.$ = {
-                "node": "class", 
-                "name": $$[$0-4],
+                "node": "class",  
                 "base": $$[$0-3],
                 "body": $$[$0-1]
             };
+        }
+        
+        if($$[$0-4]["typeParameters"]){
+            this.$["name"] = $$[$0-4]["name"];
+            this.$["typeParameters"] = $$[$0-4]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-4];
         }
     
 break;
@@ -912,10 +1222,17 @@ case 602:
 
         this.$ = {
             "node": "class", 
-            "modifiers": $$[$0-5],
-            "name": $$[$0-3],
+            "modifiers": $$[$0-5], 
             "body": $$[$0-1]
         };
+        
+        if($$[$0-3]["typeParameters"]){
+            this.$["name"] = $$[$0-3]["name"];
+            this.$["typeParameters"] = $$[$0-3]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-3];
+        }
     
 break;
 case 603:
@@ -929,22 +1246,27 @@ case 603:
         
         if (isAnnotationType){
             this.$ = {
-                "node": "class",
-                "modifiers": $$[$0-5],
-                "name": $$[$0-3],
+                "node": "annotationType",
+                "modifiers": $$[$0-5], 
                 "base": $$[$0-2],
-                "body": $$[$0],
-                "annotationType": "annotationType"
+                "body": $$[$0] 
             };
         }
         else {
             this.$ = {
                 "node": "class",
-                "modifiers": $$[$0-5],
-                "name": $$[$0-3],
+                "modifiers": $$[$0-5], 
                 "base": $$[$0-2],
                 "body": $$[$0]
             };
+        }
+        
+        if($$[$0-3]["typeParameters"]){
+            this.$["name"] = $$[$0-3]["name"];
+            this.$["typeParameters"] = $$[$0-3]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-3];
         }
     
 break;
@@ -959,22 +1281,27 @@ case 604:
         
         if (isAnnotationType){
             this.$ = {
-                "node": "class",
-                "modifiers": $$[$0-6],
-                "name": $$[$0-4],
+                "node": "annotationType",
+                "modifiers": $$[$0-6], 
                 "base": $$[$0-3],
-                "body": $$[$0-1],
-                "annotationType": "annotationType"
+                "body": $$[$0-1] 
             };
         }
         else {
             this.$ = {
                 "node": "class",
-                "modifiers": $$[$0-6],
-                "name": $$[$0-4],
+                "modifiers": $$[$0-6], 
                 "base": $$[$0-3],
                 "body": $$[$0-1]
             };
+        }
+        
+        if($$[$0-4]["typeParameters"]){
+            this.$["name"] = $$[$0-4]["name"];
+            this.$["typeParameters"] = $$[$0-4]["typeParameters"];
+        }
+        else {
+            this.$["name"] = $$[$0-4];
         }
     
 break;
