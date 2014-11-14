@@ -674,6 +674,7 @@ define(function (require, exports, module) {
      * @param {type.Model} elem
      * @return {string}
      */
+    
     CsharpCodeGenerator.prototype.getType = function (elem) {
         var _type = "void";
         // type name
@@ -712,6 +713,7 @@ define(function (require, exports, module) {
      * @param {type.Model} elem
      * @param {Object} options     
      */
+    
     CsharpCodeGenerator.prototype.writeMemberVariable = function (codeWriter, elem, options) {
          
         if (elem.name.length > 0) {

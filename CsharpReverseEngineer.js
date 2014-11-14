@@ -37,6 +37,25 @@ define(function (require, exports, module) {
 
     require("grammar/csharp");
     
+    // C# Primitive Types
+    var csharpPrimitiveTypes = [
+        "sbyte",
+        "byte",
+        "short",
+        "ushort",
+        "int",
+        "uint",
+        "long",
+        "ulong",
+        "char",
+        "float",
+        "double",
+        "decimal",
+        "bool",
+        "object",
+        "string",
+        "void"
+    ];
       
     /**
      * C# Code Analyzer
@@ -78,6 +97,8 @@ define(function (require, exports, module) {
          * @member {{namespace:type.UMLModelElement, feature:type.UMLStructuralFeature, node: Object}}
          */
         this._typedFeaturePendings = [];
+        
+        this._usingList = [];
     }
  
     /**
@@ -101,9 +122,9 @@ define(function (require, exports, module) {
         promise = this.performFirstPhase(options);
 
         // Perform 2nd Phase
-//        promise.always(function () {
-//            self.performSecondPhase(options);
-//        });
+        promise.always(function () {
+            self.performSecondPhase(options);
+        });
 
         // Load To Project
 //        promise.always(function () {
@@ -121,6 +142,363 @@ define(function (require, exports, module) {
 
         return promise;
     };
+    
+    
+    /**
+     * Convert string type name to path name (Array of string)
+     * @param {string} typeName
+     * @return {Array.<string>} pathName
+     */
+    
+    CsharpCodeAnalyzer.prototype._toPathName = function (typeName) {
+        var pathName = (typeName.indexOf(".") > 0 ? typeName.trim().split(".") : null);
+        if (!pathName) {
+            pathName = [ typeName ];
+        }
+        return pathName;
+    };
+    
+    
+    /**
+     * Find Type.
+     *
+     * @param {type.Model} namespace
+     * @param {string|Object} type Type name string or type node.
+     * @param {Object} compilationUnitNode To search type with import statements.
+     * @return {type.Model} element correspond to the type.
+     */
+    
+    CsharpCodeAnalyzer.prototype._findType = function (namespace, type, compilationUnitNode) {
+        var typeName,
+            pathName,
+            _type = null;
+
+        
+        typeName = type; 
+
+        pathName = this._toPathName(typeName);
+
+        // 1. Lookdown from context
+        if (pathName.length > 1) {
+            _type = namespace.lookdown(pathName);
+        } else {
+            _type = namespace.findByName(typeName);
+        }
+
+        // 2. Lookup from context
+        if (!_type) {
+            _type = namespace.lookup(typeName, null, this._root);
+        }
+
+        // 3. Find from imported namespaces
+        if (!_type) {
+            if (compilationUnitNode.using) {
+                var i, len;
+                for (i = 0, len = compilationUnitNode.using.length; i < len; i++) {
+                    var _import = compilationUnitNode.using[i]; 
+                    // Find in import exact matches (e.g. import java.lang.String)
+                    _type = this._root.lookdown(_import.qualifiedName); 
+                } 
+            }
+        }
+
+        if (!_type) {
+            for( i = 0, len=this._usingList.length; i < len; i++){
+                var _import = this._usingList[i]; 
+                // Find in import exact matches (e.g. import java.lang.String)
+                _type = this._root.lookdown(_import.qualifiedName);    
+            }   
+        }
+        
+        // 4. Lookdown from Root
+        if (!_type) {
+            if (pathName.length > 1) {
+                _type = this._root.lookdown(pathName);
+            } else {
+                _type = this._root.findByName(typeName);
+            }
+        }
+
+        return _type;
+    };
+    
+    
+    /**
+     * Return the class of a given pathNames. If not exists, create the class.
+     * @param {type.Model} namespace
+     * @param {Array.<string>} pathNames
+     * @return {type.Model} Class element corresponding to the pathNames
+     */
+    CsharpCodeAnalyzer.prototype._ensureClass = function (namespace, pathNames) {
+        if (pathNames.length > 0) {
+            var _className = pathNames.pop(),
+                _package = this._ensurePackage(namespace, pathNames),
+                _class = _package.findByName(_className);
+            if (!_class) {
+                _class = new type.UMLClass();
+                _class._parent = _package;
+                _class.name = _className;
+                _class.visibility = UML.VK_PUBLIC;
+                _package.ownedElements.push(_class);
+            }
+            return _class;
+        }
+        return null;
+    };
+
+    /**
+     * Return the interface of a given pathNames. If not exists, create the interface.
+     * @param {type.Model} namespace
+     * @param {Array.<string>} pathNames
+     * @return {type.Model} Interface element corresponding to the pathNames
+     */
+    CsharpCodeAnalyzer.prototype._ensureInterface = function (namespace, pathNames) {
+        if (pathNames.length > 0) {
+            var _interfaceName = pathNames.pop(),
+                _package = this._ensurePackage(namespace, pathNames),
+                _interface = _package.findByName(_interfaceName);
+            if (!_interface) {
+                _interface = new type.UMLInterface();
+                _interface._parent = _package;
+                _interface.name = _interfaceName;
+                _interface.visibility = UML.VK_PUBLIC;
+                _package.ownedElements.push(_interface);
+            }
+            return _interface;
+        }
+        return null;
+    };
+    
+    
+    /**
+     * Test a given type is a generic collection or not
+     * @param {Object} typeNode
+     * @return {string} Collection item type name
+     */
+    
+    // _itemTypeName = this._isGenericCollection(_asso.node.type, _asso.node.compilationUnitNode);
+    
+    CsharpCodeAnalyzer.prototype._isGenericCollection = function (typeNode, compilationUnitNode) {
+//        if (typeNode.qualifiedName.typeParameters && typeNode.qualifiedName.typeParameters.length > 0) {
+//            var _collectionType = typeNode.qualifiedName.name,
+//                _itemType       = typeNode.qualifiedName.typeParameters[0].name;
+//
+//            // Used Full name (e.g. java.util.List)
+//            if (_.contains(javaUtilCollectionTypes, _collectionType)) {
+//                return _itemType;
+//            }
+//
+//            // Used name with imports (e.g. List and import java.util.List or java.util.*)
+//            if (_.contains(javaCollectionTypes, _collectionType)) {
+//                if (compilationUnitNode.imports) {
+//                    var i, len;
+//                    for (i = 0, len = compilationUnitNode.imports.length; i < len; i++) {
+//                        var _import = compilationUnitNode.imports[i];
+//
+//                        // Full name import (e.g. import java.util.List)
+//                        if (_import.qualifiedName.name === "java.util." + _collectionType) {
+//                            return _itemType;
+//                        }
+//
+//                        // Wildcard import (e.g. import java.util.*)
+//                        if (_import.qualifiedName.name === "java.util" && _import.wildcard) {
+//                            return _itemType;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+        return null;
+    };
+    
+    
+     /**
+     * Perform Second Phase
+     *   - Create Generalizations
+     *   - Create InterfaceRealizations
+     *   - Create Fields or Associations
+     *   - Resolve Type References
+     *
+     * @param {Object} options
+     */
+    CsharpCodeAnalyzer.prototype.performSecondPhase = function (options) {
+        var i, len, j, len2, _typeName, _type, _itemTypeName, _itemType, _pathName;
+ 
+        
+        // Create Generalizations
+        //     if super type not found, create a Class correspond to the super type.
+        for (i = 0, len = this._extendPendings.length; i < len; i++) {
+            var _extend = this._extendPendings[i];
+            _typeName = _extend.node;
+   
+            _type = this._findType(_extend.classifier, _typeName, _extend.compilationUnitNode);
+            if (!_type) {
+                _pathName = this._toPathName(_typeName);
+                if (_extend.kind === "interface") {
+                    _type = this._ensureInterface(this._root, _pathName);
+                } else {
+                    _type = this._ensureClass(this._root, _pathName);
+                }
+            }
+
+            var generalization = new type.UMLGeneralization();
+            generalization._parent = _extend.classifier;
+            generalization.source = _extend.classifier;
+            generalization.target = _type;
+            _extend.classifier.ownedElements.push(generalization);
+
+        } 
+
+        // Create InterfaceRealizations
+        //     if super interface not found, create a Interface correspond to the super interface
+        for (i = 0, len = this._implementPendings.length; i < len; i++) {
+            var _implement = this._implementPendings[i];
+            _typeName = _implement.node;
+            
+            _type = this._findType(_implement.classifier, _typeName, _implement.compilationUnitNode);
+            if (!_type) {
+                _pathName = this._toPathName(_typeName);
+                _type = this._ensureInterface(this._root, _pathName);
+            }
+            var realization = new type.UMLInterfaceRealization();
+            realization._parent = _implement.classifier;
+            realization.source = _implement.classifier;
+            realization.target = _type;
+            _implement.classifier.ownedElements.push(realization);
+        }
+
+        
+//        var _associationPending = {
+//                classifier: namespace,
+//                node: fieldNode
+//            };
+        
+        // Create Associations
+        for (i = 0, len = this._associationPendings.length; i < len; i++) {
+            var _asso = this._associationPendings[i];
+            _typeName = _asso.node.type;
+            _type = this._findType(_asso.classifier, _typeName, _asso.node.compilationUnitNode);
+            _itemTypeName = this._isGenericCollection(_asso.node.type, _asso.node.compilationUnitNode);
+            if (_itemTypeName) {
+                _itemType = this._findType(_asso.classifier, _itemTypeName, _asso.node.compilationUnitNode);
+            } else {
+                _itemType = null;
+            }
+
+            // if type found, add as Association
+            if (_type || _itemType) {
+                for (j = 0, len2 = _asso.node.name.length; j < len2; j++) {
+                    var variableNode = _asso.node.name[j];
+
+                    // Create Association
+                    var association = new type.UMLAssociation();
+                    association._parent = _asso.classifier;
+                    _asso.classifier.ownedElements.push(association);
+
+                    // Set End1
+                    association.end1.reference = _asso.classifier;
+                    association.end1.name = "";
+                    association.end1.visibility = UML.VK_PACKAGE;
+                    association.end1.navigable = false;
+
+                    // Set End2
+                    if (_itemType) {
+                        association.end2.reference = _itemType;
+                        association.end2.multiplicity = "*";
+                        this._addTag(association.end2, Core.TK_STRING, "collection", _asso.node.type.qualifiedName.name);
+                    } else {
+                        association.end2.reference = _type;
+                    }
+                    association.end2.name = variableNode.name;
+                    association.end2.visibility = this._getVisibility(_asso.node.modifiers);
+                    association.end2.navigable = true;
+
+                    // Final Modifier
+                    if (_.contains(_asso.node.modifiers, "final")) {
+                        association.end2.isReadOnly = true;
+                    }
+
+                    // Static Modifier
+                    if (_.contains(_asso.node.modifiers, "static")) {
+                        this._addTag(association.end2, Core.TK_BOOLEAN, "static", true);
+                    }
+
+                    // Volatile Modifier
+                    if (_.contains(_asso.node.modifiers, "volatile")) {
+                        this._addTag(association.end2, Core.TK_BOOLEAN, "volatile", true);
+                    }
+
+                    // Transient Modifier
+                    if (_.contains(_asso.node.modifiers, "transient")) {
+                        this._addTag(association.end2, Core.TK_BOOLEAN, "transient", true);
+                    }
+                }
+            // if type not found, add as Attribute
+            } else {
+                this.translateFieldAsAttribute(options, _asso.classifier, _asso.node);
+            }
+        }
+//
+//        // Assign Throws to Operations
+//        for (i = 0, len = this._throwPendings.length; i < len; i++) {
+//            var _throw = this._throwPendings[i];
+//            _typeName = _throw.node.name;
+//            _type = this._findType(_throw.operation, _typeName, _throw.compilationUnitNode);
+//            if (!_type) {
+//                _pathName = this._toPathName(_typeName);
+//                _type = this._ensureClass(this._root, _pathName);
+//            }
+//            _throw.operation.raisedExceptions.push(_type);
+//        }
+//
+        
+        // Resolve Type References
+        for (i = 0, len = this._typedFeaturePendings.length; i < len; i++) {
+            var _typedFeature = this._typedFeaturePendings[i];
+            _typeName = _typedFeature.node.type;
+
+            // Find type and assign
+            _type = this._findType(_typedFeature.namespace, _typeName, _typedFeature.node.compilationUnitNode);
+
+            // if type is exists
+            if (_type) {
+                _typedFeature.feature.type = _type;
+            // if type is not exists
+            } else {
+                // if type is generic collection type (e.g. java.util.List<String>)
+                _itemTypeName = this._isGenericCollection(_typedFeature.node.type, _typedFeature.node.compilationUnitNode);
+                if (_itemTypeName) {
+                    _typeName = _itemTypeName;
+                    _typedFeature.feature.multiplicity = "*";
+                    this._addTag(_typedFeature.feature, Core.TK_STRING, "collection", _typedFeature.node.type);
+                }
+
+                // if type is primitive type
+                if (_.contains(csharpPrimitiveTypes, _typeName)) {
+                    _typedFeature.feature.type = _typeName;
+                // otherwise
+                } else {
+                    _pathName = this._toPathName(_typeName);
+                    var _newClass = this._ensureClass(this._root, _pathName);
+                    _typedFeature.feature.type = _newClass;
+                }
+            }
+
+            // Translate type's arrayDimension to multiplicity
+            if (_typedFeature.node.type && _typedFeature.node.type.length > 0) {
+                var _dim = [];
+                for (j = 0, len2 = _typedFeature.node.type.length; j < len2; j++) {
+                    if( _typedFeature.node.type [j] == '[' ) {
+                        _dim.push("*"); 
+                    }
+                }
+                _typedFeature.feature.multiplicity = _dim.join(",");
+            }
+        }
+    };
+
+    
+    
     
     CsharpCodeAnalyzer.prototype.JSONtoString = function (object) {
         var results = [];
@@ -225,6 +603,9 @@ define(function (require, exports, module) {
                     break;
                 case "annotationType":
                     this.translateAnnotationType(options, namespace, typeNode);
+                    break;
+                case "using":
+                    this._usingList.push(typeNode);
                     break;
                 }
             }
@@ -398,13 +779,23 @@ define(function (require, exports, module) {
         if (classNode["base"]) {
             var _extendPending = {
                 classifier: _class,
-                node: classNode["base"],
+                node: classNode["base"][0],
                 kind: "class",
                 compilationUnitNode: this._currentCompilationUnit
             };
             this._extendPendings.push(_extendPending);
-        }
- 
+            
+            for (i = 0, len = classNode["base"].length; i < len; i++) {
+                var _impl = classNode["base"][i];
+                var _implementPending = {
+                    classifier: _class,
+                    node: _impl,
+                    compilationUnitNode: this._currentCompilationUnit
+                };
+                this._implementPendings.push(_implementPending);
+            }   
+        } 
+              
         
         // Translate Type Parameters
         this.translateTypeParameters(options, _class, classNode.typeParameters);
@@ -610,6 +1001,7 @@ define(function (require, exports, module) {
      * @param {type.Model} namespace
      * @param {Object} parameterNode
      */
+    
     CsharpCodeAnalyzer.prototype.translateParameter = function (options, namespace, parameterNode) {
         var _parameter = new type.UMLParameter();
         _parameter._parent = namespace;
@@ -631,6 +1023,7 @@ define(function (require, exports, module) {
      * @param {type.Model} namespace
      * @param {Object} fieldNode
      */
+    
     CsharpCodeAnalyzer.prototype.translateFieldAsAssociation = function (options, namespace, fieldNode) {
         var i, len;
         if (fieldNode.name && fieldNode.name.length > 0) {
@@ -642,6 +1035,7 @@ define(function (require, exports, module) {
             this._associationPendings.push(_associationPending);
         }
     };
+    
 
     /**
      * Translate C# Field Node as UMLAttribute.
@@ -649,6 +1043,7 @@ define(function (require, exports, module) {
      * @param {type.Model} namespace
      * @param {Object} fieldNode
      */
+    
     CsharpCodeAnalyzer.prototype.translateFieldAsAttribute = function (options, namespace, fieldNode) {
         var i, len;
         if (fieldNode.name && fieldNode.name.length > 0) {
