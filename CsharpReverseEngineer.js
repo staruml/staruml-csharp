@@ -218,18 +218,128 @@ define(function (require, exports, module) {
                     this.translateClass(options, namespace, typeNode);
                     break;
                 case "interface":
-//                    this.translateInterface(options, namespace, typeNode);
+                    this.translateInterface(options, namespace, typeNode);
                     break;
                 case "enum":
-//                    this.translateEnum(options, namespace, typeNode);
+                    this.translateEnum(options, namespace, typeNode);
                     break;
                 case "annotationType":
-//                    this.translateAnnotationType(options, namespace, typeNode);
+                    this.translateAnnotationType(options, namespace, typeNode);
                     break;
                 }
             }
         }
     };
+    
+    
+    /**
+     * Translate C# AnnotationType Node.
+     * @param {Object} options
+     * @param {type.Model} namespace
+     * @param {Object} annotationTypeNode
+     */
+    CsharpCodeAnalyzer.prototype.translateAnnotationType = function (options, namespace, annotationTypeNode) {
+        var _annotationType;
+
+        // Create Class <<annotationType>>
+        _annotationType = new type.UMLClass();
+        _annotationType._parent = namespace;
+        _annotationType.name = annotationTypeNode.name;
+        _annotationType.stereotype = "annotationType";
+        _annotationType.visibility = this._getVisibility(annotationTypeNode.modifiers);
+
+        // CsharpDoc
+//        if (annotationTypeNode.comment) {
+//            _annotationType.documentation = annotationTypeNode.comment;
+//        }
+
+        namespace.ownedElements.push(_annotationType);
+
+        // Translate Type Parameters
+        this.translateTypeParameters(options, _annotationType, annotationTypeNode.typeParameters);
+        // Translate Types
+        this.translateTypes(options, _annotationType, annotationTypeNode.body);
+        // Translate Members
+        this.translateMembers(options, _annotationType, annotationTypeNode.body);
+    };
+    
+    
+    /**
+     * Translate C# Enum Node.
+     * @param {Object} options
+     * @param {type.Model} namespace
+     * @param {Object} enumNode
+     */
+    CsharpCodeAnalyzer.prototype.translateEnum = function (options, namespace, enumNode) {
+        var _enum;
+
+        // Create Enumeration
+        _enum = new type.UMLEnumeration();
+        _enum._parent = namespace;
+        _enum.name = enumNode.name;
+        _enum.visibility = this._getVisibility(enumNode.modifiers);
+
+        // CsharpDoc
+//        if (enumNode.comment) {
+//            _enum.documentation = enumNode.comment;
+//        }
+
+        namespace.ownedElements.push(_enum);
+
+        // Translate Type Parameters
+        this.translateTypeParameters(options, _enum, enumNode.typeParameters);
+        // Translate Types
+        this.translateTypes(options, _enum, enumNode.body);
+        // Translate Members
+        this.translateMembers(options, _enum, enumNode.body);
+    };
+
+    
+    
+     /**
+     * Translate C# Interface Node.
+     * @param {Object} options
+     * @param {type.Model} namespace
+     * @param {Object} interfaceNode
+     */
+    CsharpCodeAnalyzer.prototype.translateInterface = function (options, namespace, interfaceNode) {
+        var i, len, _interface;
+
+        // Create Interface
+        _interface = new type.UMLInterface();
+        _interface._parent = namespace;
+        _interface.name = interfaceNode.name;
+        _interface.visibility = this._getVisibility(interfaceNode.modifiers);
+
+        // CsharpDoc
+//        if (interfaceNode.comment) {
+//            _interface.documentation = interfaceNode.comment;
+//        }
+
+        namespace.ownedElements.push(_interface);
+
+        // Register Extends for 2nd Phase Translation
+        if (interfaceNode["base"]) {
+            for (i = 0, len = interfaceNode["base"].length; i < len; i++) {
+                var _extend = interfaceNode["base"][i];
+                this._extendPendings.push({
+                    classifier: _interface,
+                    node: _extend,
+                    kind: "interface",
+                    compilationUnitNode: this._currentCompilationUnit
+                });
+            }
+        }
+
+        // Translate Type Parameters
+        this.translateTypeParameters(options, _interface, interfaceNode.typeParameters);
+        // Translate Types
+        this.translateTypes(options, _interface, interfaceNode.body);
+        // Translate Members
+        this.translateMembers(options, _interface, interfaceNode.body);
+    };
+
+    
     
     /**
      * Return visiblity from modifiers
