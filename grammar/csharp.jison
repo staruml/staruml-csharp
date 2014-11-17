@@ -3083,7 +3083,7 @@ class-declaration
     { 
         $$ = {
             "node": "class", 
-            "body": $3
+            "body": $4
         };
         
         if($2["typeParameters"]){
@@ -4366,7 +4366,7 @@ static-constructor-declaration
     :   modifiers   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   CLOSE_PARENS   method-body
     {
         $$ = {
-            "node": "static",
+            "node": "constructor",
             "modifiers": $1,
             "name": $2
         };
@@ -4374,7 +4374,7 @@ static-constructor-declaration
     |   attributes   modifiers   IDENTIFIER_WITH_TEMPLATE   OPEN_PARENS   CLOSE_PARENS   method-body
     {
         $$ = {
-            "node": "static",
+            "node": "constructor",
             "modifiers": $2,
             "name": $3
         };

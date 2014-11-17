@@ -907,7 +907,7 @@ case 589:
  
         this.$ = {
             "node": "class", 
-            "body": $$[$0-1]
+            "body": $$[$0]
         };
         
         if($$[$0-2]["typeParameters"]){
@@ -1685,7 +1685,7 @@ break;
 case 779: case 780:
 
         this.$ = {
-            "node": "static",
+            "node": "constructor",
             "modifiers": $$[$0-4],
             "name": $$[$0-3]
         };

@@ -28,6 +28,7 @@ define(function (require, exports, module) {
 
     var Core            = app.getModule("core/Core"),
         Repository      = app.getModule("core/Repository"),
+        ProjectManager  = app.getModule("engine/ProjectManager"),
         CommandManager  = app.getModule("command/CommandManager"),
         UML             = app.getModule("uml/UML"),
         FileSystem      = app.getModule("filesystem/FileSystem"),
@@ -127,22 +128,43 @@ define(function (require, exports, module) {
         });
 
         // Load To Project
-//        promise.always(function () {
-//            var writer = new Core.Writer();
-//            writer.writeObj("data", self._root);
-//            var json = writer.current.data;
-//            Repository.importFromJson(Repository.getProject(), json);
-//        });
+        promise.always(function () {
+            var writer = new Core.Writer();
+            console.log(self._root);
+            writer.writeObj("data", self._root);
+            var json = writer.current.data;
+            ProjectManager.importFromJson(ProjectManager.getProject(), json);
+        });
 
         // Generate Diagrams
-//        promise.always(function () {
-//            self.generateDiagrams(options);
-//            console.log("[C#] done.");
-//        });
+        promise.always(function () {
+            self.generateDiagrams(options);
+            console.log("[C#] done.");
+        });
 
         return promise;
     };
     
+        /**
+     * Generate Diagrams (Type Hierarchy, Package Structure, Package Overview)
+     * @param {Object} options
+     */
+    CsharpCodeAnalyzer.prototype.generateDiagrams = function (options) {
+        var baseModel = Repository.get(this._root._id);
+        if (options.packageStructure) {
+            CommandManager.execute("diagramGenerator.packageStructure", baseModel, true);
+        }
+        if (options.typeHierarchy) {
+            CommandManager.execute("diagramGenerator.typeHierarchy", baseModel, true);
+        }
+        if (options.packageOverview) {
+            baseModel.traverse(function (elem) {
+                if (elem instanceof type.UMLPackage) {
+                    CommandManager.execute("diagramGenerator.overview", elem, true);
+                }
+            });
+        }
+    };
     
     /**
      * Convert string type name to path name (Array of string)
@@ -151,9 +173,15 @@ define(function (require, exports, module) {
      */
     
     CsharpCodeAnalyzer.prototype._toPathName = function (typeName) {
-        var pathName = (typeName.indexOf(".") > 0 ? typeName.trim().split(".") : null);
+        
+        var type_ = typeName;
+        
+        if(typeof(typeName) != "string"){
+            type_ = typeName.name;    
+        }
+        var pathName = (type_.indexOf(".") > 0 ? type_.trim().split(".") : null);
         if (!pathName) {
-            pathName = [ typeName ];
+            pathName = [ type_ ];
         }
         return pathName;
     };
@@ -168,14 +196,18 @@ define(function (require, exports, module) {
      * @return {type.Model} element correspond to the type.
      */
     
-    CsharpCodeAnalyzer.prototype._findType = function (namespace, type, compilationUnitNode) {
+    CsharpCodeAnalyzer.prototype._findType = function (namespace, type_, compilationUnitNode) {
         var typeName,
             pathName,
             _type = null;
 
         
-        typeName = type; 
-
+        typeName = type_; 
+        
+        if(typeof(typeName)!= "string"){
+            typeName = type_.name;   
+        } 
+        
         pathName = this._toPathName(typeName);
 
         // 1. Lookdown from context
@@ -218,6 +250,7 @@ define(function (require, exports, module) {
                 _type = this._root.findByName(typeName);
             }
         }
+        
 
         return _type;
     };
@@ -234,13 +267,15 @@ define(function (require, exports, module) {
             var _className = pathNames.pop(),
                 _package = this._ensurePackage(namespace, pathNames),
                 _class = _package.findByName(_className);
-            if (!_class) {
+            
+            if (!_class) { 
                 _class = new type.UMLClass();
                 _class._parent = _package;
                 _class.name = _className;
                 _class.visibility = UML.VK_PUBLIC;
-                _package.ownedElements.push(_class);
+                _package.ownedElements.push(_class); 
             }
+            
             return _class;
         }
         return null;
@@ -332,15 +367,17 @@ define(function (require, exports, module) {
             _typeName = _extend.node;
    
             _type = this._findType(_extend.classifier, _typeName, _extend.compilationUnitNode);
+            
+            
             if (!_type) {
                 _pathName = this._toPathName(_typeName);
-                if (_extend.kind === "interface") {
+                if (_extend.kind === "interface") { 
                     _type = this._ensureInterface(this._root, _pathName);
-                } else {
+                } else { 
                     _type = this._ensureClass(this._root, _pathName);
                 }
-            }
-
+            } 
+            
             var generalization = new type.UMLGeneralization();
             generalization._parent = _extend.classifier;
             generalization.source = _extend.classifier;
@@ -367,12 +404,12 @@ define(function (require, exports, module) {
             _implement.classifier.ownedElements.push(realization);
         }
 
-        
+ /*       
 //        var _associationPending = {
 //                classifier: namespace,
 //                node: fieldNode
 //            };
-        
+   */     
         // Create Associations
         for (i = 0, len = this._associationPendings.length; i < len; i++) {
             var _asso = this._associationPendings[i];
@@ -438,6 +475,8 @@ define(function (require, exports, module) {
                 this.translateFieldAsAttribute(options, _asso.classifier, _asso.node);
             }
         }
+        
+        
 //
 //        // Assign Throws to Operations
 //        for (i = 0, len = this._throwPendings.length; i < len; i++) {
@@ -534,13 +573,11 @@ define(function (require, exports, module) {
                                 results.push(property.toString() + ': ' + value);
                             }
                         }
-                        console.log( JSON.stringify(ast) ); 
-                        
+                        console.log( JSON.stringify(ast) );  
                         
                         self._currentCompilationUnit = ast;
                         self._currentCompilationUnit.file = file;
-                        self.translateCompilationUnit(options, self._root, ast);
-                          
+                        self.translateCompilationUnit(options, self._root, ast); 
                         
                         result.resolve();
                     } catch (ex) {
@@ -638,10 +675,13 @@ define(function (require, exports, module) {
 
         // Translate Type Parameters
         this.translateTypeParameters(options, _annotationType, annotationTypeNode.typeParameters);
-        // Translate Types
-        this.translateTypes(options, _annotationType, annotationTypeNode.body);
-        // Translate Members
-        this.translateMembers(options, _annotationType, annotationTypeNode.body);
+        if(annotationTypeNode.body != "{"){
+            // Translate Types
+            this.translateTypes(options, _annotationType, annotationTypeNode.body);
+            // Translate Members
+            this.translateMembers(options, _annotationType, annotationTypeNode.body);
+        }
+        
     };
     
     
@@ -669,10 +709,14 @@ define(function (require, exports, module) {
 
         // Translate Type Parameters
         this.translateTypeParameters(options, _enum, enumNode.typeParameters);
-        // Translate Types
-        this.translateTypes(options, _enum, enumNode.body);
-        // Translate Members
-        this.translateMembers(options, _enum, enumNode.body);
+        
+        if(enumNode.body != "{"){
+            // Translate Types
+            this.translateTypes(options, _enum, enumNode.body);
+            // Translate Members
+            this.translateMembers(options, _enum, enumNode.body);
+        }
+        
     };
 
     
@@ -714,10 +758,14 @@ define(function (require, exports, module) {
 
         // Translate Type Parameters
         this.translateTypeParameters(options, _interface, interfaceNode.typeParameters);
-        // Translate Types
-        this.translateTypes(options, _interface, interfaceNode.body);
-        // Translate Members
-        this.translateMembers(options, _interface, interfaceNode.body);
+        
+        if(interfaceNode.body != "{"){
+            // Translate Types
+            this.translateTypes(options, _interface, interfaceNode.body);
+            // Translate Members
+            this.translateMembers(options, _interface, interfaceNode.body);
+        }
+        
     };
 
     
@@ -799,10 +847,15 @@ define(function (require, exports, module) {
         
         // Translate Type Parameters
         this.translateTypeParameters(options, _class, classNode.typeParameters);
-        // Translate Types
-        this.translateTypes(options, _class, classNode.body);
-        // Translate Members
-        this.translateMembers(options, _class, classNode.body.members);
+        
+        if(classNode.body != "{"){
+            // Translate Types
+            this.translateTypes(options, _class, classNode.body);
+            // Translate Members
+            this.translateMembers(options, _class, classNode.body.members); 
+        }
+        
+        
     };
     
     
@@ -882,6 +935,11 @@ define(function (require, exports, module) {
         var i, len, _operation = new type.UMLOperation();
         _operation._parent = namespace;
         _operation.name = methodNode.name;
+        
+        if (!isConstructor) {
+            _operation.name = methodNode.name[0].name;
+        }
+        
         namespace.operations.push(_operation);
 
         // Modifiers
