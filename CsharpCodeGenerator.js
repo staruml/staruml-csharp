@@ -28,6 +28,7 @@ define(function (require, exports, module) {
     "use strict";
 
     var Repository = app.getModule("core/Repository"),
+        ProjectManager = app.getModule("engine/ProjectManager"),
         Engine     = app.getModule("engine/Engine"),
         FileSystem = app.getModule("filesystem/FileSystem"),
         FileUtils  = app.getModule("file/FileUtils"),
@@ -353,8 +354,8 @@ define(function (require, exports, module) {
         var i, len, terms = [];
         // Doc
         var doc = elem.documentation.trim();
-        if (Repository.getProject().author && Repository.getProject().author.length > 0) {
-            doc += "\n@author " + Repository.getProject().author;
+        if (ProjectManager.getProject().author && ProjectManager.getProject().author.length > 0) {
+            doc += "\n@author " + ProjectManager.getProject().author;
         }
         this.writeDoc(codeWriter, doc, options);
            
@@ -471,8 +472,8 @@ define(function (require, exports, module) {
          
         // Doc
         var doc = elem.documentation.trim();
-        if (Repository.getProject().author && Repository.getProject().author.length > 0) {
-            doc += "\n@author " + Repository.getProject().author;
+        if (ProjectManager.getProject().author && ProjectManager.getProject().author.length > 0) {
+            doc += "\n@author " + ProjectManager.getProject().author;
         }
         this.writeDoc(codeWriter, doc, options);
            
