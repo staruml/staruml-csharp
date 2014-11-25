@@ -4,7 +4,7 @@
     "description": "C# code generation and reverse engineering.",
     "homepage": "https://github.com/staruml/CSharp",
     "keywords": ["csharp"],
-    "version": "0.1.0",
+    "version": "0.9.0",
     "author": {
         "name": "Dongjoon Lee",
         "email": "joon1251@gmail.com",
