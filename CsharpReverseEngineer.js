@@ -537,19 +537,7 @@ define(function (require, exports, module) {
     };
 
     
-    
-    
-    CsharpCodeAnalyzer.prototype.JSONtoString = function (object) {
-        var results = [];
-        for (var property in object) {
-            var value = object[property];
-            if (value) {
-                results.push(property.toString() + ': ' + value);
-            }
-        }
-        return '{' + results.join(', ') + '}';
-    };
-    
+     
     /**
      * Perform First Phase
      *   - Create Packages, Classes, Interfaces, Enums, AnnotationTypes.
@@ -564,7 +552,7 @@ define(function (require, exports, module) {
             file.read({}, function (err, data, stat) {
                 if (!err) {
                     try {
-                        var ast = parser.parse(data);
+                        var ast = csharp.parse(data);
                         
                         var results = [];
                         for (var property in ast) {
