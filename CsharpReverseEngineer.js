@@ -37,7 +37,7 @@ define(function (require, exports, module) {
         Async           = app.getModule("utils/Async");
 
     require("grammar/csharp");
-    
+
     // C# Primitive Types
     var csharpPrimitiveTypes = [
         "sbyte",
@@ -57,7 +57,7 @@ define(function (require, exports, module) {
         "string",
         "void"
     ];
-      
+
     /**
      * C# Code Analyzer
      * @constructor
@@ -98,10 +98,10 @@ define(function (require, exports, module) {
          * @member {{namespace:type.UMLModelElement, feature:type.UMLStructuralFeature, node: Object}}
          */
         this._typedFeaturePendings = [];
-        
+
         this._usingList = [];
     }
- 
+
     /**
      * Add File to Reverse Engineer
      * @param {File} file
@@ -144,7 +144,7 @@ define(function (require, exports, module) {
 
         return promise;
     };
-    
+
         /**
      * Generate Diagrams (Type Hierarchy, Package Structure, Package Overview)
      * @param {Object} options
@@ -165,19 +165,19 @@ define(function (require, exports, module) {
             });
         }
     };
-    
+
     /**
      * Convert string type name to path name (Array of string)
      * @param {string} typeName
      * @return {Array.<string>} pathName
      */
-    
+
     CsharpCodeAnalyzer.prototype._toPathName = function (typeName) {
-        
+
         var type_ = typeName;
-        
+
         if(typeof(typeName) != "string"){
-            type_ = typeName.name;    
+            type_ = typeName.name;
         }
         var pathName = (type_.indexOf(".") > 0 ? type_.trim().split(".") : null);
         if (!pathName) {
@@ -185,8 +185,8 @@ define(function (require, exports, module) {
         }
         return pathName;
     };
-    
-    
+
+
     /**
      * Find Type.
      *
@@ -195,19 +195,19 @@ define(function (require, exports, module) {
      * @param {Object} compilationUnitNode To search type with import statements.
      * @return {type.Model} element correspond to the type.
      */
-    
+
     CsharpCodeAnalyzer.prototype._findType = function (namespace, type_, compilationUnitNode) {
         var typeName,
             pathName,
             _type = null;
 
-        
-        typeName = type_; 
-        
+
+        typeName = type_;
+
         if(typeof(typeName)!= "string"){
-            typeName = type_.name;   
-        } 
-        
+            typeName = type_.name;
+        }
+
         pathName = this._toPathName(typeName);
 
         // 1. Lookdown from context
@@ -227,21 +227,21 @@ define(function (require, exports, module) {
             if (compilationUnitNode.using) {
                 var i, len;
                 for (i = 0, len = compilationUnitNode.using.length; i < len; i++) {
-                    var _import = compilationUnitNode.using[i]; 
+                    var _import = compilationUnitNode.using[i];
                     // Find in import exact matches (e.g. import java.lang.String)
-                    _type = this._root.lookdown(_import.qualifiedName); 
-                } 
+                    _type = this._root.lookdown(_import.qualifiedName);
+                }
             }
         }
 
         if (!_type) {
             for( i = 0, len=this._usingList.length; i < len; i++){
-                var _import = this._usingList[i]; 
+                var _import = this._usingList[i];
                 // Find in import exact matches (e.g. import java.lang.String)
-                _type = this._root.lookdown(_import.qualifiedName);    
-            }   
+                _type = this._root.lookdown(_import.qualifiedName);
+            }
         }
-        
+
         // 4. Lookdown from Root
         if (!_type) {
             if (pathName.length > 1) {
@@ -250,12 +250,12 @@ define(function (require, exports, module) {
                 _type = this._root.findByName(typeName);
             }
         }
-        
+
 
         return _type;
     };
-    
-    
+
+
     /**
      * Return the class of a given pathNames. If not exists, create the class.
      * @param {type.Model} namespace
@@ -267,15 +267,15 @@ define(function (require, exports, module) {
             var _className = pathNames.pop(),
                 _package = this._ensurePackage(namespace, pathNames),
                 _class = _package.findByName(_className);
-            
-            if (!_class) { 
+
+            if (!_class) {
                 _class = new type.UMLClass();
                 _class._parent = _package;
                 _class.name = _className;
                 _class.visibility = UML.VK_PUBLIC;
-                _package.ownedElements.push(_class); 
+                _package.ownedElements.push(_class);
             }
-            
+
             return _class;
         }
         return null;
@@ -303,16 +303,16 @@ define(function (require, exports, module) {
         }
         return null;
     };
-    
-    
+
+
     /**
      * Test a given type is a generic collection or not
      * @param {Object} typeNode
      * @return {string} Collection item type name
      */
-    
+
     // _itemTypeName = this._isGenericCollection(_asso.node.type, _asso.node.compilationUnitNode);
-    
+
     CsharpCodeAnalyzer.prototype._isGenericCollection = function (typeNode, compilationUnitNode) {
 //        if (typeNode.qualifiedName.typeParameters && typeNode.qualifiedName.typeParameters.length > 0) {
 //            var _collectionType = typeNode.qualifiedName.name,
@@ -345,8 +345,8 @@ define(function (require, exports, module) {
 //        }
         return null;
     };
-    
-    
+
+
      /**
      * Perform Second Phase
      *   - Create Generalizations
@@ -358,40 +358,40 @@ define(function (require, exports, module) {
      */
     CsharpCodeAnalyzer.prototype.performSecondPhase = function (options) {
         var i, len, j, len2, _typeName, _type, _itemTypeName, _itemType, _pathName;
- 
-        
+
+
         // Create Generalizations
         //     if super type not found, create a Class correspond to the super type.
         for (i = 0, len = this._extendPendings.length; i < len; i++) {
             var _extend = this._extendPendings[i];
             _typeName = _extend.node;
-   
+
             _type = this._findType(_extend.classifier, _typeName, _extend.compilationUnitNode);
-            
-            
+
+
             if (!_type) {
                 _pathName = this._toPathName(_typeName);
-                if (_extend.kind === "interface") { 
+                if (_extend.kind === "interface") {
                     _type = this._ensureInterface(this._root, _pathName);
-                } else { 
+                } else {
                     _type = this._ensureClass(this._root, _pathName);
                 }
-            } 
-            
+            }
+
             var generalization = new type.UMLGeneralization();
             generalization._parent = _extend.classifier;
             generalization.source = _extend.classifier;
             generalization.target = _type;
             _extend.classifier.ownedElements.push(generalization);
 
-        } 
+        }
 
         // Create InterfaceRealizations
         //     if super interface not found, create a Interface correspond to the super interface
         for (i = 0, len = this._implementPendings.length; i < len; i++) {
             var _implement = this._implementPendings[i];
             _typeName = _implement.node;
-            
+
             _type = this._findType(_implement.classifier, _typeName, _implement.compilationUnitNode);
             if (!_type) {
                 _pathName = this._toPathName(_typeName);
@@ -404,12 +404,12 @@ define(function (require, exports, module) {
             _implement.classifier.ownedElements.push(realization);
         }
 
- /*       
+ /*
 //        var _associationPending = {
 //                classifier: namespace,
 //                node: fieldNode
 //            };
-   */     
+   */
         // Create Associations
         for (i = 0, len = this._associationPendings.length; i < len; i++) {
             var _asso = this._associationPendings[i];
@@ -475,8 +475,8 @@ define(function (require, exports, module) {
                 this.translateFieldAsAttribute(options, _asso.classifier, _asso.node);
             }
         }
-        
-        
+
+
 //
 //        // Assign Throws to Operations
 //        for (i = 0, len = this._throwPendings.length; i < len; i++) {
@@ -490,7 +490,7 @@ define(function (require, exports, module) {
 //            _throw.operation.raisedExceptions.push(_type);
 //        }
 //
-        
+
         // Resolve Type References
         for (i = 0, len = this._typedFeaturePendings.length; i < len; i++) {
             var _typedFeature = this._typedFeaturePendings[i];
@@ -528,7 +528,7 @@ define(function (require, exports, module) {
                 var _dim = [];
                 for (j = 0, len2 = _typedFeature.node.type.length; j < len2; j++) {
                     if( _typedFeature.node.type [j] == '[' ) {
-                        _dim.push("*"); 
+                        _dim.push("*");
                     }
                 }
                 _typedFeature.feature.multiplicity = _dim.join(",");
@@ -536,8 +536,8 @@ define(function (require, exports, module) {
         }
     };
 
-    
-     
+
+
     /**
      * Perform First Phase
      *   - Create Packages, Classes, Interfaces, Enums, AnnotationTypes.
@@ -553,7 +553,7 @@ define(function (require, exports, module) {
                 if (!err) {
                     try {
                         var ast = csharp.parse(data);
-                        
+
                         var results = [];
                         for (var property in ast) {
                             var value = ast[property];
@@ -561,12 +561,12 @@ define(function (require, exports, module) {
                                 results.push(property.toString() + ': ' + value);
                             }
                         }
-                        console.log( JSON.stringify(ast) );  
-                        
+                        console.log( JSON.stringify(ast) );
+
                         self._currentCompilationUnit = ast;
                         self._currentCompilationUnit.file = file;
-                        self.translateCompilationUnit(options, self._root, ast); 
-                        
+                        self.translateCompilationUnit(options, self._root, ast);
+
                         result.resolve();
                     } catch (ex) {
                         console.error("[C#] Failed to parse - " + file._name + "  : " + ex);
@@ -580,23 +580,23 @@ define(function (require, exports, module) {
         }, false);
     };
 
-    
+
     /**
      * Translate C# CompilationUnit Node.
      * @param {Object} options
      * @param {type.Model} namespace
      * @param {Object} compilationUnitNode
      */
-    CsharpCodeAnalyzer.prototype.translateCompilationUnit = function (options, namespace, compilationUnitNode) 
+    CsharpCodeAnalyzer.prototype.translateCompilationUnit = function (options, namespace, compilationUnitNode)
     {
         var _namespace = namespace,
             i,
-            len; 
-        
-        this.translateTypes(options, _namespace, compilationUnitNode["namespace"]);     
-        
+            len;
+
+        this.translateTypes(options, _namespace, compilationUnitNode["namespace"]);
+
     };
-    
+
     /**
      * Translate Type Nodes
      * @param {Object} options
@@ -636,8 +636,8 @@ define(function (require, exports, module) {
             }
         }
     };
-    
-    
+
+
     /**
      * Translate C# AnnotationType Node.
      * @param {Object} options
@@ -669,10 +669,10 @@ define(function (require, exports, module) {
             // Translate Members
             this.translateMembers(options, _annotationType, annotationTypeNode.body);
         }
-        
+
     };
-    
-    
+
+
     /**
      * Translate C# Enum Node.
      * @param {Object} options
@@ -697,18 +697,18 @@ define(function (require, exports, module) {
 
         // Translate Type Parameters
         this.translateTypeParameters(options, _enum, enumNode.typeParameters);
-        
+
         if(enumNode.body != "{"){
             // Translate Types
             this.translateTypes(options, _enum, enumNode.body);
             // Translate Members
             this.translateMembers(options, _enum, enumNode.body);
         }
-        
+
     };
 
-    
-    
+
+
      /**
      * Translate C# Interface Node.
      * @param {Object} options
@@ -746,18 +746,18 @@ define(function (require, exports, module) {
 
         // Translate Type Parameters
         this.translateTypeParameters(options, _interface, interfaceNode.typeParameters);
-        
+
         if(interfaceNode.body != "{"){
             // Translate Types
             this.translateTypes(options, _interface, interfaceNode.body);
             // Translate Members
             this.translateMembers(options, _interface, interfaceNode.body);
         }
-        
+
     };
 
-    
-    
+
+
     /**
      * Return visiblity from modifiers
      *
@@ -775,7 +775,7 @@ define(function (require, exports, module) {
         return UML.VK_PACKAGE;
     };
 
-    
+
     /**
      * Translate C# Class Node.
      * @param {Object} options
@@ -800,7 +800,7 @@ define(function (require, exports, module) {
 
         // Final Class
         if (_.contains(classNode.modifiers, "sealed")) {
-            _class.isFinalSpecification = true;
+            _class.isFinalSpecialization = true;
             _class.isLeaf = true;
         }
 
@@ -820,7 +820,7 @@ define(function (require, exports, module) {
                 compilationUnitNode: this._currentCompilationUnit
             };
             this._extendPendings.push(_extendPending);
-            
+
             for (i = 0, len = classNode["base"].length; i < len; i++) {
                 var _impl = classNode["base"][i];
                 var _implementPending = {
@@ -829,24 +829,24 @@ define(function (require, exports, module) {
                     compilationUnitNode: this._currentCompilationUnit
                 };
                 this._implementPendings.push(_implementPending);
-            }   
-        } 
-              
-        
+            }
+        }
+
+
         // Translate Type Parameters
         this.translateTypeParameters(options, _class, classNode.typeParameters);
-        
+
         if(classNode.body != "{"){
             // Translate Types
             this.translateTypes(options, _class, classNode.body);
             // Translate Members
-            this.translateMembers(options, _class, classNode.body.members); 
+            this.translateMembers(options, _class, classNode.body.members);
         }
-        
-        
+
+
     };
-    
-    
+
+
     /**
      * Translate Members Nodes
      * @param {Object} options
@@ -866,7 +866,7 @@ define(function (require, exports, module) {
                 }
 
                 memberNode.compilationUnitNode = this._currentCompilationUnit;
-                 
+
                 switch (memberNode.node) {
                 case "field":
                 case "property":
@@ -890,7 +890,7 @@ define(function (require, exports, module) {
         }
     };
 
-    
+
     /**
      * Translate Enumeration Constant
      * @param {Object} options
@@ -909,8 +909,8 @@ define(function (require, exports, module) {
 
 //        namespace.literals.push(_literal);
     };
-    
-    
+
+
     /**
      * Translate Method
      * @param {Object} options
@@ -923,11 +923,11 @@ define(function (require, exports, module) {
         var i, len, _operation = new type.UMLOperation();
         _operation._parent = namespace;
         _operation.name = methodNode.name;
-        
+
         if (!isConstructor) {
             _operation.name = methodNode.name[0].name;
         }
-        
+
         namespace.operations.push(_operation);
 
         // Modifiers
@@ -1007,7 +1007,7 @@ define(function (require, exports, module) {
 //        this.translateTypeParameters(options, _operation, methodNode.typeParameters);
     };
 
-    
+
     /**
      * Add a Tag
      * @param {type.Model} elem
@@ -1039,15 +1039,15 @@ define(function (require, exports, module) {
         }
         elem.tags.push(tag);
     };
-    
-    
+
+
     /**
      * Translate Method Parameters
      * @param {Object} options
      * @param {type.Model} namespace
      * @param {Object} parameterNode
      */
-    
+
     CsharpCodeAnalyzer.prototype.translateParameter = function (options, namespace, parameterNode) {
         var _parameter = new type.UMLParameter();
         _parameter._parent = namespace;
@@ -1062,14 +1062,14 @@ define(function (require, exports, module) {
         });
     };
 
-    
+
     /**
      * Translate C# Field Node as UMLAssociation.
      * @param {Object} options
      * @param {type.Model} namespace
      * @param {Object} fieldNode
      */
-    
+
     CsharpCodeAnalyzer.prototype.translateFieldAsAssociation = function (options, namespace, fieldNode) {
         var i, len;
         if (fieldNode.name && fieldNode.name.length > 0) {
@@ -1081,7 +1081,7 @@ define(function (require, exports, module) {
             this._associationPendings.push(_associationPending);
         }
     };
-    
+
 
     /**
      * Translate C# Field Node as UMLAttribute.
@@ -1089,7 +1089,7 @@ define(function (require, exports, module) {
      * @param {type.Model} namespace
      * @param {Object} fieldNode
      */
-    
+
     CsharpCodeAnalyzer.prototype.translateFieldAsAttribute = function (options, namespace, fieldNode) {
         var i, len;
         if (fieldNode.name && fieldNode.name.length > 0) {
@@ -1122,7 +1122,7 @@ define(function (require, exports, module) {
                 if (_.contains(fieldNode.modifiers, "volatile")) {
                     this._addTag(_attribute, Core.TK_BOOLEAN, "volatile", true);
                 }
- 
+
                 // CsharpDoc
 //                if (fieldNode.comment) {
 //                    _attribute.documentation = fieldNode.comment;
@@ -1142,8 +1142,8 @@ define(function (require, exports, module) {
         }
     };
 
-    
-    
+
+
     /**
      * Translate C# Type Parameter Nodes.
      * @param {Object} options
@@ -1158,7 +1158,7 @@ define(function (require, exports, module) {
                 if (_typeParam.node === "TypeParameter") {
                     var _templateParameter = new type.UMLTemplateParameter();
                     _templateParameter._parent = namespace;
-                    _templateParameter.name = _typeParam.name; 
+                    _templateParameter.name = _typeParam.name;
                     if (_typeParam.type) {
                         _templateParameter.parameterType = _typeParam.type;
                     }
@@ -1167,7 +1167,7 @@ define(function (require, exports, module) {
             }
         }
     };
-    
+
     /**
      * Translate C# Package Node.
      * @param {Object} options
@@ -1176,14 +1176,14 @@ define(function (require, exports, module) {
      */
     CsharpCodeAnalyzer.prototype.translatePackage = function (options, namespace, packageNode) {
         if (packageNode && packageNode.qualifiedName ) {
-            
-            var pathNames = packageNode.qualifiedName.split("."); 
+
+            var pathNames = packageNode.qualifiedName.split(".");
             return this._ensurePackage(namespace, pathNames);
         }
         return null;
     };
-    
-    
+
+
     /**
      * Return the package of a given pathNames. If not exists, create the package.
      * @param {type.Model} namespace
@@ -1219,7 +1219,7 @@ define(function (require, exports, module) {
             return namespace;
         }
     };
-    
+
     /**
      * Analyze all C# files in basePath
      * @param {string} basePath

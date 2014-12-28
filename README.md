@@ -21,11 +21,11 @@ Belows are the rules to convert from UML model elements to Java source codes.
 * converted to _C# Class_. (as a separate `.cs` file)
 * `visibility` to one of modifiers `public`, `protected`, `private` and none.
 * `isAbstract` property to `abstract` modifier.
-* `isFinalSpecification` and `isLeaf` property to `sealed` modifier.
+* `isFinalSpecialization` and `isLeaf` property to `sealed` modifier.
 * Default constructor is generated.
 * All contained types (_UMLClass_, _UMLInterface_, _UMLEnumeration_) are generated as inner type definition.
 * Documentation property to C#Doc comment.
-* Annotation Type is converted to C# attribute class which extends System.Attribute and postfix of class is Attribute. 
+* Annotation Type is converted to C# attribute class which extends System.Attribute and postfix of class is Attribute.
   (cf. class testAttribute:System.Attribute)
 
 ### UMLAttribute
@@ -110,7 +110,7 @@ Belows are the rules to convert from C# source code to UML model elements.
 * `abstract` modifier to `isAbstract` property.
 * `sealed` modifier to `isLeaf` property.
 * Constructors to _UMLOperation_ with stereotype `<<constructor>>`.
-* All contained types (_UMLClass_, _UMLInterface_, _UMLEnumeration_) are generated as inner type definition. 
+* All contained types (_UMLClass_, _UMLInterface_, _UMLEnumeration_) are generated as inner type definition.
 
 
 ### C# Field (to UMLAttribute)
@@ -122,7 +122,7 @@ Belows are the rules to convert from C# source code to UML model elements.
     * `T[]`(array) or its decendants: `type` property refers to `T` with multiplicity `*`.
     * `T` (User-Defined Types)  : `type` property refers to the `T` type.
     * Otherwise : `type` property has the type name as string.
-    
+
 * Access modifier `public`, `protected` and  `private` to `visibility` property.
 * `static` modifier to `isStatic` property.
 * `sealed` modifier to `isLeaf` and `isReadOnly` property.
@@ -137,7 +137,7 @@ Belows are the rules to convert from C# source code to UML model elements.
     * `T` (User-Defined Types)  : `reference` property refers to the `T` type.
     * Otherwise : converted to _UMLAttribute_, not _UMLAssociation_.
 
-* Access modifier `public`, `protected` and  `private` to `visibility` property. 
+* Access modifier `public`, `protected` and  `private` to `visibility` property.
 
 ### C# Method
 
@@ -146,14 +146,14 @@ Belows are the rules to convert from C# source code to UML model elements.
 * Access modifier `public`, `protected` and  `private` to `visibility` property.
 * `static` modifier to `isStatic` property.
 * `abstract` modifier to `isAbstract` property.
-* `sealed` modifier to `isLeaf` property. 
+* `sealed` modifier to `isLeaf` property.
 
 ### C# Interface
 
 * converted to _UMLInterface_.
 * Class name to `name` property.
 * Type parameters to _UMLTemplateParameter_.
-* Access modifier `public`, `protected` and  `private` to `visibility` property. 
+* Access modifier `public`, `protected` and  `private` to `visibility` property.
 
 ### C# Enum
 
@@ -161,12 +161,12 @@ Belows are the rules to convert from C# source code to UML model elements.
 * Enum name to `name` property.
 * Type parameters to _UMLTemplateParameter_.
 * Access modifier `public`, `protected` and  `private` to `visibility` property.
-* Enum constants are converted to _UMLEnumerationLiteral_. 
+* Enum constants are converted to _UMLEnumerationLiteral_.
 
 ### C# AnnotationType
 
 * converted to _UMLClass_ with stereotype `<<annotationType>>`.
-* Annotation type elements to _UMLOperation_. (Default value to a Tag with `name="default"`). 
+* Annotation type elements to _UMLOperation_. (Default value to a Tag with `name="default"`).
 
 
 ---
