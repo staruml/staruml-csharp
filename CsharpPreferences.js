@@ -20,18 +20,18 @@ define(function (require, exports, module) {
 
     var AppInit           = app.getModule("utils/AppInit"),
         Core              = app.getModule("core/Core"),
-        PreferenceManager = app.getModule("preference/PreferenceManager");
+        PreferenceManager = app.getModule("core/PreferenceManager");
 
     var preferenceId = "csharp";
-    
+
     var csharpPreferences = {
         "csharp.gen": {
             text: "C# Code Generation",
             type: "Section"
         },
         "csharp.gen.csharpDoc": {
-            text: "CsharpDoc",
-            description: "Generate CsharpDoc comments.",
+            text: "C# Doc",
+            description: "Generate C# Doc comments.",
             type: "Check",
             default: true
         },
@@ -82,7 +82,7 @@ define(function (require, exports, module) {
             default: true
         }
     };
-    
+
     function getId() {
         return preferenceId;
     }
@@ -94,7 +94,7 @@ define(function (require, exports, module) {
             indentSpaces  : PreferenceManager.get("csharp.gen.indentSpaces")
         };
     }
- 
+
     function getRevOptions() {
         return {
             association      : PreferenceManager.get("csharp.rev.association"),
@@ -106,11 +106,11 @@ define(function (require, exports, module) {
     }
 
     AppInit.htmlReady(function () {
-        PreferenceManager.register(preferenceId, "CSharp", csharpPreferences);
+        PreferenceManager.register(preferenceId, "C#", csharpPreferences);
     });
 
     exports.getId         = getId;
     exports.getGenOptions = getGenOptions;
     exports.getRevOptions = getRevOptions;
-    
+
 });
