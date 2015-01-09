@@ -27,13 +27,13 @@
 define(function (require, exports, module) {
     "use strict";
 
-    var Repository = app.getModule("core/Repository"),
+    var Repository     = app.getModule("core/Repository"),
         ProjectManager = app.getModule("engine/ProjectManager"),
-        Engine     = app.getModule("engine/Engine"),
-        FileSystem = app.getModule("filesystem/FileSystem"),
-        FileUtils  = app.getModule("file/FileUtils"),
-        Async      = app.getModule("utils/Async"),
-        UML        = app.getModule("uml/UML");
+        Engine         = app.getModule("engine/Engine"),
+        FileSystem     = app.getModule("filesystem/FileSystem"),
+        FileUtils      = app.getModule("file/FileUtils"),
+        Async          = app.getModule("utils/Async"),
+        UML            = app.getModule("uml/UML");
 
     var CodeGenUtils = require("CodeGenUtils");
 
