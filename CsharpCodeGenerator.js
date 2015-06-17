@@ -479,7 +479,8 @@ define(function (require, exports, module) {
 
          // Modifiers
         var _modifiers = this.getModifiers(elem);
-        if (_.some(elem.operations, function (op) { return op.isAbstract === true; })) {
+        if (_.some(elem.operations, function (op) { return op.isAbstract === true; }) && 
+            !_modifiers.contains("abstract")) {
             _modifiers.push("abstract");
         }
         if (_modifiers.length > 0) {
@@ -794,6 +795,8 @@ define(function (require, exports, module) {
             return "protected";
         case UML.VK_PRIVATE:
             return "private";
+        case UML.VK_PACKAGE:
+            return "internal";
         }
         return null;
     };
