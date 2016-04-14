@@ -39,6 +39,8 @@ Belows are the rules to convert from UML model elements to Java source codes.
 * `isLeaf` property to `sealed` modifier.
 * `defaultValue` property to initial value.
 * Documentation property to C#Doc comment.
+* If `stereotype` = `property` then converted to _C# Property_.
+    * With `isReadOnly` just the getter is generated.
 
 ### UMLOperation
 

@@ -734,7 +734,23 @@ define(function (require, exports, module) {
             if (elem.defaultValue && elem.defaultValue.length > 0) {
                 terms.push("= " + elem.defaultValue);
             }
-            codeWriter.writeLine(terms.join(" ") + ";");
+            
+            // property
+            if (elem.stereotype === "property") {
+                codeWriter.writeLine(terms.join(" ") + " {");
+                codeWriter.indent();
+                if (elem.isReadOnly) {
+                    codeWriter.writeLine("get {");
+                    codeWriter.writeLine("}");
+                } else {
+                    codeWriter.writeLine("get; set;");
+                }
+                codeWriter.outdent();
+                codeWriter.writeLine("}");
+
+            } else {
+                codeWriter.writeLine(terms.join(" ") + ";");
+            }
         }
     };
 
