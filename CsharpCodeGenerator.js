@@ -773,11 +773,11 @@ define(function (require, exports, module) {
         if (options.csharpDoc && _.isString(text)) {
             console.log("write Doc");
             lines = text.trim().split("\n");
-            codeWriter.writeLine("/**");
+            codeWriter.writeLine("/// <summary>");
             for (i = 0, len = lines.length; i < len; i++) {
-                codeWriter.writeLine(" * " + lines[i]);
+                codeWriter.writeLine("/// " + lines[i]);
             }
-            codeWriter.writeLine(" */");
+            codeWriter.writeLine("/// <summary>");
         }
     };
 
