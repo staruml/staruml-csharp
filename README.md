@@ -1,7 +1,11 @@
-C# Extension for StarUML 2
-============================
+C# Extension for StarUML
+========================
 
-This extension for StarUML(http://staruml.io) support to generate C# code from UML model and to reverse Java code to UML model. Install this extension from Extension Manager of StarUML. It is based on C# 2.0 specification.
+This extension for StarUML(http://staruml.io) support to generate C# code from UML model and to reverse C# code to UML model. Install this extension from Extension Manager of StarUML.
+
+> __Note__
+>
+>  This extension is based on C# 2.0 specification and the parser for C# used in this extension is not perfect, so some codes may not be reverse engineered.
 
 C# Code Generation
 --------------------
@@ -10,7 +14,7 @@ C# Code Generation
 2. Select a base model (or package) that will be generated to C#.
 3. Select a folder where generated C# source files will be placed.
 
-Belows are the rules to convert from UML model elements to Java source codes.
+Belows are the rules to convert from UML model elements to C# source codes.
 
 ### UMLPackage
 
@@ -74,7 +78,6 @@ Belows are the rules to convert from UML model elements to Java source codes.
 * `type` property to field type.
 * If `multiplicity` is one of `0..*`, `1..*`, `*`, then collection type (`List<>` when `isOrdered` = `true` or `HashSet<>`) is used.
 * `defaultValue` property to initial value.
-* Documentation property to JavaDoc comment.
 
 ### UMLGeneralization
 
@@ -85,7 +88,6 @@ Belows are the rules to convert from UML model elements to Java source codes.
 
 * converted to _C# Implements_ (`:`).
 * Allowed only for _UMLClass_ to _UMLInterface_.
-
 
 
 C# Reverse Engineering

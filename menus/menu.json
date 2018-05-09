@@ -1,0 +1,19 @@
+{
+  "menu": [
+    {
+      "id": "tools",
+      "submenu": [
+        {
+          "label": "C#",
+          "id": "tools.csharp",
+          "submenu": [
+            { "label": "Generate Code...", "id": "tools.csharp.generate", "command": "csharp:generate" },
+            { "label": "Reverse Code...", "id": "tools.csharp.reverse", "command": "csharp:reverse" },
+            { "type": "separator" },
+            { "label": "Configure...", "id": "tools.csharp.configure", "command": "csharp:configure" }
+          ]
+        }
+      ]
+    }
+  ]
+}
