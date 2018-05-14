@@ -4,8 +4,10 @@ C# Extension for StarUML
 This extension for StarUML(http://staruml.io) support to generate C# code from UML model and to reverse C# code to UML model. Install this extension from Extension Manager of StarUML.
 
 > __Note__
->
->  This extension is based on C# 2.0 specification and the parser for C# used in this extension is not perfect, so some codes may not be reverse engineered.
+> This extensions do not provide perfect reverse engineering which is a test and temporal feature. If you need a complete reverse engineering feature, please check other professional reverse engineering tools.
+
+> __Note__
+>  This extension is based on C# 2.0 specification.
 
 C# Code Generation
 --------------------
