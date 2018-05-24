@@ -23,7 +23,6 @@
 
 const fs = require('fs')
 const path = require('path')
-const _ = require('lodash')
 const codegen = require('./codegen-utils')
 
 /**
@@ -148,7 +147,7 @@ class CSharpCodeGenerator {
   writeNamespace (writeFunction, codeWriter, elem, options) {
     var path = null
     if (elem._parent) {
-      path = _.map(elem._parent.getPath(this.baseModel), function (e) { return e.name }).join('.')
+      path = elem._parent.getPath(this.baseModel).map(function (e) { return e.name }).join('.')
     }
     if (path) {
       codeWriter.writeLine('namespace ' + path + '{')
@@ -228,7 +227,7 @@ class CSharpCodeGenerator {
     // Extends
     var _extends = this.getSuperClasses(elem)
     if (_extends.length > 0) {
-      terms.push(': ' + _.map(_extends, function (e) { return e.name }).join(', '))
+      terms.push(': ' + _extends.map(function (e) { return e.name }).join(', '))
     }
     codeWriter.writeLine(terms.join(' ') + ' {')
     codeWriter.writeLine()
@@ -302,7 +301,7 @@ class CSharpCodeGenerator {
 
     // Modifiers
     var _modifiers = this.getModifiers(elem)
-    if (_.some(elem.operations, function (op) { return op.isAbstract === true })) {
+    if (elem.operations.some(function (op) { return op.isAbstract === true })) {
       _modifiers.push('abstract')
     }
     if (_modifiers.length > 0) {
@@ -392,7 +391,7 @@ class CSharpCodeGenerator {
 
     // Modifiers
     var _modifiers = this.getModifiers(elem)
-    if (_.some(elem.operations, function (op) { return op.isAbstract === true })) {
+    if (elem.operations.some(function (op) { return op.isAbstract === true })) {
       _modifiers.push('abstract')
     }
     if (_modifiers.length > 0) {
@@ -413,9 +412,9 @@ class CSharpCodeGenerator {
     var _implements = this.getSuperInterfaces(elem)
     if (_implements.length > 0) {
       if (_extends.length > 0) {
-        terms.push(', ' + _.map(_implements, function (e) { return e.name }).join(', '))
+        terms.push(', ' + _implements.map(function (e) { return e.name }).join(', '))
       } else {
-        terms.push(': ' + _.map(_implements, function (e) { return e.name }).join(', '))
+        terms.push(': ' + _implements.map(function (e) { return e.name }).join(', '))
       }
     }
 
@@ -494,7 +493,7 @@ class CSharpCodeGenerator {
 
       // doc
       var doc = elem.documentation.trim()
-      _.each(params, function (param) {
+      params.forEach(function (param) {
         doc += '\n@param ' + param.name + ' ' + param.documentation
       })
       if (returnParam) {
@@ -531,7 +530,7 @@ class CSharpCodeGenerator {
       terms.push(elem.name + '(' + paramTerms.join(', ') + ')')
 
       // body
-      if (skipBody === true || _.includes(_modifiers, 'abstract')) {
+      if (skipBody === true || _modifiers.includes('abstract')) {
         codeWriter.writeLine(terms.join(' ') + ';')
       } else {
         codeWriter.writeLine(terms.join(' ') + ' {')
@@ -583,14 +582,14 @@ class CSharpCodeGenerator {
     } else {
       if (elem.type instanceof type.UMLModelElement && elem.type.name.length > 0) {
         _type = elem.type.name
-      } else if (_.isString(elem.type) && elem.type.length > 0) {
+      } else if ((typeof elem.type === 'string') && elem.type.length > 0) {
         _type = elem.type
       }
     }
 
     // multiplicity
     if (elem.multiplicity) {
-      if (_.includes(['0..*', '1..*', '*'], elem.multiplicity.trim())) {
+      if (['0..*', '1..*', '*'].includes(elem.multiplicity.trim())) {
         if (elem.isOrdered === true) {
           _type = 'List<' + _type + '>'
         } else {
@@ -661,7 +660,7 @@ class CSharpCodeGenerator {
    */
   writeDoc (codeWriter, text, options) {
     var i, len, lines
-    if (options.csharpDoc && _.isString(text)) {
+    if (options.csharpDoc && (typeof text === 'string')) {
       lines = text.trim().split('\n')
       codeWriter.writeLine('/**')
       for (i = 0, len = lines.length; i < len; i++) {
@@ -729,7 +728,7 @@ class CSharpCodeGenerator {
     var generalizations = app.repository.getRelationshipsOf(elem, function (rel) {
       return (rel instanceof type.UMLGeneralization && rel.source === elem)
     })
-    return _.map(generalizations, function (gen) { return gen.target })
+    return generalizations.map(function (gen) { return gen.target })
   };
 
   /**
@@ -741,7 +740,7 @@ class CSharpCodeGenerator {
     var realizations = app.repository.getRelationshipsOf(elem, function (rel) {
       return (rel instanceof type.UMLInterfaceRealization && rel.source === elem)
     })
-    return _.map(realizations, function (gen) { return gen.target })
+    return realizations.map(function (gen) { return gen.target })
   }
 
 }

@@ -23,7 +23,6 @@
 
 const fs = require('fs')
 const path = require('path')
-const _ = require('lodash')
 const csharp = require('./grammar/csharp')
 
 // C# Primitive Types
@@ -371,22 +370,22 @@ class CSharpCodeAnalyzer {
           association.end2.navigable = true
 
           // Final Modifier
-          if (_.includes(_asso.node.modifiers, 'final')) {
+          if (_asso.node.modifiers && _asso.node.modifiers.includes('final')) {
             association.end2.isReadOnly = true
           }
 
           // Static Modifier
-          if (_.includes(_asso.node.modifiers, 'static')) {
+          if (_asso.node.modifiers && _asso.node.modifiers.includes('static')) {
             this._addTag(association.end2, type.Tag.TK_BOOLEAN, 'static', true)
           }
 
           // Volatile Modifier
-          if (_.includes(_asso.node.modifiers, 'volatile')) {
+          if (_asso.node.modifiers && _asso.node.modifiers.includes('volatile')) {
             this._addTag(association.end2, type.Tag.TK_BOOLEAN, 'volatile', true)
           }
 
           // Transient Modifier
-          if (_.includes(_asso.node.modifiers, 'transient')) {
+          if (_asso.node.modifiers && _asso.node.modifiers.includes('transient')) {
             this._addTag(association.end2, type.Tag.TK_BOOLEAN, 'transient', true)
           }
         }
@@ -418,7 +417,7 @@ class CSharpCodeAnalyzer {
         }
 
         // if type is primitive type
-        if (_.includes(csharpPrimitiveTypes, _typeName)) {
+        if (csharpPrimitiveTypes.includes(_typeName)) {
           _typedFeature.feature.type = _typeName
           // otherwise
         } else {
@@ -626,11 +625,12 @@ class CSharpCodeAnalyzer {
    * @return {string} Visibility constants for UML Elements
    */
   _getVisibility (modifiers) {
-    if (_.includes(modifiers, 'public')) {
+    modifiers = modifiers || []
+    if (modifiers.includes('public')) {
       return type.UMLModelElement.VK_PUBLIC
-    } else if (_.includes(modifiers, 'protected')) {
+    } else if (modifiers.includes('protected')) {
       return type.UMLModelElement.VK_PROTECTED
-    } else if (_.includes(modifiers, 'private')) {
+    } else if (modifiers.includes('private')) {
       return type.UMLModelElement.VK_PRIVATE
     }
     return type.UMLModelElement.VK_PACKAGE
@@ -654,12 +654,12 @@ class CSharpCodeAnalyzer {
     _class.visibility = this._getVisibility(classNode.modifiers)
 
     // Abstract Class
-    if (_.includes(classNode.modifiers, 'abstract')) {
+    if (classNode.modifiers && classNode.modifiers.includes('abstract')) {
       _class.isAbstract = true
     }
 
     // Final Class
-    if (_.includes(classNode.modifiers, 'sealed')) {
+    if (classNode.modifiers && classNode.modifiers.includes('sealed')) {
       _class.isFinalSpecialization = true
       _class.isLeaf = true
     }
@@ -774,13 +774,13 @@ class CSharpCodeAnalyzer {
 
     // Modifiers
     _operation.visibility = this._getVisibility(methodNode.modifiers)
-    if (_.includes(methodNode.modifiers, 'static')) {
+    if (methodNode.modifiers && methodNode.modifiers.includes('static')) {
       _operation.isStatic = true
     }
-    if (_.includes(methodNode.modifiers, 'abstract')) {
+    if (methodNode.modifiers && methodNode.modifiers.includes('abstract')) {
       _operation.isAbstract = true
     }
-    if (_.includes(methodNode.modifiers, 'sealed')) {
+    if (methodNode.modifiers && methodNode.modifiers.includes('sealed')) {
       _operation.isLeaf = true
     }
 
@@ -907,18 +907,18 @@ class CSharpCodeAnalyzer {
         }
 
         // Static Modifier
-        if (_.includes(fieldNode.modifiers, 'static')) {
+        if (fieldNode.modifiers && fieldNode.modifiers.includes('static')) {
           _attribute.isStatic = true
         }
 
         // Final Modifier
-        if (_.includes(fieldNode.modifiers, 'sealed')) {
+        if (fieldNode.modifiers && fieldNode.modifiers.includes('sealed')) {
           _attribute.isLeaf = true
           _attribute.isReadOnly = true
         }
 
         // Volatile Modifier
-        if (_.includes(fieldNode.modifiers, 'volatile')) {
+        if (fieldNode.modifiers && fieldNode.modifiers.includes('volatile')) {
           this._addTag(_attribute, type.Tag.TK_BOOLEAN, 'volatile', true)
         }
 
