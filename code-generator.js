@@ -391,7 +391,7 @@ class CSharpCodeGenerator {
 
     // Modifiers
     var _modifiers = this.getModifiers(elem)
-    if (elem.operations.some(function (op) { return op.isAbstract === true })) {
+    if (elem.operations.some(function (op) { return op.isAbstract === true }) && !_modifiers.includes('abstract')) {
       _modifiers.push('abstract')
     }
     if (_modifiers.length > 0) {
@@ -698,6 +698,8 @@ class CSharpCodeGenerator {
       return 'protected'
     case type.UMLModelElement.VK_PRIVATE:
       return 'private'
+    case type.UMLModelElement.VK_PACKAGE:
+      return 'internal'
     }
     return null
   }
