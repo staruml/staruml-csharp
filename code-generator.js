@@ -675,13 +675,13 @@ class CSharpCodeGenerator {
    */
   writeDoc (codeWriter, text, options) {
     var i, len, lines
-    if (options.csharpDoc && (typeof text === 'string')) {
+    if (options.csharpDoc && (typeof text === 'string') && text.trim().length > 0) {
       lines = text.trim().split('\n')
-      codeWriter.writeLine('/**')
+      codeWriter.writeLine('/// <summary>')
       for (i = 0, len = lines.length; i < len; i++) {
-        codeWriter.writeLine(' * ' + lines[i])
+        codeWriter.writeLine('/// ' + lines[i])
       }
-      codeWriter.writeLine(' */')
+      codeWriter.writeLine('/// </summary>')
     }
   }
 
