@@ -59,6 +59,8 @@ Belows are the rules to convert from UML model elements to C# source codes.
 * _UMLParameter_ with `direction` = `return` to return type of method. When no return parameter, `void` is used.
 * _UMLParameter_ with `isReadOnly` = `true` to `sealed` modifier of parameter.
 * Documentation property to C#Doc comment.
+* If `stereotype` = `property` then converted to _C# Property_.
+* With `isReadOnly` just the getter is generated.
 
 ### UMLInterface
 
