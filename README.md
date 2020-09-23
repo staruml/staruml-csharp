@@ -33,6 +33,7 @@ Belows are the rules to convert from UML model elements to C# source codes.
 * Documentation property to C#Doc comment.
 * Annotation Type is converted to C# attribute class which extends System.Attribute and postfix of class is Attribute.
   (cf. class testAttribute:System.Attribute)
+* If `stereotype` = `struct` then converted to _C# Struct_.
 
 ### UMLAttribute
 

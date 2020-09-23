@@ -399,7 +399,11 @@ class CSharpCodeGenerator {
     }
 
     // Class
-    terms.push('class')
+    if(elem.stereotype === 'struct'){
+      terms.push('struct')
+    }else{
+      terms.push('class')
+    }
     terms.push(elem.name)
 
     // Extends
