@@ -632,7 +632,7 @@ class CSharpCodeGenerator {
       }
 
       // property
-      if (elem.stereotype === 'property') {
+      if (elem.stereotype === 'property' || (options.propertiesByDefault && codegen.isEmpty(elem.stereotype))) {
         codeWriter.writeLine(terms.join(' ') + ' {')
         codeWriter.indent()
         if (elem.isReadOnly) {

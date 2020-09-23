@@ -76,3 +76,9 @@ class CodeWriter {
 }
 
 exports.CodeWriter = CodeWriter
+
+function isEmpty(str) {
+  return !str || str.match(/^ *$/) !== null;
+}
+
+exports.isEmpty = isEmpty;

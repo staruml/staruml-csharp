@@ -28,7 +28,8 @@ function getGenOptions () {
   return {
     csharpDoc: app.preferences.get('csharp.gen.csharpDoc'),
     useTab: app.preferences.get('csharp.gen.useTab'),
-    indentSpaces: app.preferences.get('csharp.gen.indentSpaces')
+    indentSpaces: app.preferences.get('csharp.gen.indentSpaces'),
+    propertiesByDefault: app.preferences.get('csharp.gen.propertiesByDefault')
   }
 }
 
