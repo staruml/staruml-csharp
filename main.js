@@ -111,9 +111,9 @@ function _handleConfigure () {
 }
 
 function init () {
-  app.commands.register('csharp:generate', _handleGenerate)
-  app.commands.register('csharp:reverse', _handleReverse)
-  app.commands.register('csharp:configure', _handleConfigure)
+  app.commands.register('csharp:generate', _handleGenerate, 'C#: Generate Code...')
+  app.commands.register('csharp:reverse', _handleReverse, 'C#: Reverse Code...')
+  app.commands.register('csharp:configure', _handleConfigure, 'C#: Configure...')
 }
 
 exports.init = init

@@ -5,7 +5,7 @@
   "homepage": "https://github.com/staruml/staruml-csharp",
   "issues": "https://github.com/staruml/staruml-csharp/issues",  
   "keywords": ["csharp"],
-  "version": "0.9.3",
+  "version": "0.9.4",
   "author": {
     "name": "Dongjoon Lee",
     "email": "joon1251@gmail.com",
@@ -13,6 +13,6 @@
   },
   "license": "MIT",
   "engines": {
-    "staruml": "^3.0.0"
+    "staruml": "^4.0.0"
   }
 }
