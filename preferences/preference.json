@@ -24,6 +24,12 @@
       "type": "number",
       "default": 4
     },
+    "csharp.gen.propertiesByDefault": {
+      "text": "Properties instead of fields",
+      "description": "Generate properties instead of fields if not explictly specified.",
+      "type": "check",
+      "default": false
+    },
     "csharp.rev": {
       "text": "C# Reverse Engineering",
       "type": "section"
