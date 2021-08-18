@@ -256,7 +256,7 @@ class CSharpCodeGenerator {
 
     // Methods
     for (i = 0, len = elem.operations.length; i < len; i++) {
-      this.writeMethod(codeWriter, elem.operations[i], options, true, false)
+      this.writeMethod(codeWriter, elem.operations[i], options, true, false, true)
       codeWriter.writeLine()
     }
 
@@ -346,7 +346,7 @@ class CSharpCodeGenerator {
 
     // Methods
     for (i = 0, len = elem.operations.length; i < len; i++) {
-      this.writeMethod(codeWriter, elem.operations[i], options, false, false)
+      this.writeMethod(codeWriter, elem.operations[i], options, false, false, false)
       codeWriter.writeLine()
     }
 
@@ -454,7 +454,7 @@ class CSharpCodeGenerator {
 
     // Methods
     for (i = 0, len = elem.operations.length; i < len; i++) {
-      this.writeMethod(codeWriter, elem.operations[i], options, false, false)
+      this.writeMethod(codeWriter, elem.operations[i], options, false, false, false)
       codeWriter.writeLine()
     }
 
@@ -489,7 +489,7 @@ class CSharpCodeGenerator {
    * @param {boolean} skipBody
    * @param {boolean} skipParams
    */
-  writeMethod (codeWriter, elem, options, skipBody, skipParams) {
+  writeMethod (codeWriter, elem, options, skipBody, skipParams, skipModifiers) {
     if (elem.name.length > 0) {
       var terms = []
       var params = elem.getNonReturnParameters()
@@ -505,10 +505,12 @@ class CSharpCodeGenerator {
       }
       this.writeDoc(codeWriter, doc, options)
 
-      // modifiers
-      var _modifiers = this.getModifiers(elem)
-      if (_modifiers.length > 0) {
-        terms.push(_modifiers.join(' '))
+      if (!skipModifiers) {
+        // modifiers
+        var _modifiers = this.getModifiers(elem)
+        if (_modifiers.length > 0) {
+          terms.push(_modifiers.join(' '))
+        }
       }
 
       // type
