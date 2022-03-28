@@ -3,8 +3,10 @@
   "title": "C#",
   "description": "C# code generation and reverse engineering.",
   "homepage": "https://github.com/staruml/staruml-csharp",
-  "issues": "https://github.com/staruml/staruml-csharp/issues",  
-  "keywords": ["csharp"],
+  "issues": "https://github.com/staruml/staruml-csharp/issues",
+  "keywords": [
+    "csharp"
+  ],
   "version": "0.9.4",
   "author": {
     "name": "Dongjoon Lee",
@@ -13,6 +15,6 @@
   },
   "license": "MIT",
   "engines": {
-    "staruml": "^4.0.0"
+    "staruml": ">=4.0.0"
   }
 }
