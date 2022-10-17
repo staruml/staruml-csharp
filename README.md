@@ -1,8 +1,8 @@
 # C# Extension for StarUML
 
-This extension for StarUML(https://staruml.io) support to generate C# code from UML model and to reverse C# code to UML model. Install this extension from Extension Manager of StarUML.
+This extension for [StarUML](https://staruml.io) supports C# code generation from a UML model. It also allows converting C# code into a UML model. Install this extension from Extension Manager of StarUML.
 
-> :warning: This extensions do not provide perfect reverse engineering which is a test and temporal feature. If you need a complete reverse engineering feature, please check other professional reverse engineering tools.
+> :warning: This extension does not provide perfect reverse engineering, which is a test and temporal feature. If you need a complete reverse engineering feature, please check other professional reverse engineering tools.
 
 > :white_check_mark: This extension is based on C# 2.0 specification.
 
@@ -12,7 +12,7 @@ This extension for StarUML(https://staruml.io) support to generate C# code from 
 2. Select a base model (or package) that will be generated to C#.
 3. Select a folder where generated C# source files will be placed.
 
-Belows are the rules to convert from UML model elements to C# source codes.
+Below are the rules to convert UML model elements to C# source code.
 
 ### UMLPackage
 
@@ -27,7 +27,7 @@ Belows are the rules to convert from UML model elements to C# source codes.
 - Default constructor is generated.
 - All contained types (_UMLClass_, _UMLInterface_, _UMLEnumeration_) are generated as inner type definition.
 - Documentation property to C#Doc comment.
-- Annotation Type is converted to C# attribute class which extends System.Attribute and postfix of class is Attribute.
+- Annotation Type is converted to C# attribute class, which extends System.Attribute and postfix of class is Attribute.
   (cf. class testAttribute:System.Attribute)
 - If `stereotype` = `struct` then converted to _C# Struct_.
 
@@ -96,7 +96,7 @@ Belows are the rules to convert from UML model elements to C# source codes.
 2. Select a folder containing C# source files to be converted to UML model elements.
 3. `CsharpReverse` model will be created in the Project.
 
-Belows are the rules to convert from C# source code to UML model elements.
+Below are the rules to convert from C# source code to UML model elements.
 
 ### C# Namespace
 
@@ -119,7 +119,7 @@ Belows are the rules to convert from C# source code to UML model elements.
 - Field type to `type` property.
 
   - Primitive Types : `type` property has the primitive type name as string.
-  - `T[]`(array) or its decendants: `type` property refers to `T` with multiplicity `*`.
+  - `T[]`(array) or its descendants: `type` property refers to `T` with multiplicity `*`.
   - `T` (User-Defined Types) : `type` property refers to the `T` type.
   - Otherwise : `type` property has the type name as string.
 
@@ -130,10 +130,10 @@ Belows are the rules to convert from C# source code to UML model elements.
 
 ### C# Field (to UMLAssociation)
 
-- converted to (Directed) _UMLAssociation_ if **"Use Association"** is **on** in Preferences and there is a UML type element (_UMLClass_, _UMLInterface_, or _UMLEnumeration_) correspond to the field type.
+- converted to (Directed) _UMLAssociation_ if **"Use Association"** is **on** in Preferences and there is a UML type element (_UMLClass_, _UMLInterface_, or _UMLEnumeration_) that corresponds to the field type.
 - Field type to `end2.reference` property.
 
-  - `T[]`(array) or its decendants: `reference` property refers to `T` with multiplicity `*`.
+  - `T[]`(array) or its descendants: `reference` property refers to `T` with multiplicity `*`.
   - `T` (User-Defined Types) : `reference` property refers to the `T` type.
   - Otherwise : converted to _UMLAttribute_, not _UMLAssociation_.
 
