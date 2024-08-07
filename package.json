@@ -7,7 +7,7 @@
   "keywords": [
     "csharp"
   ],
-  "version": "0.9.4",
+  "version": "0.9.5",
   "author": {
     "name": "Dongjoon Lee",
     "email": "joon1251@gmail.com",
@@ -15,6 +15,6 @@
   },
   "license": "MIT",
   "engines": {
-    "staruml": ">=4.0.0"
+    "staruml": ">=6.0.0"
   }
 }
