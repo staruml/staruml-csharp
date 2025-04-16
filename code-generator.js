@@ -286,10 +286,16 @@ class CSharpCodeGenerator {
     });
     for (i = 0, len = associations.length; i < len; i++) {
       var asso = associations[i];
-      if (asso.end1.reference === elem && asso.end2.navigable === true) {
+      if (
+        asso.end1.reference === elem &&
+        asso.end2.navigable !== "notNavigable"
+      ) {
         this.writeMemberVariable(codeWriter, asso.end2, options);
         codeWriter.writeLine();
-      } else if (asso.end2.reference === elem && asso.end1.navigable === true) {
+      } else if (
+        asso.end2.reference === elem &&
+        asso.end1.navigable !== "notNavigable"
+      ) {
         this.writeMemberVariable(codeWriter, asso.end1, options);
         codeWriter.writeLine();
       }
@@ -390,10 +396,16 @@ class CSharpCodeGenerator {
 
     for (i = 0, len = associations.length; i < len; i++) {
       var asso = associations[i];
-      if (asso.end1.reference === elem && asso.end2.navigable === true) {
+      if (
+        asso.end1.reference === elem &&
+        asso.end2.navigable !== "notNavigable"
+      ) {
         this.writeMemberVariable(codeWriter, asso.end2, options);
         codeWriter.writeLine();
-      } else if (asso.end2.reference === elem && asso.end1.navigable === true) {
+      } else if (
+        asso.end2.reference === elem &&
+        asso.end1.navigable !== "notNavigable"
+      ) {
         this.writeMemberVariable(codeWriter, asso.end1, options);
         codeWriter.writeLine();
       }
@@ -527,10 +539,16 @@ class CSharpCodeGenerator {
 
     for (i = 0, len = associations.length; i < len; i++) {
       var asso = associations[i];
-      if (asso.end1.reference === elem && asso.end2.navigable === true) {
+      if (
+        asso.end1.reference === elem &&
+        asso.end2.navigable !== "notNavigable"
+      ) {
         this.writeMemberVariable(codeWriter, asso.end2, options);
         codeWriter.writeLine();
-      } else if (asso.end2.reference === elem && asso.end1.navigable === true) {
+      } else if (
+        asso.end2.reference === elem &&
+        asso.end1.navigable !== "notNavigable"
+      ) {
         this.writeMemberVariable(codeWriter, asso.end1, options);
         codeWriter.writeLine();
       }
